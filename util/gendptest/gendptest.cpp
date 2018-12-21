@@ -329,7 +329,7 @@ inline const char* data_literal( data dt )
 inline const char* mode_char( mode md )
 {
 	return md == md_rptr ? "r" :
-	       md == md_dptr ? "d" :
+	       md == md_dptr ? "p" :
 	       md == md_data ? "n" : "ERROR";
 }
 
@@ -1260,10 +1260,10 @@ void writer::write_token( token* tk, mode vp, data vt, mode kp, data kt, mode xp
 void writer::write_target_container( mode vp, data vt, mode kp, data kt )
 {
 	if ( kp != md_null )
-		fprintf( m_out, "%s%s_%s<%s,%s>", mode_char( kp ), mode_char( vp ),
+		fprintf( m_out, "d%s%s_%s<%s,%s>", mode_char( kp ), mode_char( vp ),
 						  m_pcontainer + 3, data_ntype( kt ), data_ntype( vt ));
 	else if ( vp != md_data )
-		fprintf( m_out, "%sp_%s<%s>", mode_char( vp ), m_pcontainer + 3, data_ntype( vt ));
+		fprintf( m_out, "d%s_%s<%s>", mode_char( vp ), m_pcontainer + 3, data_ntype( vt ));
 	else
 		fprintf( m_out, "std::%s<%s>", m_pcontainer + 3, data_ntype( vt ));
 }
@@ -1272,9 +1272,9 @@ void writer::write_target_container( mode vp, data vt, mode kp, data kt )
 void writer::write_target_template( mode vp, mode kp )
 {
 	if ( kp != md_null )
-		fprintf( m_out, "%s%s_%s", mode_char( kp ), mode_char( vp ), m_pcontainer + 3 );
+		fprintf( m_out, "d%s%s_%s", mode_char( kp ), mode_char( vp ), m_pcontainer + 3 );
 	else if ( vp != md_data )
-		fprintf( m_out, "%sp_%s", mode_char( vp ), m_pcontainer + 3 );
+		fprintf( m_out, "d%s_%s", mode_char( vp ), m_pcontainer + 3 );
 	else
 		fprintf( m_out, "std::%s", m_pcontainer + 3 );
 }

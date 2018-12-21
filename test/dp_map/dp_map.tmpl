@@ -4,14 +4,14 @@ $X${
 // Testdata Check Utilities
 // -----------------------------------------------------------------------------
 template <typename K, typename T>
-inline bool check_map( dp_map<K,T> const& ls,
-		       std::initializer_list<typename dp_map<K,T>::value_pointer> const& ts )
+inline bool check_map( __dp_map<K,T> const& ls,
+		       std::initializer_list<typename __dp_map<K,T>::value_pointer> const& ts )
 {
 	std::map<dp_const_pointer<K>,dp_pointer<T>>	l;
 
 	for ( auto a : ts ) l.emplace( a.first, a.second );
 
-	return ls == reinterpret_cast<dp_map<K,T> const&>( l );
+	return ls == reinterpret_cast<__dp_map<K,T> const&>( l );
 }
 $}
 
@@ -171,7 +171,7 @@ $D${	AssertNotEqual( pm[ @d@7 ] = $d$7, $7 );
 	AssertTrue( check_map( pm, {{ @n, $n }, { @1, $1 }, { @2, $2 }, { @5, $5 },
 				    { @8, $8 }, { @4, $4 }, { @3, $3 }, { @7, $7 }} ));
 
-	$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_map<@v,$v>	l1, r1, l2, r2, l3, r3, l4, r4, l5, r5, er;
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_map<@v,$v>	l1, r1, l2, r2, l3, r3, l4, r4, l5, r5, er;
 	$a::iterator		b, e;
 	$a::const_iterator	c, f;
 
@@ -250,9 +250,9 @@ ${
 	typedef typename $a::iterator		iterator;
 	typedef typename $a::const_iterator	const_iterator;
 
-	$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_map<@v,$v>	m1 = {{ @1, $1 }, { @2, $2 }};
-	$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_map<@v,$v>	m2;
-	$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_map<@v,$v>	m3 = {{ @2, $2 }, { @3, $3 }, { @5, $5 }};
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_map<@v,$v>	m1 = {{ @1, $1 }, { @2, $2 }};
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_map<@v,$v>	m2;
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_map<@v,$v>	m3 = {{ @2, $2 }, { @3, $3 }, { @5, $5 }};
 
 	// emplace
 	{

@@ -6,7 +6,7 @@ $X${
 template <typename T>
 inline bool check_multiset( dp_multiset<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_multiset<T> l;
+	dr_multiset<T> l;
 
 	for ( auto&& a : ts ) l.emplace( a );
 
@@ -14,9 +14,9 @@ inline bool check_multiset( dp_multiset<T> const& ls, std::initializer_list<type
 }
 
 template <typename T>
-inline bool check_multiset( rp_multiset<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+inline bool check_multiset( dr_multiset<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_multiset<T> l;
+	dr_multiset<T> l;
 
 	for ( auto&& a : ts ) l.emplace( a );
 
@@ -151,7 +151,7 @@ $T${	AssertEqual( **s.find( $4 ), t4 );$}
 
 	AssertTrue( check_multiset( s, { $1, $2, $5, $8, $4, $2, $3, $6, $3, $4, $5, $4, $4, $1, $2, $n } ));
 
-$R$D${	rp_multiset<$v>		      l1, r1, l2, r2, l3, r3, l4, r4, l5, r5;$}$&
+$R$D${	dr_multiset<$v>		      l1, r1, l2, r2, l3, r3, l4, r4, l5, r5;$}$&
 $N${	std::multiset<$v>		      l1, r1, l2, r2, l3, r3, l4, r4, l5, r5;$}
 	$a::iterator    b, e;
 
@@ -222,9 +222,9 @@ $}
 
 $V "emplace/insert/erase"
 ${
-$R$D${	rp_multiset<$v>	m1 = { $1, $2 };
-	rp_multiset<$v>	m2;
-	rp_multiset<$v>	m3 = { $2, $3, $3, $3, $5 };$}$&
+$R$D${	dr_multiset<$v>	m1 = { $1, $2 };
+	dr_multiset<$v>	m2;
+	dr_multiset<$v>	m3 = { $2, $3, $3, $3, $5 };$}$&
 $N${	std::multiset<$v>	m1 = { $1, $2 };
 	std::multiset<$v>	m2;
 	std::multiset<$v>	m3 = { $2, $3, $3, $3, $5 };$}

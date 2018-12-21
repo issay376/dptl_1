@@ -169,10 +169,10 @@ class __dp_list : public std::list<T>
 // alias for deep pointer list: T=V*/V[]/V[N]
 //
 //	dp_list: list for deep pointer
-//	rp_list: list for deep reference pointer
+//	dr_list: list for deep reference pointer
 // -----------------------------------------------------------------------------
 template <typename T> using dp_list = __dp_list<deep_ptr<T>>;
-template <typename T> using rp_list = __dp_list<dref_ptr<T>>;
+template <typename T> using dr_list = __dp_list<dref_ptr<T>>;
 
 #ifndef NO_NAMESPACE
 }       

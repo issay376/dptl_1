@@ -542,11 +542,11 @@ template <> struct print_element<const wchar_t[]> 	{ void operator()( const wcha
 // -----------------------------------------------------------------------------
 #ifdef __DPTL_DP_LIST_HPP
 template <typename T>
-inline void print( dp_list<T> const& pd )
+inline void print( __dp_list<T> const& pd )
 {
         printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( *i ) print_element<T>()( *i ); else printf( "null" );
+                if ( *i ) print_element<dp_type<T>>()( *i ); else printf( "null" );
                 printf( "\n" );
         }
         printf( "<---\n" );
@@ -555,19 +555,32 @@ inline void print( dp_list<T> const& pd )
 template <typename T>
 inline void print( std::list<T> const& pd )
 {
-        printf( "- -> %p(%zu)\n", &pd, pd.size());
+        printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
                 if ( *i ) print_element<T>()( *i ); else printf( "null" );
                 printf( "\n" );
         }
-        printf( "<- -\n" );
+        printf( "<---\n" );
 }
 #endif
 
 // -----------------------------------------------------------------------------
 #ifdef __DPTL_DP_FORWARD_LIST_HPP
 template <typename T>
-inline void print( dp_forward_list<T> const& pd )
+inline void print( __dp_forward_list<T> const& pd )
+{
+	size_t	n;
+
+        printf( "---> %p\n", &pd );
+        for ( auto i = pd.begin(); i != pd.end(); ++i, ++n ) {
+                if ( *i ) print_element<dp_type<T>>()( *i ); else printf( "null" );
+                printf( "\n" );
+        }
+        printf( "<---(%lu)\n", n );
+}
+
+template <typename T>
+inline void print( std::forward_list<T> const& pd )
 {
 	size_t	n;
 
@@ -578,24 +591,23 @@ inline void print( dp_forward_list<T> const& pd )
         }
         printf( "<---(%lu)\n", n );
 }
-
-inline void print( std::forward_list<T> const& pd )
-{
-	size_t	n;
-
-        printf( "- -> %p\n", &pd );
-        for ( auto i = pd.begin(); i != pd.end(); ++i, ++n ) {
-                if ( *i ) print_element<T>()( *i ); else printf( "null" );
-                printf( "\n" );
-        }
-        printf( "<- -(%lu)\n", n );
-}
 #endif
 
 // -----------------------------------------------------------------------------
 #ifdef __DPTL_DP_DEQUE_HPP
 template <typename T>
 inline void print( __dp_deque<T> const& pd )
+{
+        printf( "---> %p(%zu)\n", &pd, pd.size());
+        for ( auto i = pd.begin(); i != pd.end(); ++i ) {
+                if ( auto&& p = i->get()) print_element<dp_type<T>>()( p ); else printf( "null" );
+                printf( "\n" );
+        }
+        printf( "<---\n" );
+}
+
+template <typename T>
+inline void print( std::deque<T> const& pd )
 {
         printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
@@ -609,7 +621,18 @@ inline void print( __dp_deque<T> const& pd )
 // -----------------------------------------------------------------------------
 #ifdef __DPTL_DP_SET_HPP
 template <typename T>
-inline void print( dp_set<T> const& pd )
+inline void print( __dp_set<T> const& pd )
+{
+        printf( "---> %p(%zu)\n", &pd, pd.size());
+        for ( auto i = pd.begin(); i != pd.end(); ++i ) {
+                if ( *i ) print_element<dp_type<T>>()( *i ); else printf( "null" );
+                printf( "\n" );
+        }
+        printf( "<---\n" );
+}
+
+template <typename T>
+inline void print( std::set<T> const& pd )
 {
         printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
@@ -619,19 +642,19 @@ inline void print( dp_set<T> const& pd )
         printf( "<---\n" );
 }
 
-template <typename T, typename L>
-inline void print( std::set<T,L> const& pd )
+template <typename T>
+inline void print( __dp_multiset<T> const& pd )
 {
-        printf( "- -> %p(%zu)\n", &pd, pd.size());
+        printf( "--=> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( *i ) print_element<T>()( *i ); else printf( "null" );
+                if ( *i ) print_element<dp_type<T>>()( *i ); else printf( "null" );
                 printf( "\n" );
         }
-        printf( "<- -\n" );
+        printf( "<=--\n" );
 }
 
 template <typename T>
-inline void print( dp_multiset<T> const& pd )
+inline void print( std::multiset<T> const& pd )
 {
         printf( "--=> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
@@ -640,27 +663,16 @@ inline void print( dp_multiset<T> const& pd )
         }
         printf( "<=--\n" );
 }
-
-template <typename T, typename L>
-inline void print( std::multiset<T,L> const& pd )
-{
-        printf( "- => %p(%zu)\n", &pd, pd.size());
-        for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( *i ) print_element<T>()( *i ); else printf( "null" );
-                printf( "\n" );
-        }
-        printf( "<= -\n" );
-}
 #endif
 
 // -----------------------------------------------------------------------------
 #ifdef __DPTL_DP_UNORDERED_SET_HPP
 template <typename T>
-inline void print( dp_unordered_set<T> const& pd )
+inline void print( __dp_unordered_set<T> const& pd )
 {
         printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( *i ) print_element<T>()( *i ); else printf( "null" );
+                if ( *i ) print_element<dp_type<T>>()( *i ); else printf( "null" );
                 printf( "\n" );
         }
         printf( "<---\n" );
@@ -669,20 +681,20 @@ inline void print( dp_unordered_set<T> const& pd )
 template <typename T>
 inline void print( std::unordered_set<T> const& pd )
 {
-        printf( "- -> %p(%zu)\n", &pd, pd.size());
+        printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
                 if ( *i ) print_element<T>()( *i ); else printf( "null" );
                 printf( "\n" );
         }
-        printf( "<- -\n" );
+        printf( "<---\n" );
 }
 
 template <typename T>
-inline void print( dp_unordered_multiset<T> const& pd )
+inline void print( __dp_unordered_multiset<T> const& pd )
 {
         printf( "--=> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( *i ) print_element<T>()( *i ); else printf( "null" );
+                if ( *i ) print_element<dp_type<T>>()( *i ); else printf( "null" );
                 printf( "\n" );
         }
         printf( "<=--\n" );
@@ -691,19 +703,19 @@ inline void print( dp_unordered_multiset<T> const& pd )
 template <typename T>
 inline void print( std::unordered_multiset<T> const& pd )
 {
-        printf( "- => %p(%zu)\n", &pd, pd.size());
+        printf( "--=> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
                 if ( *i ) print_element<T>()( *i ); else printf( "null" );
                 printf( "\n" );
         }
-        printf( "<= -\n" );
+        printf( "<=--\n" );
 }
 #endif
 
 // -----------------------------------------------------------------------------
 #ifdef __DPTL_DP_MAP_HPP
 template <typename K, typename T>
-inline void print( dp_map<K,T> const& pd )
+inline void print( __dp_map<K,T> const& pd )
 {
         printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
@@ -716,7 +728,7 @@ inline void print( dp_map<K,T> const& pd )
 }
 
 template <typename K, typename T>
-inline void print( dp_multimap<K,T> const& pd )
+inline void print( __dp_multimap<K,T> const& pd )
 {
         printf( "--=> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
@@ -732,7 +744,7 @@ inline void print( dp_multimap<K,T> const& pd )
 // -----------------------------------------------------------------------------
 #ifdef __DPTL_DP_UNORDERED_MAP_HPP
 template <typename K, typename T>
-inline void print( dd_unordered_map<K,T> const& pd )
+inline void print( __dp_unordered_map<K,T> const& pd )
 {
         printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
@@ -745,46 +757,7 @@ inline void print( dd_unordered_map<K,T> const& pd )
 }
 
 template <typename K, typename T>
-inline void print( dr_unordered_map<K,T> const& pd )
-{
-        printf( "- -> %p(%zu)\n", &pd, pd.size());
-        for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<K>()( i->first ); else printf( "null" );
-                printf( " -> " );
-                if ( i->second ) print_element<T>()( i->second ); else printf( "null" );
-                printf( "\n" );
-        }
-        printf( "<- -\n" );
-}
-
-template <typename K, typename T>
-inline void print( rd_unordered_map<K,T> const& pd )
-{
-        printf( " --> %p(%zu)\n", &pd, pd.size());
-        for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<K>()( i->first ); else printf( "null" );
-                printf( " -> " );
-                if ( i->second ) print_element<T>()( i->second ); else printf( "null" );
-                printf( "\n" );
-        }
-        printf( "<-- \n" );
-}
-
-template <typename K, typename T>
-inline void print( rr_unordered_map<K,T> const& pd )
-{
-        printf( "  -> %p(%zu)\n", &pd, pd.size());
-        for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<K>()( i->first ); else printf( "null" );
-                printf( " -> " );
-                if ( i->second ) print_element<T>()( i->second ); else printf( "null" );
-                printf( "\n" );
-        }
-        printf( "<-  \n" );
-}
-
-template <typename K, typename T>
-inline void print( dd_unordered_multimap<K,T> const& pd )
+inline void print( __dp_unordered_multimap<K,T> const& pd )
 {
         printf( "--=> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
@@ -795,51 +768,23 @@ inline void print( dd_unordered_multimap<K,T> const& pd )
         }
         printf( "<=--\n" );
 }
-
-template <typename K, typename T>
-inline void print( dr_unordered_multimap<K,T> const& pd )
-{
-        printf( "- => %p(%zu)\n", &pd, pd.size());
-        for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<K>()( i->first ); else printf( "null" );
-                printf( " -> " );
-                if ( i->second ) print_element<T>()( i->second ); else printf( "null" );
-                printf( "\n" );
-        }
-        printf( "<= -\n" );
-}
-
-template <typename K, typename T>
-inline void print( rd_unordered_multimap<K,T> const& pd )
-{
-        printf( " -=> %p(%zu)\n", &pd, pd.size());
-        for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<K>()( i->first ); else printf( "null" );
-                printf( " -> " );
-                if ( i->second ) print_element<T>()( i->second ); else printf( "null" );
-                printf( "\n" );
-        }
-        printf( "<=- \n" );
-}
-
-template <typename K, typename T>
-inline void print( rr_unordered_multimap<K,T> const& pd )
-{
-        printf( "  => %p(%zu)\n", &pd, pd.size());
-        for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<K>()( i->first ); else printf( "null" );
-                printf( " -> " );
-                if ( i->second ) print_element<T>()( i->second ); else printf( "null" );
-                printf( "\n" );
-        }
-        printf( "<=  \n" );
-}
 #endif
 
 // -----------------------------------------------------------------------------
 #ifdef __DPTL_DP_ARRAY_HPP
-template <typename T, Policy P, size_t N>
-inline void print( dp_array<T,P,N> const& va )
+template <typename T, size_t N>
+inline void print( __dp_array<T,N> const& va )
+{       
+        printf( "---> %p(%zu/%zu)\n", &va, va.size(), N );
+        for ( auto i = va.begin(); i != va.end(); ++i ) {
+                if ( *i ) print_element<dp_type<T>>()( *i ); else printf( "null" );
+                printf( "\n" );
+        }
+        printf( "<---\n" );
+}
+
+template <typename T, size_t N>
+inline void print( std::array<T,N> const& va )
 {       
         printf( "---> %p(%zu/%zu)\n", &va, va.size(), N );
         for ( auto i = va.begin(); i != va.end(); ++i ) {
@@ -848,27 +793,16 @@ inline void print( dp_array<T,P,N> const& va )
         }
         printf( "<---\n" );
 }
-
-template <typename T, Policy P, size_t N>
-inline void print( std::array<T,P,N> const& va )
-{       
-        printf( "- -> %p(%zu/%zu)\n", &va, va.size(), N );
-        for ( auto i = va.begin(); i != va.end(); ++i ) {
-                if ( *i ) print_element<T>()( *i ); else printf( "null" );
-                printf( "\n" );
-        }
-        printf( "<- -\n" );
-}
 #endif
 
 // -----------------------------------------------------------------------------
 #ifdef __DPTL_DP_VECTOR_HPP
 template <typename T>
-inline void print( dp_vector<T> const& vc )
+inline void print( __dp_vector<T> const& vc )
 {       
         printf( "---> %p(%zu/%zu)\n", &vc, vc.size(), vc.capacity());
         for ( auto i = vc.begin(); i != vc.end(); ++i ) {
-                if ( *i ) print_element<T>()( *i ); else printf( "null" );
+                if ( *i ) print_element<dp_type<T>>()( *i ); else printf( "null" );
                 printf( "\n" );
         }
         printf( "<---\n" );
@@ -877,12 +811,12 @@ inline void print( dp_vector<T> const& vc )
 template <typename T>
 inline void print( std::vector<T> const& vc )
 {       
-        printf( "- -> %p(%zu/%zu)\n", &vc, vc.size(), vc.capacity());
+        printf( "---> %p(%zu/%zu)\n", &vc, vc.size(), vc.capacity());
         for ( auto i = vc.begin(); i != vc.end(); ++i ) {
                 if ( *i ) print_element<T>()( *i ); else printf( "null" );
                 printf( "\n" );
         }
-        printf( "<- -\n" );
+        printf( "<---\n" );
 }
 #endif
 

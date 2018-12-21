@@ -4,14 +4,14 @@ $X${
 // Testdata Check Utilities
 // -----------------------------------------------------------------------------
 template <typename K, typename T>
-inline bool check_multimap( dp_multimap<K,T> const& ls,
-			    std::initializer_list<typename dp_multimap<K,T>::value_pointer> const& ts )
+inline bool check_multimap( __dp_multimap<K,T> const& ls,
+			    std::initializer_list<typename __dp_multimap<K,T>::value_pointer> const& ts )
 {
 	std::multimap<dp_const_pointer<K>,dp_pointer<T>>	l;
 
 	for ( auto a : ts ) l.emplace( a.first, a.second );
 
-	return ls == reinterpret_cast<dp_multimap<K,T> const&>( l );
+	return ls == reinterpret_cast<__dp_multimap<K,T> const&>( l );
 }
 $}
 
@@ -149,7 +149,7 @@ $D${	AssertNotEqual( cm.find( @4 )->second, $4 );$}$T${
 	AssertEqual( pm.find( @n )->first, @n );
 	AssertEqual( pm.find( @n )->second, $n );
 
-	$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_multimap<@v,$v>	l1, r1, l2, r2, l3, r3, l4, r4, l5, r5, er;
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_multimap<@v,$v>	l1, r1, l2, r2, l3, r3, l4, r4, l5, r5, er;
 	$a::iterator		b, e;
 	$a::const_iterator	c, f;
 
@@ -238,9 +238,9 @@ ${
 	typedef typename $a::const_iterator	const_iterator;
 	typedef	typename $a::value_type	pair;
 	
-	$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_multimap<@v,$v>	m1 = {{ @1, $1 }, { @2, $2 }};
-	$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_multimap<@v,$v>	m2;
-	$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_multimap<@v,$v>	m3 = {{ @2, $2 }, { @3, $3 }, { @3, $3 }, { @3, $3 }, { @5, $5 }};
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_multimap<@v,$v>	m1 = {{ @1, $1 }, { @2, $2 }};
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_multimap<@v,$v>	m2;
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_multimap<@v,$v>	m3 = {{ @2, $2 }, { @3, $3 }, { @3, $3 }, { @3, $3 }, { @5, $5 }};
 
 	// emplace
 	{

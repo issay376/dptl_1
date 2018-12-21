@@ -4,7 +4,7 @@ $X${
 template <typename T>
 inline bool check_list( dp_list<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_list<T>	l;
+	dr_list<T>	l;
 
 	for ( auto&& a : ts ) l.push_back( a );
 
@@ -12,9 +12,9 @@ inline bool check_list( dp_list<T> const& ls, std::initializer_list<typename val
 }
 
 template <typename T>
-inline bool check_list( rp_list<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+inline bool check_list( dr_list<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_list<T>	l;
+	dr_list<T>	l;
 
 	for ( auto&& a : ts ) l.push_back( a );
 
@@ -633,7 +633,7 @@ ${
 		AssertEqual( 7, l.size());
 	}
 	{
-		rp_list<base*>	l = { &t1, &u2, &i3, &u4, &t5, &t6, &i7 };
+		dr_list<base*>	l = { &t1, &u2, &i3, &u4, &t5, &t6, &i7 };
 
 		println( l );
 		AssertEqual( 7, l.size());

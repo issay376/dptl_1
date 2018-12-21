@@ -167,10 +167,10 @@ class __dp_deque : public std::deque<T>
 // alias for deep pointer deque: T=V*/V[]/V[N]
 //
 //	dp_deque: deque for deep pointer  
-//	rp_deque: deque for deep reference pointer
+//	dr_deque: deque for deep reference pointer
 // ----------------------------------------------------------------------------- 
 template <typename T> using dp_deque = __dp_deque<deep_ptr<T>>;
-template <typename T> using rp_deque = __dp_deque<dref_ptr<T>>;
+template <typename T> using dr_deque = __dp_deque<dref_ptr<T>>;
 
 
 #ifndef NO_NAMESPACE

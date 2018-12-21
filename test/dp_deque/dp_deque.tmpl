@@ -4,7 +4,7 @@ $X${
 template <typename T>
 inline bool check_deque( dp_deque<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_deque<T>	l;
+	dr_deque<T>	l;
 
 	for ( auto&& a : ts ) l.push_back( a );
 
@@ -12,9 +12,9 @@ inline bool check_deque( dp_deque<T> const& ls, std::initializer_list<typename v
 }
 
 template <typename T>
-inline bool check_deque( rp_deque<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+inline bool check_deque( dr_deque<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_deque<T>	l;
+	dr_deque<T>	l;
 
 	for ( auto&& a : ts ) l.push_back( a );
 

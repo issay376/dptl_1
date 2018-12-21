@@ -131,7 +131,7 @@ class dp_dequetest : public unittest, public basic_testdata
 template <typename T>
 inline bool check_deque( dp_deque<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_deque<T>	l;
+	dr_deque<T>	l;
 
 	for ( auto&& a : ts ) l.push_back( a );
 
@@ -139,9 +139,9 @@ inline bool check_deque( dp_deque<T> const& ls, std::initializer_list<typename v
 }
 
 template <typename T>
-inline bool check_deque( rp_deque<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+inline bool check_deque( dr_deque<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_deque<T>	l;
+	dr_deque<T>	l;
 
 	for ( auto&& a : ts ) l.push_back( a );
 
@@ -164,21 +164,21 @@ void dp_dequetest::test01()
 	this->set_subtitle( "constructor/assignment/destructor - reference pointer(pointer) value" );
 
 	// default constructor
-	rp_deque<test*>		lr;
+	dr_deque<test*>		lr;
 	AssertTrue( check_deque( lr, { } ));
 
 	// copy constructor
-	rp_deque<test*>		p0( lr );
-	const rp_deque<test*>	c0( lr );
+	dr_deque<test*>		p0( lr );
+	const dr_deque<test*>	c0( lr );
 	lr.push_back( &t1 );
-	rp_deque<test*>		p1( lr );
-	const rp_deque<test*>	c1( lr );
+	dr_deque<test*>		p1( lr );
+	const dr_deque<test*>	c1( lr );
 	lr.push_back( &t2 );
 	lr.push_back( &t3 );
 	lr.push_back( &t4 );
 	lr.push_back( &t5 );
-	rp_deque<test*>		p5( lr );
-	const rp_deque<test*>	c5( lr );
+	dr_deque<test*>		p5( lr );
+	const dr_deque<test*>	c5( lr );
 
 	AssertTrue( p0.empty());
 	AssertTrue( check_deque( p1, { &t1 } ));
@@ -189,15 +189,15 @@ void dp_dequetest::test01()
 
 	fprintf( stderr, "--- move constructor ---\n" );
 	{
-		rp_deque<test*>	lx = lr;
-		rp_deque<test*>	ly( std::move( lx ));
+		dr_deque<test*>	lx = lr;
+		dr_deque<test*>	ly( std::move( lx ));
 
 		AssertTrue( lx.empty());
 		AssertTrue( check_deque( ly, { &t1, &t2, &t3, &t4, &t5 } ));
 	}
 	fprintf( stderr, "--- copy assignment operator ---\n" );
 	{
-		rp_deque<test*>	lx;
+		dr_deque<test*>	lx;
 
 		lx = p1;
 		AssertTrue( check_deque( lx, { &t1 } ));
@@ -208,10 +208,10 @@ void dp_dequetest::test01()
 	}
 	fprintf( stderr, "--- move assignment operator ---\n" );
 	{
-		rp_deque<test*>	lx;
+		dr_deque<test*>	lx;
 
 		lr = p1;
-		lx = rp_deque<test*>( { &t5, &t3, &t2 } );				// move assignment by r-value
+		lx = dr_deque<test*>( { &t5, &t3, &t2 } );				// move assignment by r-value
 		AssertTrue( check_deque( lx, { &t5, &t3, &t2 } ));
 
 		lx = std::move( lr );					// move assignment by std::move()
@@ -223,30 +223,30 @@ void dp_dequetest::test01()
 	}
 	fprintf( stderr, "--- iterator constructor ---\n" );
 	{
-		rp_deque<test*>	lx = p5;
+		dr_deque<test*>	lx = p5;
 
-		rp_deque<test*>	x3( lx.begin(), lx.begin() += 3 );
+		dr_deque<test*>	x3( lx.begin(), lx.begin() += 3 );
 		AssertTrue( check_deque( x3, { &t1, &t2, &t3 } ));
-		rp_deque<test*>	x0( lx.begin() += 2, lx.begin() += 2 );
+		dr_deque<test*>	x0( lx.begin() += 2, lx.begin() += 2 );
 		AssertTrue( x0.empty());
-		rp_deque<test*>	x1( lx.begin() += 4, lx.end());
+		dr_deque<test*>	x1( lx.begin() += 4, lx.end());
 		AssertTrue( check_deque( x1, { &t5 } ));
 	}
 	fprintf( stderr, "--- fill constructor ---\n" );
 	{
-		rp_deque<test*>	x0( 3 );
+		dr_deque<test*>	x0( 3 );
 		AssertTrue( check_deque( x0, { nullptr, nullptr, nullptr } ));
-		rp_deque<test*>	x1( 2, nullptr );
+		dr_deque<test*>	x1( 2, nullptr );
 		AssertTrue( check_deque( x1, { nullptr, nullptr } ));
-		rp_deque<test*>	x2( 4, &t3 );
+		dr_deque<test*>	x2( 4, &t3 );
 		AssertTrue( check_deque( x2, { &t3, &t3, &t3, &t3 } ));
 	}
 	fprintf( stderr, "--- initializer constructor/assignment operator ---\n" );
 	{
-		rp_deque<test*>	lx = p5;
-		rp_deque<test*>	x0 { };
-		rp_deque<test*>	x1 { &t1 };
-		rp_deque<test*>	x5 { &t1, &t2, &t3, &t4, &t5 };
+		dr_deque<test*>	lx = p5;
+		dr_deque<test*>	x0 { };
+		dr_deque<test*>	x1 { &t1 };
+		dr_deque<test*>	x5 { &t1, &t2, &t3, &t4, &t5 };
 
 		AssertTrue( x0.empty());
 		AssertTrue( check_deque( x1, { &t1 } ));
@@ -370,21 +370,21 @@ void dp_dequetest::test03()
 	this->set_subtitle( "constructor/assignment/destructor - reference pointer(c-string) value" );
 
 	// default constructor
-	rp_deque<const char[]>		lr;
+	dr_deque<const char[]>		lr;
 	AssertTrue( check_deque( lr, { } ));
 
 	// copy constructor
-	rp_deque<const char[]>		p0( lr );
-	const rp_deque<const char[]>	c0( lr );
+	dr_deque<const char[]>		p0( lr );
+	const dr_deque<const char[]>	c0( lr );
 	lr.push_back( s1 );
-	rp_deque<const char[]>		p1( lr );
-	const rp_deque<const char[]>	c1( lr );
+	dr_deque<const char[]>		p1( lr );
+	const dr_deque<const char[]>	c1( lr );
 	lr.push_back( s2 );
 	lr.push_back( s3 );
 	lr.push_back( s4 );
 	lr.push_back( s5 );
-	rp_deque<const char[]>		p5( lr );
-	const rp_deque<const char[]>	c5( lr );
+	dr_deque<const char[]>		p5( lr );
+	const dr_deque<const char[]>	c5( lr );
 
 	AssertTrue( p0.empty());
 	AssertTrue( check_deque( p1, { s1 } ));
@@ -395,15 +395,15 @@ void dp_dequetest::test03()
 
 	fprintf( stderr, "--- move constructor ---\n" );
 	{
-		rp_deque<const char[]>	lx = lr;
-		rp_deque<const char[]>	ly( std::move( lx ));
+		dr_deque<const char[]>	lx = lr;
+		dr_deque<const char[]>	ly( std::move( lx ));
 
 		AssertTrue( lx.empty());
 		AssertTrue( check_deque( ly, { s1, s2, s3, s4, s5 } ));
 	}
 	fprintf( stderr, "--- copy assignment operator ---\n" );
 	{
-		rp_deque<const char[]>	lx;
+		dr_deque<const char[]>	lx;
 
 		lx = p1;
 		AssertTrue( check_deque( lx, { s1 } ));
@@ -414,10 +414,10 @@ void dp_dequetest::test03()
 	}
 	fprintf( stderr, "--- move assignment operator ---\n" );
 	{
-		rp_deque<const char[]>	lx;
+		dr_deque<const char[]>	lx;
 
 		lr = p1;
-		lx = rp_deque<const char[]>( { s5, s3, s2 } );				// move assignment by r-value
+		lx = dr_deque<const char[]>( { s5, s3, s2 } );				// move assignment by r-value
 		AssertTrue( check_deque( lx, { s5, s3, s2 } ));
 
 		lx = std::move( lr );					// move assignment by std::move()
@@ -429,30 +429,30 @@ void dp_dequetest::test03()
 	}
 	fprintf( stderr, "--- iterator constructor ---\n" );
 	{
-		rp_deque<const char[]>	lx = p5;
+		dr_deque<const char[]>	lx = p5;
 
-		rp_deque<const char[]>	x3( lx.begin(), lx.begin() += 3 );
+		dr_deque<const char[]>	x3( lx.begin(), lx.begin() += 3 );
 		AssertTrue( check_deque( x3, { s1, s2, s3 } ));
-		rp_deque<const char[]>	x0( lx.begin() += 2, lx.begin() += 2 );
+		dr_deque<const char[]>	x0( lx.begin() += 2, lx.begin() += 2 );
 		AssertTrue( x0.empty());
-		rp_deque<const char[]>	x1( lx.begin() += 4, lx.end());
+		dr_deque<const char[]>	x1( lx.begin() += 4, lx.end());
 		AssertTrue( check_deque( x1, { s5 } ));
 	}
 	fprintf( stderr, "--- fill constructor ---\n" );
 	{
-		rp_deque<const char[]>	x0( 3 );
+		dr_deque<const char[]>	x0( 3 );
 		AssertTrue( check_deque( x0, { nullptr, nullptr, nullptr } ));
-		rp_deque<const char[]>	x1( 2, nullptr );
+		dr_deque<const char[]>	x1( 2, nullptr );
 		AssertTrue( check_deque( x1, { nullptr, nullptr } ));
-		rp_deque<const char[]>	x2( 4, s3 );
+		dr_deque<const char[]>	x2( 4, s3 );
 		AssertTrue( check_deque( x2, { s3, s3, s3, s3 } ));
 	}
 	fprintf( stderr, "--- initializer constructor/assignment operator ---\n" );
 	{
-		rp_deque<const char[]>	lx = p5;
-		rp_deque<const char[]>	x0 { };
-		rp_deque<const char[]>	x1 { s1 };
-		rp_deque<const char[]>	x5 { s1, s2, s3, s4, s5 };
+		dr_deque<const char[]>	lx = p5;
+		dr_deque<const char[]>	x0 { };
+		dr_deque<const char[]>	x1 { s1 };
+		dr_deque<const char[]>	x5 { s1, s2, s3, s4, s5 };
 
 		AssertTrue( x0.empty());
 		AssertTrue( check_deque( x1, { s1 } ));
@@ -576,21 +576,21 @@ void dp_dequetest::test05()
 	this->set_subtitle( "constructor/assignment/destructor - reference pointer(v-array) value" );
 
 	// default constructor
-	rp_deque<test[]>		lr;
+	dr_deque<test[]>		lr;
 	AssertTrue( check_deque( lr, { } ));
 
 	// copy constructor
-	rp_deque<test[]>		p0( lr );
-	const rp_deque<test[]>	c0( lr );
+	dr_deque<test[]>		p0( lr );
+	const dr_deque<test[]>	c0( lr );
 	lr.push_back( v1 );
-	rp_deque<test[]>		p1( lr );
-	const rp_deque<test[]>	c1( lr );
+	dr_deque<test[]>		p1( lr );
+	const dr_deque<test[]>	c1( lr );
 	lr.push_back( v2 );
 	lr.push_back( v3 );
 	lr.push_back( v4 );
 	lr.push_back( v5 );
-	rp_deque<test[]>		p5( lr );
-	const rp_deque<test[]>	c5( lr );
+	dr_deque<test[]>		p5( lr );
+	const dr_deque<test[]>	c5( lr );
 
 	AssertTrue( p0.empty());
 	AssertTrue( check_deque( p1, { v1 } ));
@@ -601,15 +601,15 @@ void dp_dequetest::test05()
 
 	fprintf( stderr, "--- move constructor ---\n" );
 	{
-		rp_deque<test[]>	lx = lr;
-		rp_deque<test[]>	ly( std::move( lx ));
+		dr_deque<test[]>	lx = lr;
+		dr_deque<test[]>	ly( std::move( lx ));
 
 		AssertTrue( lx.empty());
 		AssertTrue( check_deque( ly, { v1, v2, v3, v4, v5 } ));
 	}
 	fprintf( stderr, "--- copy assignment operator ---\n" );
 	{
-		rp_deque<test[]>	lx;
+		dr_deque<test[]>	lx;
 
 		lx = p1;
 		AssertTrue( check_deque( lx, { v1 } ));
@@ -620,10 +620,10 @@ void dp_dequetest::test05()
 	}
 	fprintf( stderr, "--- move assignment operator ---\n" );
 	{
-		rp_deque<test[]>	lx;
+		dr_deque<test[]>	lx;
 
 		lr = p1;
-		lx = rp_deque<test[]>( { v5, v3, v2 } );				// move assignment by r-value
+		lx = dr_deque<test[]>( { v5, v3, v2 } );				// move assignment by r-value
 		AssertTrue( check_deque( lx, { v5, v3, v2 } ));
 
 		lx = std::move( lr );					// move assignment by std::move()
@@ -635,30 +635,30 @@ void dp_dequetest::test05()
 	}
 	fprintf( stderr, "--- iterator constructor ---\n" );
 	{
-		rp_deque<test[]>	lx = p5;
+		dr_deque<test[]>	lx = p5;
 
-		rp_deque<test[]>	x3( lx.begin(), lx.begin() += 3 );
+		dr_deque<test[]>	x3( lx.begin(), lx.begin() += 3 );
 		AssertTrue( check_deque( x3, { v1, v2, v3 } ));
-		rp_deque<test[]>	x0( lx.begin() += 2, lx.begin() += 2 );
+		dr_deque<test[]>	x0( lx.begin() += 2, lx.begin() += 2 );
 		AssertTrue( x0.empty());
-		rp_deque<test[]>	x1( lx.begin() += 4, lx.end());
+		dr_deque<test[]>	x1( lx.begin() += 4, lx.end());
 		AssertTrue( check_deque( x1, { v5 } ));
 	}
 	fprintf( stderr, "--- fill constructor ---\n" );
 	{
-		rp_deque<test[]>	x0( 3 );
+		dr_deque<test[]>	x0( 3 );
 		AssertTrue( check_deque( x0, { nullptr, nullptr, nullptr } ));
-		rp_deque<test[]>	x1( 2, nullptr );
+		dr_deque<test[]>	x1( 2, nullptr );
 		AssertTrue( check_deque( x1, { nullptr, nullptr } ));
-		rp_deque<test[]>	x2( 4, v3 );
+		dr_deque<test[]>	x2( 4, v3 );
 		AssertTrue( check_deque( x2, { v3, v3, v3, v3 } ));
 	}
 	fprintf( stderr, "--- initializer constructor/assignment operator ---\n" );
 	{
-		rp_deque<test[]>	lx = p5;
-		rp_deque<test[]>	x0 { };
-		rp_deque<test[]>	x1 { v1 };
-		rp_deque<test[]>	x5 { v1, v2, v3, v4, v5 };
+		dr_deque<test[]>	lx = p5;
+		dr_deque<test[]>	x0 { };
+		dr_deque<test[]>	x1 { v1 };
+		dr_deque<test[]>	x5 { v1, v2, v3, v4, v5 };
 
 		AssertTrue( x0.empty());
 		AssertTrue( check_deque( x1, { v1 } ));
@@ -782,21 +782,21 @@ void dp_dequetest::test07()
 	this->set_subtitle( "constructor/assignment/destructor - reference pointer(f-array) value" );
 
 	// default constructor
-	rp_deque<test[3]>		lr;
+	dr_deque<test[3]>		lr;
 	AssertTrue( check_deque( lr, { } ));
 
 	// copy constructor
-	rp_deque<test[3]>		p0( lr );
-	const rp_deque<test[3]>	c0( lr );
+	dr_deque<test[3]>		p0( lr );
+	const dr_deque<test[3]>	c0( lr );
 	lr.push_back( w1 );
-	rp_deque<test[3]>		p1( lr );
-	const rp_deque<test[3]>	c1( lr );
+	dr_deque<test[3]>		p1( lr );
+	const dr_deque<test[3]>	c1( lr );
 	lr.push_back( w2 );
 	lr.push_back( w3 );
 	lr.push_back( w4 );
 	lr.push_back( w5 );
-	rp_deque<test[3]>		p5( lr );
-	const rp_deque<test[3]>	c5( lr );
+	dr_deque<test[3]>		p5( lr );
+	const dr_deque<test[3]>	c5( lr );
 
 	AssertTrue( p0.empty());
 	AssertTrue( check_deque( p1, { w1 } ));
@@ -807,15 +807,15 @@ void dp_dequetest::test07()
 
 	fprintf( stderr, "--- move constructor ---\n" );
 	{
-		rp_deque<test[3]>	lx = lr;
-		rp_deque<test[3]>	ly( std::move( lx ));
+		dr_deque<test[3]>	lx = lr;
+		dr_deque<test[3]>	ly( std::move( lx ));
 
 		AssertTrue( lx.empty());
 		AssertTrue( check_deque( ly, { w1, w2, w3, w4, w5 } ));
 	}
 	fprintf( stderr, "--- copy assignment operator ---\n" );
 	{
-		rp_deque<test[3]>	lx;
+		dr_deque<test[3]>	lx;
 
 		lx = p1;
 		AssertTrue( check_deque( lx, { w1 } ));
@@ -826,10 +826,10 @@ void dp_dequetest::test07()
 	}
 	fprintf( stderr, "--- move assignment operator ---\n" );
 	{
-		rp_deque<test[3]>	lx;
+		dr_deque<test[3]>	lx;
 
 		lr = p1;
-		lx = rp_deque<test[3]>( { w5, w3, w2 } );				// move assignment by r-value
+		lx = dr_deque<test[3]>( { w5, w3, w2 } );				// move assignment by r-value
 		AssertTrue( check_deque( lx, { w5, w3, w2 } ));
 
 		lx = std::move( lr );					// move assignment by std::move()
@@ -841,30 +841,30 @@ void dp_dequetest::test07()
 	}
 	fprintf( stderr, "--- iterator constructor ---\n" );
 	{
-		rp_deque<test[3]>	lx = p5;
+		dr_deque<test[3]>	lx = p5;
 
-		rp_deque<test[3]>	x3( lx.begin(), lx.begin() += 3 );
+		dr_deque<test[3]>	x3( lx.begin(), lx.begin() += 3 );
 		AssertTrue( check_deque( x3, { w1, w2, w3 } ));
-		rp_deque<test[3]>	x0( lx.begin() += 2, lx.begin() += 2 );
+		dr_deque<test[3]>	x0( lx.begin() += 2, lx.begin() += 2 );
 		AssertTrue( x0.empty());
-		rp_deque<test[3]>	x1( lx.begin() += 4, lx.end());
+		dr_deque<test[3]>	x1( lx.begin() += 4, lx.end());
 		AssertTrue( check_deque( x1, { w5 } ));
 	}
 	fprintf( stderr, "--- fill constructor ---\n" );
 	{
-		rp_deque<test[3]>	x0( 3 );
+		dr_deque<test[3]>	x0( 3 );
 		AssertTrue( check_deque( x0, { nullptr, nullptr, nullptr } ));
-		rp_deque<test[3]>	x1( 2, nullptr );
+		dr_deque<test[3]>	x1( 2, nullptr );
 		AssertTrue( check_deque( x1, { nullptr, nullptr } ));
-		rp_deque<test[3]>	x2( 4, w3 );
+		dr_deque<test[3]>	x2( 4, w3 );
 		AssertTrue( check_deque( x2, { w3, w3, w3, w3 } ));
 	}
 	fprintf( stderr, "--- initializer constructor/assignment operator ---\n" );
 	{
-		rp_deque<test[3]>	lx = p5;
-		rp_deque<test[3]>	x0 { };
-		rp_deque<test[3]>	x1 { w1 };
-		rp_deque<test[3]>	x5 { w1, w2, w3, w4, w5 };
+		dr_deque<test[3]>	lx = p5;
+		dr_deque<test[3]>	x0 { };
+		dr_deque<test[3]>	x1 { w1 };
+		dr_deque<test[3]>	x5 { w1, w2, w3, w4, w5 };
 
 		AssertTrue( x0.empty());
 		AssertTrue( check_deque( x1, { w1 } ));
@@ -1092,7 +1092,7 @@ void dp_dequetest::test0A()
 
 	fprintf( stderr, "--- copy-push ---\n" );
 	{
-		rp_deque<test*>	lp;
+		dr_deque<test*>	lp;
 
 		lp.push_back( static_cast<test* const&>( &t3 ));
 		lp.push_front( static_cast<test* const&>( &t2 ));
@@ -1111,7 +1111,7 @@ void dp_dequetest::test0A()
 	}
 	fprintf( stderr, "--- move-push ---\n" );
 	{
-		rp_deque<test*>	lp;
+		dr_deque<test*>	lp;
 
 		lp.push_back( &t3 );
 		lp.push_front( &t2 );
@@ -1182,7 +1182,7 @@ void dp_dequetest::test0C()
 
 	fprintf( stderr, "--- copy-push ---\n" );
 	{
-		rp_deque<const char[]>	lp;
+		dr_deque<const char[]>	lp;
 
 		lp.push_back( static_cast<const char* const&>( s3 ));
 		lp.push_front( static_cast<const char* const&>( s2 ));
@@ -1201,7 +1201,7 @@ void dp_dequetest::test0C()
 	}
 	fprintf( stderr, "--- move-push ---\n" );
 	{
-		rp_deque<const char[]>	lp;
+		dr_deque<const char[]>	lp;
 
 		lp.push_back( s3 );
 		lp.push_front( s2 );
@@ -1272,7 +1272,7 @@ void dp_dequetest::test0E()
 
 	fprintf( stderr, "--- copy-push ---\n" );
 	{
-		rp_deque<test[]>	lp;
+		dr_deque<test[]>	lp;
 
 		lp.push_back( static_cast<test* const&>( v3 ));
 		lp.push_front( static_cast<test* const&>( v2 ));
@@ -1291,7 +1291,7 @@ void dp_dequetest::test0E()
 	}
 	fprintf( stderr, "--- move-push ---\n" );
 	{
-		rp_deque<test[]>	lp;
+		dr_deque<test[]>	lp;
 
 		lp.push_back( v3 );
 		lp.push_front( v2 );
@@ -1362,7 +1362,7 @@ void dp_dequetest::test10()
 
 	fprintf( stderr, "--- copy-push ---\n" );
 	{
-		rp_deque<test[3]>	lp;
+		dr_deque<test[3]>	lp;
 
 		lp.push_back( static_cast<test* const&>( w3 ));
 		lp.push_front( static_cast<test* const&>( w2 ));
@@ -1381,7 +1381,7 @@ void dp_dequetest::test10()
 	}
 	fprintf( stderr, "--- move-push ---\n" );
 	{
-		rp_deque<test[3]>	lp;
+		dr_deque<test[3]>	lp;
 
 		lp.push_back( w3 );
 		lp.push_front( w2 );
@@ -1495,12 +1495,12 @@ void dp_dequetest::test13()
 {
 	this->set_subtitle( "list operations (modifier) - reference pointer(pointer) value" );
 	{
-		rp_deque<test*>	lp = { &t1, &t2, &t3, &t4, &t5 };
-		rp_deque<test*>	l0;
+		dr_deque<test*>	lp = { &t1, &t2, &t3, &t4, &t5 };
+		dr_deque<test*>	l0;
 
 		fprintf( stderr, "--- assign ---\n" );
 		{
-			rp_deque<test*>	lx;
+			dr_deque<test*>	lx;
 
 			lx.assign( 3, nullptr );
 			AssertTrue( check_deque( lx, { nullptr, nullptr, nullptr } ));
@@ -1513,8 +1513,8 @@ void dp_dequetest::test13()
 		}
 		fprintf( stderr, "--- insert ---\n" );
 		{
-			rp_deque<test*>		lx = { &t2, &t3, &t5 };
-			rp_deque<test*>::iterator	r;
+			dr_deque<test*>		lx = { &t2, &t3, &t5 };
+			dr_deque<test*>::iterator	r;
 
 			// single element (copy)
 			r = lx.insert( lx.begin(), static_cast<test* const&>( &t1 ));
@@ -1614,8 +1614,8 @@ void dp_dequetest::test13()
 
 		fprintf( stderr, "--- erase ---\n" );
 		{
-			rp_deque<test*>		lx;
-			rp_deque<test*>::iterator	r;
+			dr_deque<test*>		lx;
+			dr_deque<test*>::iterator	r;
 
 			lx = lp;
 			r = lx.erase( lx.begin() + 1, lx.begin() + 3 );
@@ -1785,12 +1785,12 @@ void dp_dequetest::test15()
 {
 	this->set_subtitle( "list operations (modifier) - reference pointer(c-string) value" );
 	{
-		rp_deque<const char[]>	lp = { s1, s2, s3, s4, s5 };
-		rp_deque<const char[]>	l0;
+		dr_deque<const char[]>	lp = { s1, s2, s3, s4, s5 };
+		dr_deque<const char[]>	l0;
 
 		fprintf( stderr, "--- assign ---\n" );
 		{
-			rp_deque<const char[]>	lx;
+			dr_deque<const char[]>	lx;
 
 			lx.assign( 3, nullptr );
 			AssertTrue( check_deque( lx, { nullptr, nullptr, nullptr } ));
@@ -1803,8 +1803,8 @@ void dp_dequetest::test15()
 		}
 		fprintf( stderr, "--- insert ---\n" );
 		{
-			rp_deque<const char[]>		lx = { s2, s3, s5 };
-			rp_deque<const char[]>::iterator	r;
+			dr_deque<const char[]>		lx = { s2, s3, s5 };
+			dr_deque<const char[]>::iterator	r;
 
 			// single element (copy)
 			r = lx.insert( lx.begin(), static_cast<const char* const&>( s1 ));
@@ -1904,8 +1904,8 @@ void dp_dequetest::test15()
 
 		fprintf( stderr, "--- erase ---\n" );
 		{
-			rp_deque<const char[]>		lx;
-			rp_deque<const char[]>::iterator	r;
+			dr_deque<const char[]>		lx;
+			dr_deque<const char[]>::iterator	r;
 
 			lx = lp;
 			r = lx.erase( lx.begin() + 1, lx.begin() + 3 );
@@ -2075,12 +2075,12 @@ void dp_dequetest::test17()
 {
 	this->set_subtitle( "list operations (modifier) - reference pointer(v-array) value" );
 	{
-		rp_deque<test[]>	lp = { v1, v2, v3, v4, v5 };
-		rp_deque<test[]>	l0;
+		dr_deque<test[]>	lp = { v1, v2, v3, v4, v5 };
+		dr_deque<test[]>	l0;
 
 		fprintf( stderr, "--- assign ---\n" );
 		{
-			rp_deque<test[]>	lx;
+			dr_deque<test[]>	lx;
 
 			lx.assign( 3, nullptr );
 			AssertTrue( check_deque( lx, { nullptr, nullptr, nullptr } ));
@@ -2093,8 +2093,8 @@ void dp_dequetest::test17()
 		}
 		fprintf( stderr, "--- insert ---\n" );
 		{
-			rp_deque<test[]>		lx = { v2, v3, v5 };
-			rp_deque<test[]>::iterator	r;
+			dr_deque<test[]>		lx = { v2, v3, v5 };
+			dr_deque<test[]>::iterator	r;
 
 			// single element (copy)
 			r = lx.insert( lx.begin(), static_cast<test* const&>( v1 ));
@@ -2194,8 +2194,8 @@ void dp_dequetest::test17()
 
 		fprintf( stderr, "--- erase ---\n" );
 		{
-			rp_deque<test[]>		lx;
-			rp_deque<test[]>::iterator	r;
+			dr_deque<test[]>		lx;
+			dr_deque<test[]>::iterator	r;
 
 			lx = lp;
 			r = lx.erase( lx.begin() + 1, lx.begin() + 3 );
@@ -2365,12 +2365,12 @@ void dp_dequetest::test19()
 {
 	this->set_subtitle( "list operations (modifier) - reference pointer(f-array) value" );
 	{
-		rp_deque<test[3]>	lp = { w1, w2, w3, w4, w5 };
-		rp_deque<test[3]>	l0;
+		dr_deque<test[3]>	lp = { w1, w2, w3, w4, w5 };
+		dr_deque<test[3]>	l0;
 
 		fprintf( stderr, "--- assign ---\n" );
 		{
-			rp_deque<test[3]>	lx;
+			dr_deque<test[3]>	lx;
 
 			lx.assign( 3, nullptr );
 			AssertTrue( check_deque( lx, { nullptr, nullptr, nullptr } ));
@@ -2383,8 +2383,8 @@ void dp_dequetest::test19()
 		}
 		fprintf( stderr, "--- insert ---\n" );
 		{
-			rp_deque<test[3]>		lx = { w2, w3, w5 };
-			rp_deque<test[3]>::iterator	r;
+			dr_deque<test[3]>		lx = { w2, w3, w5 };
+			dr_deque<test[3]>::iterator	r;
 
 			// single element (copy)
 			r = lx.insert( lx.begin(), static_cast<test* const&>( w1 ));
@@ -2484,8 +2484,8 @@ void dp_dequetest::test19()
 
 		fprintf( stderr, "--- erase ---\n" );
 		{
-			rp_deque<test[3]>		lx;
-			rp_deque<test[3]>::iterator	r;
+			dr_deque<test[3]>		lx;
+			dr_deque<test[3]>::iterator	r;
 
 			lx = lp;
 			r = lx.erase( lx.begin() + 1, lx.begin() + 3 );
@@ -2802,8 +2802,8 @@ void dp_dequetest::test1C()
 	{
 		fprintf( stderr, "--- at/operator[] ---\n" );
 		{
-			rp_deque<test*>		lp = { &t1, &t2, &t3, &t4, &t5 };
-			rp_deque<test*> const&	cp = lp;
+			dr_deque<test*>		lp = { &t1, &t2, &t3, &t4, &t5 };
+			dr_deque<test*> const&	cp = lp;
 
 			AssertEqual( *lp[ 0 ], t1 );
 			AssertEqual( *lp.at( 1 ), t2 );
@@ -2836,8 +2836,8 @@ void dp_dequetest::test1C()
 		}
 		fprintf( stderr, "--- front/back ---\n" );
 		{
-			rp_deque<test*>		lp;
-			rp_deque<test*> const&	cp = lp;
+			dr_deque<test*>		lp;
+			dr_deque<test*> const&	cp = lp;
 
 			lp = { &t1, &t2, &t3, &t1, &t4, &t5 };
 			AssertTrue( static_cast<bool>( lp.front() ));
@@ -2872,8 +2872,8 @@ void dp_dequetest::test1C()
 
 		fprintf( stderr, "--- returned reference\n" );
 		{
-			rp_deque<test*>		nn { &t1, &t2, &t3, &t4, nullptr, &t5 };
-			rp_deque<const test*>		cn { &t1, &t2, &t3, &t4, nullptr, &t5 };
+			dr_deque<test*>		nn { &t1, &t2, &t3, &t4, nullptr, &t5 };
+			dr_deque<const test*>		cn { &t1, &t2, &t3, &t4, nullptr, &t5 };
 
 			AssertEqual( nn[ 1 ], &t2 );				// adresss comparison
 			AssertEqual( cn[ 1 ], &t2 );			//
@@ -3006,8 +3006,8 @@ void dp_dequetest::test1E()
 	{
 		fprintf( stderr, "--- at/operator[] ---\n" );
 		{
-			rp_deque<const char[]>		lp = { s1, s2, s3, s4, s5 };
-			rp_deque<const char[]> const&	cp = lp;
+			dr_deque<const char[]>		lp = { s1, s2, s3, s4, s5 };
+			dr_deque<const char[]> const&	cp = lp;
 
 			AssertZero( strcmp( lp[ 0 ], s1 ));
 			AssertZero( strcmp( lp.at( 2 ), s3 ));
@@ -3029,8 +3029,8 @@ void dp_dequetest::test1E()
 		}
 		fprintf( stderr, "--- front/back ---\n" );
 		{
-			rp_deque<const char[]>		lp;
-			rp_deque<const char[]> const&	cp = lp;
+			dr_deque<const char[]>		lp;
+			dr_deque<const char[]> const&	cp = lp;
 
 			lp = { s1, s2, s3, s1, s4, s5 };
 			AssertTrue( static_cast<bool>( lp.front() ));
@@ -3124,8 +3124,8 @@ void dp_dequetest::test20()
 	{
 		fprintf( stderr, "--- at/operator[] ---\n" );
 		{
-			rp_deque<test[]>		lp = { v1, v2, v3, v4, v5 };
-			rp_deque<test[]> const&	cp = lp;
+			dr_deque<test[]>		lp = { v1, v2, v3, v4, v5 };
+			dr_deque<test[]> const&	cp = lp;
 
 			AssertTrue( dp_eql<test[]>()( lp[ 0 ], v1 ));
 			AssertTrue( dp_eql<test[]>()( lp.at( 2 ), v3 ));
@@ -3147,8 +3147,8 @@ void dp_dequetest::test20()
 		}
 		fprintf( stderr, "--- front/back ---\n" );
 		{
-			rp_deque<test[]>		lp;
-			rp_deque<test[]> const&	cp = lp;
+			dr_deque<test[]>		lp;
+			dr_deque<test[]> const&	cp = lp;
 
 			lp = { v1, v2, v3, v1, v4, v5 };
 			AssertTrue( static_cast<bool>( lp.front() ));
@@ -3242,8 +3242,8 @@ void dp_dequetest::test22()
 	{
 		fprintf( stderr, "--- at/operator[] ---\n" );
 		{
-			rp_deque<test[3]>		lp = { w1, w2, w3, w4, w5 };
-			rp_deque<test[3]> const&	cp = lp;
+			dr_deque<test[3]>		lp = { w1, w2, w3, w4, w5 };
+			dr_deque<test[3]> const&	cp = lp;
 
 			AssertTrue( dp_eql<test[3]>()( lp[ 0 ], w1 ));
 			AssertTrue( dp_eql<test[3]>()( lp.at( 2 ), w3 ));
@@ -3265,8 +3265,8 @@ void dp_dequetest::test22()
 		}
 		fprintf( stderr, "--- front/back ---\n" );
 		{
-			rp_deque<test[3]>		lp;
-			rp_deque<test[3]> const&	cp = lp;
+			dr_deque<test[3]>		lp;
+			dr_deque<test[3]> const&	cp = lp;
 
 			lp = { w1, w2, w3, w1, w4, w5 };
 			AssertTrue( static_cast<bool>( lp.front() ));
@@ -3417,8 +3417,8 @@ void dp_dequetest::test25()
 
 	fprintf( stderr, "--- iterator ---\n" );
 	{
-		rp_deque<test*>		lr;
-		rp_deque<test*>::iterator	e, i, j;
+		dr_deque<test*>		lr;
+		dr_deque<test*>::iterator	e, i, j;
 		unsigned			n;
 
 		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
@@ -3442,7 +3442,7 @@ void dp_dequetest::test25()
 	}
 	fprintf( stderr, "--- const_iterator ---\n" );
 	{
-		const rp_deque<test*>		lr = { &t1, &t2, &t3, &t4, &t5 };
+		const dr_deque<test*>		lr = { &t1, &t2, &t3, &t4, &t5 };
 		unsigned			n = 0;
 
 		for ( auto i = lr.begin(); i != lr.end(); ++i, ++n ) println( *i );
@@ -3513,8 +3513,8 @@ void dp_dequetest::test27()
 
 	fprintf( stderr, "--- iterator ---\n" );
 	{
-		rp_deque<const char[]>		lr;
-		rp_deque<const char[]>::iterator	e, i, j;
+		dr_deque<const char[]>		lr;
+		dr_deque<const char[]>::iterator	e, i, j;
 		unsigned			n;
 
 		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
@@ -3538,7 +3538,7 @@ void dp_dequetest::test27()
 	}
 	fprintf( stderr, "--- const_iterator ---\n" );
 	{
-		const rp_deque<const char[]>		lr = { s1, s2, s3, s4, s5 };
+		const dr_deque<const char[]>		lr = { s1, s2, s3, s4, s5 };
 		unsigned			n = 0;
 
 		for ( auto i = lr.begin(); i != lr.end(); ++i, ++n ) println( *i );
@@ -3609,8 +3609,8 @@ void dp_dequetest::test29()
 
 	fprintf( stderr, "--- iterator ---\n" );
 	{
-		rp_deque<test[]>		lr;
-		rp_deque<test[]>::iterator	e, i, j;
+		dr_deque<test[]>		lr;
+		dr_deque<test[]>::iterator	e, i, j;
 		unsigned			n;
 
 		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
@@ -3634,7 +3634,7 @@ void dp_dequetest::test29()
 	}
 	fprintf( stderr, "--- const_iterator ---\n" );
 	{
-		const rp_deque<test[]>		lr = { v1, v2, v3, v4, v5 };
+		const dr_deque<test[]>		lr = { v1, v2, v3, v4, v5 };
 		unsigned			n = 0;
 
 		for ( auto i = lr.begin(); i != lr.end(); ++i, ++n ) println( *i );
@@ -3705,8 +3705,8 @@ void dp_dequetest::test2B()
 
 	fprintf( stderr, "--- iterator ---\n" );
 	{
-		rp_deque<test[3]>		lr;
-		rp_deque<test[3]>::iterator	e, i, j;
+		dr_deque<test[3]>		lr;
+		dr_deque<test[3]>::iterator	e, i, j;
 		unsigned			n;
 
 		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
@@ -3730,7 +3730,7 @@ void dp_dequetest::test2B()
 	}
 	fprintf( stderr, "--- const_iterator ---\n" );
 	{
-		const rp_deque<test[3]>		lr = { w1, w2, w3, w4, w5 };
+		const dr_deque<test[3]>		lr = { w1, w2, w3, w4, w5 };
 		unsigned			n = 0;
 
 		for ( auto i = lr.begin(); i != lr.end(); ++i, ++n ) println( *i );
@@ -3846,9 +3846,9 @@ void dp_dequetest::test2E()
 {
 	this->set_subtitle( "list operations (miscellaneous) - reference pointer(pointer) value" );
 
-	rp_deque<test*>	r0;
-	rp_deque<test*>	r1 = { &t1 };
-	rp_deque<test*>	r5 = { &t1, &t2, &t3, &t4, &t5 };
+	dr_deque<test*>	r0;
+	dr_deque<test*>	r1 = { &t1 };
+	dr_deque<test*>	r5 = { &t1, &t2, &t3, &t4, &t5 };
 
 	fprintf( stderr, "--- empty() ---\n" );
 	AssertTrue( r0.empty());
@@ -3862,21 +3862,21 @@ void dp_dequetest::test2E()
 
 	fprintf( stderr, "--- resize() ---\n" );
 	{
-		rp_deque<test*>  l5 = r5;
+		dr_deque<test*>  l5 = r5;
 		l5.resize( 3 );
 		AssertTrue( check_deque( l5, { &t1, &t2, &t3 } ));
-		rp_deque<test*>  l1 = r1;
+		dr_deque<test*>  l1 = r1;
 		l1.resize( 3 );
 		AssertTrue( check_deque( l1, { &t1, nullptr, nullptr } ));
-		rp_deque<test*>  l0 = r0;
+		dr_deque<test*>  l0 = r0;
 		l0.resize( 3 );
 		AssertTrue( check_deque( l0, { nullptr, nullptr, nullptr } ));
 	}
 
 	fprintf( stderr, "--- swap, clear ---\n" );
 	{
-		rp_deque<test*>	  lx;
-		rp_deque<test*>	  ly;
+		dr_deque<test*>	  lx;
+		dr_deque<test*>	  ly;
 
 		lx.swap( ly );
 		AssertTrue( lx.empty());
@@ -3958,9 +3958,9 @@ void dp_dequetest::test30()
 {
 	this->set_subtitle( "list operations (miscellaneous) - reference pointer(c-string) value" );
 
-	rp_deque<const char[]>	r0;
-	rp_deque<const char[]>	r1 = { s1 };
-	rp_deque<const char[]>	r5 = { s1, s2, s3, s4, s5 };
+	dr_deque<const char[]>	r0;
+	dr_deque<const char[]>	r1 = { s1 };
+	dr_deque<const char[]>	r5 = { s1, s2, s3, s4, s5 };
 
 	fprintf( stderr, "--- empty() ---\n" );
 	AssertTrue( r0.empty());
@@ -3974,21 +3974,21 @@ void dp_dequetest::test30()
 
 	fprintf( stderr, "--- resize() ---\n" );
 	{
-		rp_deque<const char[]>  l5 = r5;
+		dr_deque<const char[]>  l5 = r5;
 		l5.resize( 3 );
 		AssertTrue( check_deque( l5, { s1, s2, s3 } ));
-		rp_deque<const char[]>  l1 = r1;
+		dr_deque<const char[]>  l1 = r1;
 		l1.resize( 3 );
 		AssertTrue( check_deque( l1, { s1, nullptr, nullptr } ));
-		rp_deque<const char[]>  l0 = r0;
+		dr_deque<const char[]>  l0 = r0;
 		l0.resize( 3 );
 		AssertTrue( check_deque( l0, { nullptr, nullptr, nullptr } ));
 	}
 
 	fprintf( stderr, "--- swap, clear ---\n" );
 	{
-		rp_deque<const char[]>	  lx;
-		rp_deque<const char[]>	  ly;
+		dr_deque<const char[]>	  lx;
+		dr_deque<const char[]>	  ly;
 
 		lx.swap( ly );
 		AssertTrue( lx.empty());
@@ -4070,9 +4070,9 @@ void dp_dequetest::test32()
 {
 	this->set_subtitle( "list operations (miscellaneous) - reference pointer(v-array) value" );
 
-	rp_deque<test[]>	r0;
-	rp_deque<test[]>	r1 = { v1 };
-	rp_deque<test[]>	r5 = { v1, v2, v3, v4, v5 };
+	dr_deque<test[]>	r0;
+	dr_deque<test[]>	r1 = { v1 };
+	dr_deque<test[]>	r5 = { v1, v2, v3, v4, v5 };
 
 	fprintf( stderr, "--- empty() ---\n" );
 	AssertTrue( r0.empty());
@@ -4086,21 +4086,21 @@ void dp_dequetest::test32()
 
 	fprintf( stderr, "--- resize() ---\n" );
 	{
-		rp_deque<test[]>  l5 = r5;
+		dr_deque<test[]>  l5 = r5;
 		l5.resize( 3 );
 		AssertTrue( check_deque( l5, { v1, v2, v3 } ));
-		rp_deque<test[]>  l1 = r1;
+		dr_deque<test[]>  l1 = r1;
 		l1.resize( 3 );
 		AssertTrue( check_deque( l1, { v1, nullptr, nullptr } ));
-		rp_deque<test[]>  l0 = r0;
+		dr_deque<test[]>  l0 = r0;
 		l0.resize( 3 );
 		AssertTrue( check_deque( l0, { nullptr, nullptr, nullptr } ));
 	}
 
 	fprintf( stderr, "--- swap, clear ---\n" );
 	{
-		rp_deque<test[]>	  lx;
-		rp_deque<test[]>	  ly;
+		dr_deque<test[]>	  lx;
+		dr_deque<test[]>	  ly;
 
 		lx.swap( ly );
 		AssertTrue( lx.empty());
@@ -4182,9 +4182,9 @@ void dp_dequetest::test34()
 {
 	this->set_subtitle( "list operations (miscellaneous) - reference pointer(f-array) value" );
 
-	rp_deque<test[3]>	r0;
-	rp_deque<test[3]>	r1 = { w1 };
-	rp_deque<test[3]>	r5 = { w1, w2, w3, w4, w5 };
+	dr_deque<test[3]>	r0;
+	dr_deque<test[3]>	r1 = { w1 };
+	dr_deque<test[3]>	r5 = { w1, w2, w3, w4, w5 };
 
 	fprintf( stderr, "--- empty() ---\n" );
 	AssertTrue( r0.empty());
@@ -4198,21 +4198,21 @@ void dp_dequetest::test34()
 
 	fprintf( stderr, "--- resize() ---\n" );
 	{
-		rp_deque<test[3]>  l5 = r5;
+		dr_deque<test[3]>  l5 = r5;
 		l5.resize( 3 );
 		AssertTrue( check_deque( l5, { w1, w2, w3 } ));
-		rp_deque<test[3]>  l1 = r1;
+		dr_deque<test[3]>  l1 = r1;
 		l1.resize( 3 );
 		AssertTrue( check_deque( l1, { w1, nullptr, nullptr } ));
-		rp_deque<test[3]>  l0 = r0;
+		dr_deque<test[3]>  l0 = r0;
 		l0.resize( 3 );
 		AssertTrue( check_deque( l0, { nullptr, nullptr, nullptr } ));
 	}
 
 	fprintf( stderr, "--- swap, clear ---\n" );
 	{
-		rp_deque<test[3]>	  lx;
-		rp_deque<test[3]>	  ly;
+		dr_deque<test[3]>	  lx;
+		dr_deque<test[3]>	  ly;
 
 		lx.swap( ly );
 		AssertTrue( lx.empty());
@@ -4350,13 +4350,13 @@ void dp_dequetest::test37()
 {
 	this->set_subtitle( "relational operators - reference pointer(pointer) value" );
 
-	rp_deque<test*>	l0;
-	rp_deque<test*>	l1 = { &t1, &t2, &t3 };
-	rp_deque<test*>	l2 = { &t1, &t2, &t3, nullptr };
-	rp_deque<test*>	l3 = { &t1, &t2, &t3, &t4 };
-	rp_deque<test*>	l4 = { &t1, &t2, &t4 };
+	dr_deque<test*>	l0;
+	dr_deque<test*>	l1 = { &t1, &t2, &t3 };
+	dr_deque<test*>	l2 = { &t1, &t2, &t3, nullptr };
+	dr_deque<test*>	l3 = { &t1, &t2, &t3, &t4 };
+	dr_deque<test*>	l4 = { &t1, &t2, &t4 };
 
-	rp_deque<test*>	l  = { &t1, &t2, &t3 };
+	dr_deque<test*>	l  = { &t1, &t2, &t3 };
 
 
 	fprintf( stderr, "--- equality ---\n" );
@@ -4412,13 +4412,13 @@ void dp_dequetest::test39()
 {
 	this->set_subtitle( "relational operators - reference pointer(c-string) value" );
 
-	rp_deque<const char[]>	l0;
-	rp_deque<const char[]>	l1 = { s1, s2, s3 };
-	rp_deque<const char[]>	l2 = { s1, s2, s3, nullptr };
-	rp_deque<const char[]>	l3 = { s1, s2, s3, s4 };
-	rp_deque<const char[]>	l4 = { s1, s2, s4 };
+	dr_deque<const char[]>	l0;
+	dr_deque<const char[]>	l1 = { s1, s2, s3 };
+	dr_deque<const char[]>	l2 = { s1, s2, s3, nullptr };
+	dr_deque<const char[]>	l3 = { s1, s2, s3, s4 };
+	dr_deque<const char[]>	l4 = { s1, s2, s4 };
 
-	rp_deque<const char[]>	l  = { s1, s2, s3 };
+	dr_deque<const char[]>	l  = { s1, s2, s3 };
 
 
 	fprintf( stderr, "--- equality ---\n" );
@@ -4474,13 +4474,13 @@ void dp_dequetest::test3B()
 {
 	this->set_subtitle( "relational operators - reference pointer(v-array) value" );
 
-	rp_deque<test[]>	l0;
-	rp_deque<test[]>	l1 = { v1, v2, v3 };
-	rp_deque<test[]>	l2 = { v1, v2, v3, nullptr };
-	rp_deque<test[]>	l3 = { v1, v2, v3, v4 };
-	rp_deque<test[]>	l4 = { v1, v2, v4 };
+	dr_deque<test[]>	l0;
+	dr_deque<test[]>	l1 = { v1, v2, v3 };
+	dr_deque<test[]>	l2 = { v1, v2, v3, nullptr };
+	dr_deque<test[]>	l3 = { v1, v2, v3, v4 };
+	dr_deque<test[]>	l4 = { v1, v2, v4 };
 
-	rp_deque<test[]>	l  = { v1, v2, v3 };
+	dr_deque<test[]>	l  = { v1, v2, v3 };
 
 
 	fprintf( stderr, "--- equality ---\n" );
@@ -4536,13 +4536,13 @@ void dp_dequetest::test3D()
 {
 	this->set_subtitle( "relational operators - reference pointer(f-array) value" );
 
-	rp_deque<test[3]>	l0;
-	rp_deque<test[3]>	l1 = { w1, w2, w3 };
-	rp_deque<test[3]>	l2 = { w1, w2, w3, nullptr };
-	rp_deque<test[3]>	l3 = { w1, w2, w3, w4 };
-	rp_deque<test[3]>	l4 = { w1, w2, w4 };
+	dr_deque<test[3]>	l0;
+	dr_deque<test[3]>	l1 = { w1, w2, w3 };
+	dr_deque<test[3]>	l2 = { w1, w2, w3, nullptr };
+	dr_deque<test[3]>	l3 = { w1, w2, w3, w4 };
+	dr_deque<test[3]>	l4 = { w1, w2, w4 };
 
-	rp_deque<test[3]>	l  = { w1, w2, w3 };
+	dr_deque<test[3]>	l  = { w1, w2, w3 };
 
 
 	fprintf( stderr, "--- equality ---\n" );
@@ -4629,8 +4629,8 @@ void dp_dequetest::test40()
 {
 	this->set_subtitle( "list duplication - reference pointer(pointer) value" );
 
-	rp_deque<test*>	l;
-	rp_deque<test*>*	p;
+	dr_deque<test*>	l;
+	dr_deque<test*>*	p;
 
 	p = dpl( &l );
 	AssertTrue( p->empty());
@@ -4683,8 +4683,8 @@ void dp_dequetest::test42()
 {
 	this->set_subtitle( "list duplication - reference pointer(c-string) value" );
 
-	rp_deque<const char[]>	l;
-	rp_deque<const char[]>*	p;
+	dr_deque<const char[]>	l;
+	dr_deque<const char[]>*	p;
 
 	p = dpl( &l );
 	AssertTrue( p->empty());
@@ -4737,8 +4737,8 @@ void dp_dequetest::test44()
 {
 	this->set_subtitle( "list duplication - reference pointer(v-array) value" );
 
-	rp_deque<test[]>	l;
-	rp_deque<test[]>*	p;
+	dr_deque<test[]>	l;
+	dr_deque<test[]>*	p;
 
 	p = dpl( &l );
 	AssertTrue( p->empty());
@@ -4791,8 +4791,8 @@ void dp_dequetest::test46()
 {
 	this->set_subtitle( "list duplication - reference pointer(f-array) value" );
 
-	rp_deque<test[3]>	l;
-	rp_deque<test[3]>*	p;
+	dr_deque<test[3]>	l;
+	dr_deque<test[3]>*	p;
 
 	p = dpl( &l );
 	AssertTrue( p->empty());

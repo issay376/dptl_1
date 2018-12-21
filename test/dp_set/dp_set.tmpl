@@ -4,7 +4,7 @@ $X${
 template <typename T>
 inline bool check_set( dp_set<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_set<T> l;
+	dr_set<T> l;
 
 	for ( auto&& a : ts ) l.emplace( a );
 
@@ -12,9 +12,9 @@ inline bool check_set( dp_set<T> const& ls, std::initializer_list<typename value
 }
 
 template <typename T>
-inline bool check_set( rp_set<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+inline bool check_set( dr_set<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	rp_set<T> l;
+	dr_set<T> l;
 
 	for ( auto&& a : ts ) l.emplace( a );
 
@@ -147,7 +147,7 @@ $T${	AssertEqual( **s.find( $4 ), t4 );$}
 
 	AssertTrue( check_set( s, { $n, $1, $2, $3, $4, $5, $R${$6, $}$8 } ));
 
-$R$D${	rp_set<$v>			l1, r1, l2, r2, l3, r3, l4, r4, l5, r5;$}$&
+$R$D${	dr_set<$v>			l1, r1, l2, r2, l3, r3, l4, r4, l5, r5;$}$&
 $N${	std::set<$v>			l1, r1, l2, r2, l3, r3, l4, r4, l5, r5;$}
 	$a::iterator	b, e;
 
@@ -218,9 +218,9 @@ $}
 
 $V "emplace/insert/erase"
 ${
-$D$R${	rp_set<$v>	m1 = { $1, $2 };
-	rp_set<$v>	m2;
-	rp_set<$v>	m3 = { $2, $3, $5 };$}$&
+$D$R${	dr_set<$v>	m1 = { $1, $2 };
+	dr_set<$v>	m2;
+	dr_set<$v>	m3 = { $2, $3, $5 };$}$&
 $N${	std::set<$v>	m1 = { $1, $2 };
 	std::set<$v>	m2;
 	std::set<$v>	m3 = { $2, $3, $5 };$}

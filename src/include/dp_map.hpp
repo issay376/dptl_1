@@ -22,7 +22,7 @@ namespace DPTL_NAMESPACE {
 // map with policy based pointer key
 // -----------------------------------------------------------------------------
 template <typename K, typename T> 
-class dp_map : public std::map<dp_const<K>,T>
+class __dp_map : public std::map<dp_const<K>,T>
 {
 	typedef dp_const<K>				KD;
 	typedef dp_const_type<K>			KT;
@@ -55,29 +55,29 @@ class dp_map : public std::map<dp_const<K>,T>
 
 #if defined(__cplusplus) && (__cplusplus >= 201402)
 	// ---- for c++14
-	dp_map() = default;
-	explicit dp_map( const key_compare& comp,
+	__dp_map() = default;
+	explicit __dp_map( const key_compare& comp,
 		         const allocator_type& alloc = allocator_type()) : super( comp, alloc ) { }
-	explicit dp_map( const allocator_type& alloc ) : super( alloc ) { }
+	explicit __dp_map( const allocator_type& alloc ) : super( alloc ) { }
 
 	template <class II>
-	dp_map( II first, II last, const key_compare& comp,
+	__dp_map( II first, II last, const key_compare& comp,
 		const allocator_type& alloc = allocator_type()) : super( first, last, comp, alloc ) { }
 	template <class II>
-	dp_map( II first, II last, const allocator_type& alloc = allocator_type()) : super( first, last, alloc ) { }
+	__dp_map( II first, II last, const allocator_type& alloc = allocator_type()) : super( first, last, alloc ) { }
 
-	dp_map( const dp_map& ) = default;
-	dp_map( const dp_map& s, const allocator_type& alloc ) : super( s, alloc ) { }  
-	dp_map( dp_map&& ) = default;
-	dp_map( dp_map&& s, const allocator_type& alloc ) : super( std::move( s ), alloc ) { }  
+	__dp_map( const __dp_map& ) = default;
+	__dp_map( const __dp_map& s, const allocator_type& alloc ) : super( s, alloc ) { }  
+	__dp_map( __dp_map&& ) = default;
+	__dp_map( __dp_map&& s, const allocator_type& alloc ) : super( std::move( s ), alloc ) { }  
 
-	dp_map( std::initializer_list<value_pointer> il,
+	__dp_map( std::initializer_list<value_pointer> il,
 		 const key_compare& comp,
 		 const allocator_type& alloc = allocator_type()) : super( comp, alloc )
 	{
 		for ( auto&& p : il ) super::emplace( p.first, p.second );
 	}
-	dp_map( std::initializer_list<value_pointer> il,
+	__dp_map( std::initializer_list<value_pointer> il,
 		 const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
 		for ( auto&& p : il ) super::emplace( p.first, p.second );
@@ -85,20 +85,20 @@ class dp_map : public std::map<dp_const<K>,T>
 
 #elif defined(__cplusplus) && (__cplusplus >= 201103)
 	// ---- for c++11
-	explicit dp_map( const key_compare& comp = key_compare(),
+	explicit __dp_map( const key_compare& comp = key_compare(),
 		         const allocator_type& alloc = allocator_type()) : super( comp, alloc ) { }
-	explicit dp_map( const allocator_type& alloc ) : super( alloc ) { }
+	explicit __dp_map( const allocator_type& alloc ) : super( alloc ) { }
 
 	template <class II>
-	dp_map( II first, II last, const key_compare& comp = key_compare(),
+	__dp_map( II first, II last, const key_compare& comp = key_compare(),
 		const allocator_type& alloc = allocator_type()) : super( first, last, comp, alloc ) { }
 
-	dp_map( const dp_map& ) = default;
-	dp_map( const dp_map& s, const allocator_type& alloc ) : super( s, alloc ) { }  
-	dp_map( dp_map&& ) = default;
-	dp_map( dp_map&& s, const allocator_type& alloc ) : super( std::move( s ), alloc ) { }  
+	__dp_map( const __dp_map& ) = default;
+	__dp_map( const __dp_map& s, const allocator_type& alloc ) : super( s, alloc ) { }  
+	__dp_map( __dp_map&& ) = default;
+	__dp_map( __dp_map&& s, const allocator_type& alloc ) : super( std::move( s ), alloc ) { }  
 
-	dp_map( std::initializer_list<value_pointer> il,
+	__dp_map( std::initializer_list<value_pointer> il,
 		 const key_compare& comp = key_compare(),
 		 const allocator_type& alloc = allocator_type()) : super( comp, alloc )
 	{
@@ -108,22 +108,22 @@ class dp_map : public std::map<dp_const<K>,T>
 #error "c++11 up required"
 #endif
 
-	//dp_map& operator=( const dp_map& ) = default;
-	dp_map& operator=( const dp_map& m )
+	//__dp_map& operator=( const __dp_map& ) = default;
+	__dp_map& operator=( const __dp_map& m )
 	{
 		super::clear();
 		for ( auto&& p : m ) super::emplace( p.first, p.second );
 		return *this;
 	}
-	dp_map& operator=( dp_map&& ) = default;
-	dp_map& operator=( std::initializer_list<value_pointer> il )
+	__dp_map& operator=( __dp_map&& ) = default;
+	__dp_map& operator=( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
 		for ( auto&& p : il ) super::emplace( p.first, p.second );
 		return *this;
 	}
 
-	~dp_map() = default;
+	~__dp_map() = default;
 
 	// wrapper for appropriate casting of raw pointer
 	template <typename... Args> std::pair<iterator, bool> emplace( Args&&... args )
@@ -235,34 +235,34 @@ class dp_map : public std::map<dp_const<K>,T>
 //
 // alias for deep pointer map, key: K=Q*/Q[]/Q[N], mapped-value: T=V*/V[]/V[N]
 //
-//	dd_map: map for deep pointer key and deep pointer mapped-value
-//	dr_map: map for deep pointer key and deep reference pointer mapped-value
-//	dn_map: map for deep pointer key and non-pointer/non-array mapped-value
+//	dpp_map: map for deep pointer key and deep pointer mapped-value
+//	dpr_map: map for deep pointer key and deep reference pointer mapped-value
+//	dpn_map: map for deep pointer key and non-pointer/non-array mapped-value
 //
-//	rd_map: map for deep reference pointer key and deep pointer mapped-value
-//	rr_map: map for deep reference pointer key and deep reference pointer mapped-value
-//	rn_map: map for deep reference pointer key and non-pointer/non-array mapped-value
+//	drp_map: map for deep reference pointer key and deep pointer mapped-value
+//	drr_map: map for deep reference pointer key and deep reference pointer mapped-value
+//	drn_map: map for deep reference pointer key and non-pointer/non-array mapped-value
 //
-//	nd_map: map for non-pointer/non-array key and deep pointer mapped-value
-//	nr_map: map for non-pointer/non-array key and deep reference pointer mapped-value
+//	dnp_map: map for non-pointer/non-array key and deep pointer mapped-value
+//	dnr_map: map for non-pointer/non-array key and deep reference pointer mapped-value
 //
 // -----------------------------------------------------------------------------
-template <typename K, typename T> using dd_map = dp_map<deep_ptr<K>, deep_ptr<T>>;
-template <typename K, typename T> using dr_map = dp_map<deep_ptr<K>, dref_ptr<T>>;
-template <typename K, typename T> using dn_map = dp_map<deep_ptr<K>, T>;
+template <typename K, typename T> using dpp_map = __dp_map<deep_ptr<K>, deep_ptr<T>>;
+template <typename K, typename T> using dpr_map = __dp_map<deep_ptr<K>, dref_ptr<T>>;
+template <typename K, typename T> using dpn_map = __dp_map<deep_ptr<K>, T>;
 
-template <typename K, typename T> using rd_map = dp_map<dref_ptr<K>, deep_ptr<T>>;
-template <typename K, typename T> using rr_map = dp_map<dref_ptr<K>, dref_ptr<T>>;
-template <typename K, typename T> using rn_map = dp_map<dref_ptr<K>, T>;
+template <typename K, typename T> using drp_map = __dp_map<dref_ptr<K>, deep_ptr<T>>;
+template <typename K, typename T> using drr_map = __dp_map<dref_ptr<K>, dref_ptr<T>>;
+template <typename K, typename T> using drn_map = __dp_map<dref_ptr<K>, T>;
 
-template <typename K, typename T> using nd_map = dp_map<K, deep_ptr<T>>;
-template <typename K, typename T> using nr_map = dp_map<K, dref_ptr<T>>;
+template <typename K, typename T> using dnp_map = __dp_map<K, deep_ptr<T>>;
+template <typename K, typename T> using dnr_map = __dp_map<K, dref_ptr<T>>;
 
 //
 // multimap with policy based pointer key
 // -----------------------------------------------------------------------------
 template <typename K, typename T> 
-class dp_multimap : public std::multimap<dp_const<K>,T>
+class __dp_multimap : public std::multimap<dp_const<K>,T>
 {
 	typedef dp_const<K>				KD;
 	typedef dp_const_type<K>			KT;
@@ -295,29 +295,29 @@ class dp_multimap : public std::multimap<dp_const<K>,T>
 
 #if defined(__cplusplus) && (__cplusplus >= 201402)
 	// ---- for c++14
-	dp_multimap() = default;
-	explicit dp_multimap( const key_compare& comp,
+	__dp_multimap() = default;
+	explicit __dp_multimap( const key_compare& comp,
 		         const allocator_type& alloc = allocator_type()) : super( comp, alloc ) { }
-	explicit dp_multimap( const allocator_type& alloc ) : super( alloc ) { }
+	explicit __dp_multimap( const allocator_type& alloc ) : super( alloc ) { }
 
 	template <class II>
-	dp_multimap( II first, II last, const key_compare& comp,
+	__dp_multimap( II first, II last, const key_compare& comp,
 		const allocator_type& alloc = allocator_type()) : super( first, last, comp, alloc ) { }
 	template <class II>
-	dp_multimap( II first, II last, const allocator_type& alloc = allocator_type()) : super( first, last, alloc ) { }
+	__dp_multimap( II first, II last, const allocator_type& alloc = allocator_type()) : super( first, last, alloc ) { }
 
-	dp_multimap( const dp_multimap& ) = default;
-	dp_multimap( const dp_multimap& s, const allocator_type& alloc ) : super( s, alloc ) { }  
-	dp_multimap( dp_multimap&& ) = default;
-	dp_multimap( dp_multimap&& s, const allocator_type& alloc ) : super( std::move( s ), alloc ) { }  
+	__dp_multimap( const __dp_multimap& ) = default;
+	__dp_multimap( const __dp_multimap& s, const allocator_type& alloc ) : super( s, alloc ) { }  
+	__dp_multimap( __dp_multimap&& ) = default;
+	__dp_multimap( __dp_multimap&& s, const allocator_type& alloc ) : super( std::move( s ), alloc ) { }  
 
-	dp_multimap( std::initializer_list<value_pointer> il,
+	__dp_multimap( std::initializer_list<value_pointer> il,
 		 const key_compare& comp,
 		 const allocator_type& alloc = allocator_type()) : super( comp, alloc )
 	{
 		for ( auto&& p : il ) super::emplace( p.first, p.second );
 	}
-	dp_multimap( std::initializer_list<value_pointer> il,
+	__dp_multimap( std::initializer_list<value_pointer> il,
 		 const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
 		for ( auto&& p : il ) super::emplace( p.first, p.second );
@@ -325,20 +325,20 @@ class dp_multimap : public std::multimap<dp_const<K>,T>
 
 #elif defined(__cplusplus) && (__cplusplus >= 201103)
 	// ---- for c++11
-	explicit dp_multimap( const key_compare& comp = key_compare(),
+	explicit __dp_multimap( const key_compare& comp = key_compare(),
 		              const allocator_type& alloc = allocator_type()) : super( comp, alloc ) { }
-	explicit dp_multimap( const allocator_type& alloc ) : super( alloc ) { }
+	explicit __dp_multimap( const allocator_type& alloc ) : super( alloc ) { }
 
 	template <class II>
-	dp_multimap( II first, II last, const key_compare& comp = key_compare(),
+	__dp_multimap( II first, II last, const key_compare& comp = key_compare(),
 		     const allocator_type& alloc = allocator_type()) : super( first, last, comp, alloc ) { }
 
-	dp_multimap( const dp_multimap& ) = default;
-	dp_multimap( const dp_multimap& s, const allocator_type& alloc ) : super( s, alloc ) { }  
-	dp_multimap( dp_multimap&& ) = default;
-	dp_multimap( dp_multimap&& s, const allocator_type& alloc ) : super( std::move( s ), alloc ) { }  
+	__dp_multimap( const __dp_multimap& ) = default;
+	__dp_multimap( const __dp_multimap& s, const allocator_type& alloc ) : super( s, alloc ) { }  
+	__dp_multimap( __dp_multimap&& ) = default;
+	__dp_multimap( __dp_multimap&& s, const allocator_type& alloc ) : super( std::move( s ), alloc ) { }  
 
-	dp_multimap( std::initializer_list<value_pointer> il,
+	__dp_multimap( std::initializer_list<value_pointer> il,
 		 const key_compare& comp = key_compare(),
 		 const allocator_type& alloc = allocator_type()) : super( comp, alloc )
 	{
@@ -348,22 +348,22 @@ class dp_multimap : public std::multimap<dp_const<K>,T>
 #error "c++11 up required"
 #endif
 
-	//dp_multimap& operator=( const dp_multimap& ) = default;
-	dp_multimap& operator=( const dp_multimap& m )
+	//__dp_multimap& operator=( const __dp_multimap& ) = default;
+	__dp_multimap& operator=( const __dp_multimap& m )
 	{
 		super::clear();
 		for ( auto&& p : m ) super::emplace( p.first, p.second );
 		return *this;
 	}
-	dp_multimap& operator=( dp_multimap&& ) = default;
-	dp_multimap& operator=( std::initializer_list<value_pointer> il )
+	__dp_multimap& operator=( __dp_multimap&& ) = default;
+	__dp_multimap& operator=( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
 		for ( auto&& p : il ) super::emplace( p.first, p.second );
 		return *this;
 	}
 
-	~dp_multimap() = default;
+	~__dp_multimap() = default;
 
 	// wrapper for appropriate casting of raw pointer
 	template <typename... Args>
@@ -457,28 +457,28 @@ class dp_multimap : public std::multimap<dp_const<K>,T>
 //
 // alias for deep pointer multimap, key: K=Q*/Q[]/Q[N], mapped-value: T=V*/V[]/V[N]
 //
-//	dd_multimap: multimap for deep pointer key and deep pointer mapped-value
-//	dr_multimap: multimap for deep pointer key and deep reference pointer mapped-value
-//	dn_multimap: multimap for deep pointer key and non-pointer/non-array mapped-value
+//	dpp_multimap: multimap for deep pointer key and deep pointer mapped-value
+//	dpr_multimap: multimap for deep pointer key and deep reference pointer mapped-value
+//	dpn_multimap: multimap for deep pointer key and non-pointer/non-array mapped-value
 //
-//	rd_multimap: multimap for deep reference pointer key and deep pointer mapped-value
-//	rr_multimap: multimap for deep reference pointer key and deep reference pointer mapped-value
-//	rn_multimap: multimap for deep reference pointer key and non-pointer/non-array mapped-value
+//	drp_multimap: multimap for deep reference pointer key and deep pointer mapped-value
+//	drr_multimap: multimap for deep reference pointer key and deep reference pointer mapped-value
+//	drn_multimap: multimap for deep reference pointer key and non-pointer/non-array mapped-value
 //
-//	nd_multimap: multimap for non-pointer/non-array key and deep pointer mapped-value
-//	nr_multimap: multimap for non-pointer/non-array key and deep reference pointer mapped-value
+//	dnp_multimap: multimap for non-pointer/non-array key and deep pointer mapped-value
+//	dnr_multimap: multimap for non-pointer/non-array key and deep reference pointer mapped-value
 //
 // -----------------------------------------------------------------------------
-template <typename K, typename T> using dd_multimap = dp_multimap<deep_ptr<K>, deep_ptr<T>>;
-template <typename K, typename T> using dr_multimap = dp_multimap<deep_ptr<K>, dref_ptr<T>>;
-template <typename K, typename T> using dn_multimap = dp_multimap<deep_ptr<K>, T>;
+template <typename K, typename T> using dpp_multimap = __dp_multimap<deep_ptr<K>, deep_ptr<T>>;
+template <typename K, typename T> using dpr_multimap = __dp_multimap<deep_ptr<K>, dref_ptr<T>>;
+template <typename K, typename T> using dpn_multimap = __dp_multimap<deep_ptr<K>, T>;
 
-template <typename K, typename T> using rd_multimap = dp_multimap<dref_ptr<K>, deep_ptr<T>>;
-template <typename K, typename T> using rr_multimap = dp_multimap<dref_ptr<K>, dref_ptr<T>>;
-template <typename K, typename T> using rn_multimap = dp_multimap<dref_ptr<K>, T>;
+template <typename K, typename T> using drp_multimap = __dp_multimap<dref_ptr<K>, deep_ptr<T>>;
+template <typename K, typename T> using drr_multimap = __dp_multimap<dref_ptr<K>, dref_ptr<T>>;
+template <typename K, typename T> using drn_multimap = __dp_multimap<dref_ptr<K>, T>;
 
-template <typename K, typename T> using nd_multimap = dp_multimap<K, deep_ptr<T>>;
-template <typename K, typename T> using nr_multimap = dp_multimap<K, dref_ptr<T>>;
+template <typename K, typename T> using dnp_multimap = __dp_multimap<K, deep_ptr<T>>;
+template <typename K, typename T> using dnr_multimap = __dp_multimap<K, dref_ptr<T>>;
 
 #ifndef NO_NAMESPACE
 }       

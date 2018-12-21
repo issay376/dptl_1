@@ -386,16 +386,16 @@ class __dp_multiset : public std::multiset<dp_const<K>>
 // alias for deep pointer set/multiset: T=V*/V[]/V[N]
 //
 //	dp_set: set for deep pointer
-//	rp_set: set for deep reference pointer
+//	dr_set: set for deep reference pointer
 //
 //	dp_multiset: multiset for deep pointer
-//	rp_multiset: multiset for deep reference pointer
+//	dr_multiset: multiset for deep reference pointer
 // -----------------------------------------------------------------------------
 template <typename T> using dp_set      = __dp_set<deep_ptr<T>>;
-template <typename T> using rp_set      = __dp_set<dref_ptr<T>>;
+template <typename T> using dr_set      = __dp_set<dref_ptr<T>>;
 
 template <typename T> using dp_multiset = __dp_multiset<deep_ptr<T>>;
-template <typename T> using rp_multiset = __dp_multiset<dref_ptr<T>>;
+template <typename T> using dr_multiset = __dp_multiset<dref_ptr<T>>;
 
 
 #ifndef NO_NAMESPACE
