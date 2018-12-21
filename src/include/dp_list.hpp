@@ -20,129 +20,103 @@ namespace DPTL_NAMESPACE {
 
 // policy based pointer set
 // -----------------------------------------------------------------------------
-template <typename T, Policy P>
-class pp_list : public std::list<ppointer<T,P>>
+template <typename T>
+class __dp_list : public std::list<T>
 {
-	typedef std::list<ppointer<T,P>>		super;
+	typedef dp_type<T>				VT;
+	typedef dp_pointer<T>				VP;
+	typedef std::list<T>				super;
 
     public:
 	typedef typename value_p<T>::t			value_type;
-	typedef typename super::allocator_type	  allocator_type;
-	typedef typename super::reference	       reference;
-	typedef typename super::const_reference	 const_reference;
-	typedef typename super::pointer		 pointer;
-	typedef typename super::const_pointer	   const_pointer;
+	typedef typename super::allocator_type		allocator_type;
+	typedef typename super::reference		reference;
+	typedef typename super::const_reference		const_reference;
+	typedef typename super::pointer			pointer;
+	typedef typename super::const_pointer		const_pointer;
 	typedef typename super::iterator		iterator;
-	typedef typename super::const_iterator	  const_iterator;
+	typedef typename super::const_iterator		const_iterator;
 	typedef typename super::reverse_iterator	reverse_iterator;
 	typedef typename super::const_reverse_iterator  const_reverse_iterator;
-	typedef typename super::difference_type	 difference_type;
-	typedef typename super::size_type	       size_type;
+	typedef typename super::difference_type		difference_type;
+	typedef typename super::size_type		size_type;
+
+	typedef VP					value_pointer;
 
 #if defined(__cplusplus) && (__cplusplus >= 201402)
-	pp_list() = default;
-	explicit pp_list( const allocator_type& alloc ) : super( alloc ) { }
-	explicit pp_list( size_type n, const allocator_type& alloc = allocator_type()) : super( n, alloc ) { }
-	pp_list( size_type n, const value_type& v, const allocator_type& alloc = allocator_type()) : super( alloc )
+	__dp_list() = default;
+	explicit __dp_list( const allocator_type& alloc ) : super( alloc ) { }
+	explicit __dp_list( size_type n, const allocator_type& alloc = allocator_type()) : super( n, alloc ) { }
+	__dp_list( size_type n, const value_pointer& v, const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
 		assign( n, v );
 	}
 
 	template <class II>
-	pp_list( II first, II last, const allocator_type& alloc = allocator_type()) : super( first, last, alloc ) { }
+	__dp_list( II first, II last, const allocator_type& alloc = allocator_type()) : super( first, last, alloc ) { }
 
-	pp_list( const pp_list& ) = default;
-	pp_list( const pp_list& l, const allocator_type& alloc ) : super( l, alloc ) { }
-	pp_list( pp_list&& ) = default;
-	pp_list( pp_list&& l, const allocator_type& alloc ) : super( std::move( l ), alloc ) { }
+	__dp_list( const __dp_list& ) = default;
+	__dp_list( const __dp_list& l, const allocator_type& alloc ) : super( l, alloc ) { }
+	__dp_list( __dp_list&& ) = default;
+	__dp_list( __dp_list&& l, const allocator_type& alloc ) : super( std::move( l ), alloc ) { }
 
-	pp_list( std::initializer_list<value_type> il,
-		 const allocator_type& alloc = allocator_type()) : super( alloc )
+	__dp_list( std::initializer_list<value_pointer> il,
+		const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
-		for ( auto p : il ) super::push_back( p );
+		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )&>( p ));
 	}
 
 #elif defined(__cplusplus) && (__cplusplus >= 201103)
 	// ---- for c++11
-	explicit pp_list( const allocator_type& alloc = allocator_type()) : super( alloc ) { }
-	explicit pp_list( size_type n ) : super( n ) { }
-	pp_list( size_type n, const value_type& v, const allocator_type& alloc = allocator_type()) : super( alloc )
+	explicit __dp_list( const allocator_type& alloc = allocator_type()) : super( alloc ) { }
+	explicit __dp_list( size_type n ) : super( n ) { }
+	__dp_list( size_type n, const value_pointer& v, const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
 		assign( n, v );
 	}
 
 	template <class II>
-	pp_list( II first, II last, const allocator_type& alloc = allocator_type()) : super( first, last, alloc ) { }
+	__dp_list( II first, II last, const allocator_type& alloc = allocator_type()) : super( first, last, alloc ) { }
 
-	pp_list( const pp_list& ) = default;
-	pp_list( const pp_list& l, const allocator_type& alloc ) : super( l, alloc ) { }
-	pp_list( pp_list&& ) = default;
-	pp_list( pp_list&& l, const allocator_type& alloc ) : super( std::move( l ), alloc ) { }
+	__dp_list( const __dp_list& ) = default;
+	__dp_list( const __dp_list& l, const allocator_type& alloc ) : super( l, alloc ) { }
+	__dp_list( __dp_list&& ) = default;
+	__dp_list( __dp_list&& l, const allocator_type& alloc ) : super( std::move( l ), alloc ) { }
 
-	pp_list( std::initializer_list<value_type> il,
-		 const allocator_type& alloc = allocator_type()) : super( alloc )
+	__dp_list( std::initializer_list<value_pointer> il,
+		const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
-		for ( auto p : il ) super::push_back( p );
+		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )&>( p ));
 	}
 #else
 #error "c++11 up required"
 #endif
 
-	pp_list& operator=( const pp_list& ) = default;
-	pp_list& operator=( pp_list&& ) = default;
-	pp_list& operator=( std::initializer_list<value_type> il )
+	__dp_list& operator=( const __dp_list& ) = default;
+	__dp_list& operator=( __dp_list&& ) = default;
+	__dp_list& operator=( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
-		for ( auto p : il ) super::push_back( p );
+		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )&>( p ));
 		return *this;
 	}
 
-	~pp_list() = default;
+	~__dp_list() = default;
 
 	// wrapper for appropriate casting of raw pointer
 	template <class II> void assign( II fst, II lst )
 	{
 		super::assign( fst, lst );
 	}
-	void assign( size_type n, const value_type& v )
+	void assign( size_type n, const value_pointer& v )
 	{
-		refer_ptr<T>   p( v );
-		super::assign( n, reinterpret_cast<ppointer<T,P>&>( p ));
+		super::assign( n, reinterpret_cast<const T&>( v ));
 	}
-	void assign( std::initializer_list<value_type> il )
+	void assign( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
-		for ( auto p : il ) super::push_back( p );
+		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )&>( p ));
 	}
-
-	iterator insert( const_iterator i, const value_type& p )
-	{
-		return super::insert( i, ppointer<T,P>( p ));
-	}
-	iterator insert( const_iterator i, value_type&& p )
-	{
-		return super::insert( i, ppointer<T,P>( p ));
-	}
-	iterator insert( const_iterator i, size_type n, const value_type& v )
-	{
-		refer_ptr<T>   p( v );
-		return super::insert( i, n, reinterpret_cast<ppointer<T,P>&>( p ));
-	}
-	template <class II> iterator insert( const_iterator i, II fst, II lst )
-	{
-		return super::insert( i, fst, lst );
-	}
-        iterator insert( const_iterator i, std::initializer_list<value_type> il )
-        {
-		// 'reinterpret_cast' is unavoidable to support null initializer_list,
-		// but it's possible to ommit it (or limit it only) in the case of null il:
-		//	iterator	r/* = reinterpret_cast<iterator&>( i )*/; // comment out if support null il
-		//	for ( const value_type* p = il.end(); p != il.begin(); ) i = r = insert( i, *--p );
-		//	return r;
-		//
-                for ( const value_type* p = il.end(); p != il.begin(); ) i = insert( i, *--p );
-                return reinterpret_cast<iterator&>( i );
-        }
 
 	template <typename... Args> iterator emplace( const_iterator pos, Args&&... args )
 	{
@@ -157,26 +131,48 @@ class pp_list : public std::list<ppointer<T,P>>
 		super::emplace_front( std::forward<Args>( args )... );
 	}
 
-	// wrapper for appropriate casting of raw pointer avoiding unnecessary duplication
-	void remove( const value_type& k )
+	iterator insert( const_iterator i, const value_type& p )
 	{
-		refer_ptr<T>   p( k );
-		super::remove( reinterpret_cast<ppointer<T,P>&>( p ));
+		return super::insert( i, p );
+	}
+	iterator insert( const_iterator i, value_type&& p )
+	{
+		return super::insert( i, std::move( p ));
+	}
+	iterator insert( const_iterator i, size_type n, const value_pointer& v )
+	{
+		return super::insert( i, n, reinterpret_cast<const T&>( v ));
+	}
+	template <class II> iterator insert( const_iterator i, II fst, II lst )
+	{
+		return super::insert( i, fst, lst );
+	}
+        iterator insert( const_iterator i, std::initializer_list<value_pointer> il )
+        {
+                for ( auto&& p = il.end(); p != il.begin(); ) i = insert( i, *--p );
+                return reinterpret_cast<iterator&>( i );
+        }
+
+	// wrapper for appropriate casting of raw pointer avoiding unnecessary duplication
+	void remove( const value_pointer& k )
+	{
+		super::remove( reinterpret_cast<const T&>( k ));
 	}
 
 	void resize( size_type n ) { super::resize( n ); }
-	void resize( size_type n, const value_type& v )
+	void resize( size_type n, const value_pointer& v )
 	{
-		refer_ptr<T>   p( v );
-		super::resize( n, reinterpret_cast<ppointer<T,P>&>( p ));
+		super::resize( n, reinterpret_cast<const T&>( v ));
 	}
 };
 		
-// alias for list (for pp_list.h)
+// alias for deep pointer list: T=V*/V[]/V[N]
+//
+//	dp_list: list for deep pointer
+//	rp_list: list for deep reference pointer
 // -----------------------------------------------------------------------------
-template <typename T> using pr_list = pp_list<T,pRefer>;
-template <typename T> using ps_list = pp_list<T,pStore>;
-template <typename T> using pc_list = pp_list<T,pCopy>;
+template <typename T> using dp_list = __dp_list<deep_ptr<T>>;
+template <typename T> using rp_list = __dp_list<dref_ptr<T>>;
 
 #ifndef NO_NAMESPACE
 }       

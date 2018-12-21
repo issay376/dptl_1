@@ -4,23 +4,31 @@ $X${
 template <typename T>
 inline bool check_deque( dp_deque<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	std::deque<typename value_p<T>::t>      l;
+	rp_deque<T>	l;
 
-	for ( auto&& a : ts ) { l.push_back( a ); }
+	for ( auto&& a : ts ) l.push_back( a );
 
 	return ls == reinterpret_cast<dp_deque<T> const&>( l );
 }
 
 template <typename T>
+inline bool check_deque( rp_deque<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+	rp_deque<T>	l;
+
+	for ( auto&& a : ts ) l.push_back( a );
+
+	return ls == l;
+}
+
+template <typename T>
 inline bool check_deque( std::deque<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
 {
-	auto	i = ls.begin();
-	auto	j = ts.begin();
+	std::deque<T>	l;
 
-	for ( ; j != ts.end(); ++j ) {
-		if ( !dp_eql<T>()( *j, *i++ )) break;
-	}
-	return i == ls.end() && j == ts.end();
+	for ( auto&& a : ts ) l.push_back( a );
+
+	return ls == l;
 }
 $}
 
