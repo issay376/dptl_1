@@ -719,7 +719,7 @@ inline void print( __dp_map<K,T> const& pd )
 {
         printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<dp_type<K>>()( i->first ); else printf( "null" );
+                if ( i->first ) print_element<dp_const_type<K>>()( i->first ); else printf( "null" );
                 printf( " -> " );
                 if ( i->second ) print_element<dp_type<T>>()( i->second ); else printf( "null" );
                 printf( "\n" );
@@ -732,7 +732,7 @@ inline void print( __dp_multimap<K,T> const& pd )
 {
         printf( "--=> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<dp_type<K>>()( i->first ); else printf( "null" );
+                if ( i->first ) print_element<dp_const_type<K>>()( i->first ); else printf( "null" );
                 printf( " -> " );
                 if ( i->second ) print_element<dp_type<T>>()( i->second ); else printf( "null" );
                 printf( "\n" );
@@ -748,9 +748,9 @@ inline void print( __dp_unordered_map<K,T> const& pd )
 {
         printf( "---> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<K>()( i->first ); else printf( "null" );
+                if ( i->first ) print_element<dp_const_type<K>>()( i->first ); else printf( "null" );
                 printf( " -> " );
-                if ( i->second ) print_element<T>()( i->second ); else printf( "null" );
+                if ( i->second ) print_element<dp_type<T>>()( i->second ); else printf( "null" );
                 printf( "\n" );
         }
         printf( "<---\n" );
@@ -761,9 +761,9 @@ inline void print( __dp_unordered_multimap<K,T> const& pd )
 {
         printf( "--=> %p(%zu)\n", &pd, pd.size());
         for ( auto i = pd.begin(); i != pd.end(); ++i ) {
-                if ( i->first ) print_element<K>()( i->first ); else printf( "null" );
+                if ( i->first ) print_element<dp_const_type<K>>()( i->first ); else printf( "null" );
                 printf( " -> " );
-                if ( i->second ) print_element<T>()( i->second ); else printf( "null" );
+                if ( i->second ) print_element<dp_type<T>>()( i->second ); else printf( "null" );
                 printf( "\n" );
         }
         printf( "<=--\n" );

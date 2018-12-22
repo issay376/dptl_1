@@ -1,6 +1,4 @@
 $X${
-#include <dptl/dp_map.hpp>
-
 // Testdata Check Utilities
 // -----------------------------------------------------------------------------
 template <typename K, typename T>
@@ -451,6 +449,10 @@ ${
 	r1.clear();
 	AssertTrue( r1.empty());
 	AssertTrue( check_multimap( r1, { } ));
+
+	// print ( udata.hpp )
+	$a	m = {{ @1, $1 }, { @2, $2 }, { @3, $3 }};
+	print( m );
 $}
 
 $W "relational operators"

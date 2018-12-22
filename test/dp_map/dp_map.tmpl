@@ -1,6 +1,4 @@
 $X${
-#include <dptl/dp_map.hpp>
-
 // Testdata Check Utilities
 // -----------------------------------------------------------------------------
 template <typename K, typename T>
@@ -438,7 +436,7 @@ $F$A${				AssertTrue( dp_eql<$v>()( i->second, $1 ));$}
 	}
 $}
 
-$W "miscellaneous (swap/count/size/empty/clear)"
+$W "miscellaneous (swap/count/size/empty/clear, print)"
 ${
 	$a	r1;
 	$a	r2 = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }};
@@ -463,6 +461,10 @@ ${
 	r1.clear();
 	AssertTrue( r1.empty());
 	AssertTrue( check_map( r1, { } ));
+
+	// print ( udata.hpp )
+	$a	m = {{ @1, $1 }, { @2, $2 }, { @3, $3 }};
+	print( m );
 $}
 
 $W "relational operators"

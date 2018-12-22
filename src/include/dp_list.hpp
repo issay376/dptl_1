@@ -28,7 +28,7 @@ class __dp_list : public std::list<T>
 	typedef std::list<T>				super;
 
     public:
-	typedef typename value_p<T>::t			value_type;
+	typedef typename super::value_type		value_type;
 	typedef typename super::allocator_type		allocator_type;
 	typedef typename super::reference		reference;
 	typedef typename super::const_reference		const_reference;

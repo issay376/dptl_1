@@ -19,7 +19,7 @@ namespace DPTL_NAMESPACE {
 #endif          
 
 //                
-// map with policy based pointer key
+// map for deep pointer
 // -----------------------------------------------------------------------------
 template <typename K, typename T> 
 class __dp_map : public std::map<dp_const<K>,T>
@@ -259,7 +259,7 @@ template <typename K, typename T> using dnp_map = __dp_map<K, deep_ptr<T>>;
 template <typename K, typename T> using dnr_map = __dp_map<K, dref_ptr<T>>;
 
 //
-// multimap with policy based pointer key
+// multimap for deep pointer
 // -----------------------------------------------------------------------------
 template <typename K, typename T> 
 class __dp_multimap : public std::multimap<dp_const<K>,T>
