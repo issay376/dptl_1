@@ -1,0 +1,554 @@
+$X${
+// Testdata Check Utilities
+// -----------------------------------------------------------------------------
+template <typename T>
+inline bool check_forward_list( dp_forward_list<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+	dr_forward_list<T>	l;
+
+	for ( auto&& a : ts ) l.push_front( a );
+	l.reverse();
+
+	return ls == reinterpret_cast<dp_forward_list<T> const&>( l );
+}
+
+template <typename T>
+inline bool check_forward_list( dr_forward_list<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+	dr_forward_list<T>	l;
+
+	for ( auto&& a : ts ) l.push_front( a );
+	l.reverse();
+
+	return ls == l;
+}
+
+template <typename T>
+inline bool check_forward_list( std::forward_list<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+	std::forward_list<T>	l;
+
+	for ( auto&& a : ts ) l.push_front( a );
+	l.reverse();
+
+	return ls == l;
+}
+
+// iterator utility
+// -----------------------------------------------------------------------------
+template <typename It>
+inline It operator+( const It& i, int n )
+{
+	It	r = i;
+
+	while ( n-- > 0 ) ++r;
+
+	return r;
+}
+$}
+
+$V "constructor/assignment/destructor"
+${
+	// default constructor
+	$a		lr;
+	AssertTrue( check_forward_list( lr, { } ));
+
+	// copy constructor
+	$a		p0( lr );
+	const $a	c0( lr );
+	lr.push_front( $d$5 );
+	$a		p1( lr );
+	const $a	c1( lr );
+	lr.push_front( $d$4 );
+	lr.push_front( $d$3 );
+	lr.push_front( $d$2 );
+	lr.push_front( $d$1 );
+	$a		p5( lr );
+	const $a	c5( lr );
+
+	AssertTrue( check_forward_list( p0, { } ));
+	AssertTrue( check_forward_list( p1, { $5 } ));
+	AssertTrue( check_forward_list( p5, { $1, $2, $3, $4, $5 } ));
+	AssertTrue( check_forward_list( c0, { } ));
+	AssertTrue( check_forward_list( c1, { $5 } ));
+	AssertTrue( check_forward_list( c5, { $1, $2, $3, $4, $5 } ));
+
+	// move constructor
+	{
+		$a	lx = lr;
+		$a	ly( std::move( lx ));
+
+		AssertTrue( check_forward_list( lx, { } ));
+		AssertTrue( check_forward_list( ly, { $1, $2, $3, $4, $5 } ));
+	}
+	// copy assignment operator
+	{
+		$a	lx;
+
+		lx = p1;
+		AssertTrue( check_forward_list( lx, { $5 } ));
+		lx = p0;
+		AssertTrue( check_forward_list( lx, { } ));
+		lx = p5;
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+	}
+	// move assignment operator
+	{
+		$a	lx;
+
+		lr = p1;
+		lx = $a( { $5, $3, $2 } );				// move assignment by r-value
+		AssertTrue( check_forward_list( lx, { $5, $3, $2 } ));
+
+		lx = std::move( lr );						// move assignment by std::move()
+		AssertTrue( check_forward_list( lx, { $5 } ));
+		AssertTrue( check_forward_list( lr, { } ));			// not mandatory
+
+		lx = std::move( lx );
+		AssertTrue( check_forward_list( lx, { } ));			// not mandatory
+	}
+	// iterator constructor
+	{
+		$a		lx = p5;
+
+		$a	x3( lx.begin(), lx.begin() + 3 );
+		AssertTrue( check_forward_list( x3, { $1, $2, $3 } ));
+		$a	x0( lx.begin() + 2, lx.begin() + 2 );
+		AssertTrue( check_forward_list( x0, { } ));
+		$a	x1( lx.begin() + 3, lx.end());
+		AssertTrue( check_forward_list( x1, { $4, $5 } ));
+	}
+	// fill constructor
+	{
+		$a	x0( 3 );
+		AssertTrue( check_forward_list( x0, { $n, $n, $n } ));
+		$a	x1( 2, $n );
+		AssertTrue( check_forward_list( x1, { $n, $n } ));
+		$a	x2( 4, $3 );
+		AssertTrue( check_forward_list( x2, { $3, $3, $3, $3 } ));
+	}
+	// initializer constructor/assignment operator
+	{
+		$a	lx = p5;
+		$a	x0 { };
+		$a	x1 { $1 };
+		$a	x5 { $1, $2, $3, $4, $5 };
+
+		AssertTrue( check_forward_list( x0, { } ));
+		AssertTrue( check_forward_list( x1, { $1 } ));
+		AssertTrue( check_forward_list( x5, { $1, $2, $3, $4, $5 } ));
+
+		lx = { };
+		AssertTrue( check_forward_list( lx, { } ));
+		lx = { $1 };
+		AssertTrue( check_forward_list( lx, { $1 } ));
+		lx = { $1, $2, $3, $4, $5 };
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+	}
+$}
+
+$V "stack operations"
+${	{       
+		$a	lp;
+		
+		lp.push_front( $d$1 );
+		lp.push_front( $d$2 );
+		lp.push_front( $d$3 );
+		AssertTrue( check_forward_list( lp, { $3, $2, $1 } ));
+		lp.pop_front();
+		lp.pop_front();
+		lp.pop_front(); 
+		AssertTrue( lp.empty());
+//		lp.pop_front();		// runtime error
+	}
+$}
+
+$V "list operations (modifier)"
+${	
+	$a	lp = { $1, $2, $3, $4, $5 };
+	$a	l0;
+
+	fprintf( stderr, "--- assign ---\n" );
+	{
+		$a	lx;
+
+		lx.assign( 3, $n );
+		AssertTrue( check_forward_list( lx, { $n, $n, $n } ));
+		lx.assign( 7, $4 );
+		AssertTrue( check_forward_list( lx, { $4, $4, $4, $4, $4, $4, $4 } ));
+		lx.assign( lp.begin() + 2, lp.end());
+		AssertTrue( check_forward_list( lx, { $3, $4, $5 } ));
+		lx.assign( lp.begin(), lp.begin());
+		AssertTrue( check_forward_list( lx, { } ));
+		lx.assign( { $1, $2, $3, $4, $5 } );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+		lx.assign( { } );
+		AssertTrue( check_forward_list( lx, { } ));
+	}
+	fprintf( stderr, "--- emplace_front/emplace_after ---\n" );
+	{
+		$a		lx = { $2, $3, $5 };
+		$a::iterator		r;
+
+		lx.emplace_front( $d$1 );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $5 } ));
+		r = lx.emplace_after( lx.begin() + 2, $d$4 );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 3 );
+		r = lx.emplace_after( lx.begin() + 4, $d$7 );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5, $7 } ));
+		AssertTrue( r == lx.begin() + 5 );
+	}
+	fprintf( stderr, "--- insert_after ---\n" );
+	{
+		$a		lx = { $2, $3, $5 };
+		$a::iterator		r;
+
+		r = lx.insert_after( lx.before_begin(), $d$1 );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $5 } ));
+		AssertTrue( r == lx.begin());
+		r = lx.insert_after( lx.begin() + 2, $d$4 );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 3 );
+
+		r = lx.insert_after( lx.before_begin(), { $1, $0 } );
+		AssertTrue( check_forward_list( lx, { $1, $0, $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 1 );
+		r = lx.insert_after( lx.begin() + 5, { $2, $0 } );
+		AssertTrue( check_forward_list( lx, { $1, $0, $1, $2, $3, $4, $2, $0, $5 } ));
+		AssertTrue( r == lx.begin() + 7 );
+		r = lx.insert_after( lx.begin() + 4, { } );
+		AssertTrue( check_forward_list( lx, { $1, $0, $1, $2, $3, $4, $2, $0, $5 } ));
+		AssertTrue( r == lx.begin() + 4 );
+
+		lx.clear();
+		r = lx.insert_after( lx.before_begin(), 4, $1 );
+		AssertTrue( check_forward_list( lx, { $1, $1, $1, $1 } ));
+		AssertTrue( r == lx.begin() + 3 );
+		r = lx.insert_after( lx.begin() + 2, 2, $2 );
+		AssertTrue( check_forward_list( lx, { $1, $1, $1, $2, $2, $1 } ));
+		AssertTrue( r == lx.begin() + 4 );
+
+		lx.clear();
+		r = lx.insert_after( lx.before_begin(), lp.begin(), lp.end());
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 4 );
+		r = lx.insert_after( lx.before_begin(), l0.begin(), l0.end());
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.before_begin());
+		r = lx.insert_after( lx.begin() + 3, l0.begin(), l0.end());
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 3 );
+		r = lx.insert_after( lx.begin(), lp.begin(), lp.begin() + 2 );
+		AssertTrue( check_forward_list( lx, { $1, $1, $2, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 2 );
+		r = lx.insert_after( lx.begin() + 2, lp.begin() + 1, lp.begin() + 4 );
+		AssertTrue( check_forward_list( lx, { $1, $1, $2, $2, $3, $4, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 5 );
+		r = lx.insert_after( lx.begin() + 9, lp.begin() + 3, lp.end());
+		AssertTrue( check_forward_list( lx, { $1, $1, $2, $2, $3, $4, $2, $3, $4, $5, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 11 );
+
+		// self insert_afterion
+		lx = lp;
+		r = lx.insert_after( lx.begin() + 4, lx.begin(), lx.begin() + 3 );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5, $1, $2, $3 } ));
+		AssertTrue( r == lx.begin() + 7 );
+		r = lx.insert_after( lx.begin() + 4, lx.begin() + 2, lx.begin() + 5 );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5, $3, $4, $5, $1, $2, $3 } ));
+		AssertTrue( r == lx.begin() + 7 );
+	}
+	fprintf( stderr, "--- erase_after ---\n" );
+	{
+		$a		lx = lp;
+		$a::iterator	r = lx.before_begin();
+
+		r = lx.erase_after( r );
+		AssertTrue( check_forward_list( lx, { $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin());
+		r = lx.erase_after( r );
+		AssertTrue( check_forward_list( lx, { $2, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 1 );
+		r = lx.erase_after( r );
+		AssertTrue( check_forward_list( lx, { $2, $4 } ));
+		AssertTrue( r == lx.end());
+
+		lx = lp;
+		r = lx.erase_after( lx.before_begin(), lx.begin() + 2 );
+		AssertTrue( check_forward_list( lx, { $3, $4, $5 } ));
+		AssertTrue( r == lx.begin());
+		lx = lp;
+		r = lx.erase_after( lx.begin(), lx.begin() + 3 );
+		AssertTrue( check_forward_list( lx, { $1, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 1 );
+		lx = lp;
+		r = lx.erase_after( lx.begin() + 2, lx.end());
+		AssertTrue( check_forward_list( lx, { $1, $2, $3 } ));
+		AssertTrue( r == lx.end());
+	}
+	fprintf( stderr, "--- remove, remove_if ---\n" );
+	{
+		$a	  lx = { $1, $2, $3, $4, $5, $5, $4, $3, $2, $1 };
+
+		lx.remove( $3 );
+		AssertTrue( check_forward_list( lx, { $1, $2, $4, $5, $5, $4, $2, $1 } ));
+		lx.remove( $1 );
+		AssertTrue( check_forward_list( lx, { $2, $4, $5, $5, $4, $2 } ));
+		lx.remove( $6 );
+		AssertTrue( check_forward_list( lx, { $2, $4, $5, $5, $4, $2 } ));
+
+$T${		lx = lp;
+		lx.remove_if( [ ]( const test* p ) { return p->num() % 2 == 1; } );
+		AssertTrue( check_forward_list( lx, { $2, $4 } ));
+		lx.remove_if( [ ]( const test* p ) { return p->num() % 2 == 0; } );
+		AssertTrue( check_forward_list( lx, { } ));$}$&
+$Z${		lx = lp;
+		lx.remove_if( [ ]( const char* p ) { return p && strlen( p ) % 2 == 1; } );
+		AssertTrue( check_forward_list( lx, { $3 } ));
+		lx.remove_if( [ ]( const char* p ) { return p && strlen( p ) % 2 == 0; } );
+		AssertTrue( check_forward_list( lx, { } ));$}$&
+$A$F${		lx = lp;
+		lx.remove_if( [ ]( const test* v ) { return v[ 0 ].num() % 2 == 1; } );
+		AssertTrue( check_forward_list( lx, { $2, $4 } ));
+		lx.remove_if( [ ]( const test* v ) { return v[ 0 ].num() % 2 == 0; } );
+		AssertTrue( check_forward_list( lx, { } ));$}$&
+	}
+$}
+
+$V "list operations (accessor)"
+${	      
+	fprintf( stderr, "--- front ---\n" );
+	{
+		$a		lp = { $1, $2, $3, $1, $4, $5 };
+		$a const&	c$p = lp;
+
+		AssertTrue( static_cast<bool>( lp.front() ));
+$R${		AssertEqual( static_cast<$t>( lp.front()), $1 );$}$&
+$D${		AssertNotEqual( static_cast<$t>( lp.front()), $1 );$}
+$T${		AssertEqual( *lp.front(), t1 );
+		AssertEqual( lp.front()->num(), 1 );$}$&
+$Z${		AssertZero( strcmp( lp.front(), $1 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( lp.front(), $1 ));$}
+$T${
+		test	bk = *lp.front();
+		*lp.front() = t7;
+$R${		AssertTrue( check_forward_list( lp, { $7, $2, $3, $7, $4, $5 } ));$}$&
+$D${		AssertTrue( check_forward_list( lp, { $7, $2, $3, $1, $4, $5 } ));$}
+		*lp.front() = bk;
+$}
+	}
+$}
+
+$V "std style iterator"
+${
+	fprintf( stderr, "--- iterator ---\n" );
+	{
+		$a		lr;
+		$a::iterator	i, j;
+		unsigned			n;
+
+		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
+		AssertZero( n );
+
+		lr = { $1, $2, $3, $4, $5 };
+		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
+		AssertEqual( n, 5 );
+
+		i = lr.begin();
+		j = i + 2;
+		while ( i != lr.end()) {
+			if ( i == j ) *i = $d$7;
+			println( *i );
+			++i;
+		}
+		AssertTrue( check_forward_list( lr, { $1, $2, $7, $4, $5 } ));
+
+		for ( $t const& p : lr ) println( p );
+	}
+	fprintf( stderr, "--- const_iterator ---\n" );
+	{
+		const $a		lr = { $1, $2, $3, $4, $5 };
+		unsigned			n = 0;
+
+		for ( auto i = lr.begin(); i != lr.end(); ++i, ++n ) println( *i );
+		AssertEqual( n, 5 );
+
+$T${		AssertEqual( **( lr.begin() + 3 ), t4 );$}$&
+$Z${		AssertZero( strcmp( *( lr.begin() + 3 ), $4 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( *( lr.begin() + 3 ), $4 ));$}
+
+		n = 0;
+$T${		for ( auto i = lr.begin(); i != lr.end(); ++i ) n += ( *i )->num();
+		AssertEqual( n, 15 );$}$&
+$Z${		for ( auto i = lr.begin(); i != lr.end(); ++i ) n += strlen( *i );
+		AssertEqual( n, 30 );$}$&
+$A$F${		for ( auto i = lr.begin(); i != lr.end(); ++i ) n += ( *i )[ 0 ].num();
+		AssertEqual( n, 15 );$}
+
+		for ( $c const& p : lr ) println( p );
+	}
+$}
+
+$V "list operations (capacity)"
+${
+	$a	r0;
+	$a	r1 = { $1 };
+	$a	r5 = { $1, $2, $3, $4, $5 };
+
+	fprintf( stderr, "--- empty() ---\n" );
+	AssertTrue( r0.empty());
+	AssertFalse( r1.empty());
+	AssertFalse( r5.empty());
+
+	fprintf( stderr, "--- resize() ---\n" );
+	{
+		$a	l5 = r5;
+		l5.resize( 3 );
+		AssertTrue( check_forward_list( l5, { $1, $2, $3 } ));
+		l5.resize( 0 );
+		AssertTrue( check_forward_list( l5, { } ));
+		$a	l1 = r1;
+		l1.resize( 3 );
+		AssertTrue( check_forward_list( l1, { $1, $n, $n } ));
+		l1.resize( 7, $4 );
+		AssertTrue( check_forward_list( l1, { $1, $n, $n, $4, $4, $4, $4 } ));
+		$a	l0 = r0;
+		l0.resize( 3 );
+		AssertTrue( check_forward_list( l0, { $n, $n, $n } ));
+	}
+$}
+
+$V "list operations (miscellaneous)"
+${
+	$a	lp = { $1, $1, $2, $5, $3, $3, $3, $5, $4, $4 };
+
+	fprintf( stderr, "--- unique ---\n" );
+	{
+		$a	lx;
+
+		lx.unique();
+		AssertTrue( check_forward_list( lx, { } ));
+
+		lx = lp;
+		lx.unique();
+		AssertTrue( check_forward_list( lx, { $1, $2, $5, $3, $5, $4 } ));
+
+		lx = lp;
+$T${		lx.unique( [ ] ( $c r, $c s ) { return ( r->num() + s->num() ) % 2 == 0; } );
+		AssertTrue( check_forward_list( lx, { $1, $2, $5, $4 } ));$}$&
+$Z${		lx.unique( [ ] ( $c r, $c s ) { return ( strlen( r ) + strlen( s ) ) % 2 == 0; } );
+		AssertTrue( check_forward_list( lx, { $1, $3, $5 } ));$}$&
+$A$F${		lx.unique( [ ] ( $c r, $c s ) { return ( r[ 0 ].num() + s[ 0 ].num() ) % 2 == 0; } );
+		AssertTrue( check_forward_list( lx, { $1, $2, $5, $4 } ));$}
+	}
+	fprintf( stderr, "--- splice_after ---\n" );
+	{
+		$a	lx = { $1, $2, $3 };
+		$a	ly = lp;
+
+		lx.splice_after( lx.begin(), ly, ly.begin() + 6 );
+		AssertTrue( check_forward_list( lx, { $1, $5, $2, $3 } ));
+		AssertTrue( check_forward_list( ly, { $1, $1, $2, $5, $3, $3, $3, $4, $4 } ));
+
+		lx.splice_after( lx.begin() + 1, ly, ly.begin() + 2, ly.begin() + 6 );
+		AssertTrue( check_forward_list( lx, { $1, $5, $5, $3, $3, $2, $3 } ));
+		AssertTrue( check_forward_list( ly, { $1, $1, $2, $3, $4, $4 } ));
+
+		lx.splice_after( lx.begin() + 6, ly );
+		AssertTrue( check_forward_list( lx, { $1, $5, $5, $3, $3, $2, $3, $1, $1, $2, $3, $4, $4 } ));
+		AssertTrue( check_forward_list( ly, { } ));
+
+		// lx.splice_after( lx.begin() + 4, lx, lx.begin(), lx.begin() + 7 );	// error: pos in [fst,lst)
+
+		lx.splice_after( lx.begin() + 9, lx, lx.before_begin(), lx.begin() + 7 );
+		AssertTrue( check_forward_list( lx, { $1, $1, $2, $1, $5, $5, $3, $3, $2, $3, $3, $4, $4 } ));
+	}
+
+	lp = { $1, $2, $3, $4, $5 };
+	fprintf( stderr, "--- swap, reverse, clear ---\n" );
+	{
+		$a	  lx;
+		$a	  ly;
+
+		lx.swap( ly );
+		AssertTrue( check_forward_list( lx, { } ));
+		AssertTrue( check_forward_list( ly, { } ));
+		lx = lp;
+		lx.swap( ly );
+		AssertTrue( check_forward_list( lx, { } ));
+		AssertTrue( check_forward_list( ly, { $1, $2, $3, $4, $5 } ));
+		lx.swap( ly );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( check_forward_list( ly, { } ));
+
+		ly = lp;
+		lx.reverse();
+		AssertTrue( check_forward_list( lx, { $5, $4, $3, $2, $1 } ));
+		lx.swap( ly );
+		AssertTrue( check_forward_list( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( check_forward_list( ly, { $5, $4, $3, $2, $1 } ));
+
+		lx = { $1 };
+		lx.reverse();
+		AssertTrue( check_forward_list( lx, { $1 } ));
+		lx = { };
+		lx.reverse();
+		AssertTrue( check_forward_list( lx, { } ));
+
+		lx = lp;
+		lx.clear();
+		AssertTrue( check_forward_list( lx, { } ));
+		lx.clear();
+		AssertTrue( check_forward_list( lx, { } ));
+	}
+
+	fprintf( stderr, "--- print ( udata.hpp ) ---\n" );
+	print( lp );
+$}
+
+$V "list duplication"
+${
+	$a	l;
+	$a*	p;
+	
+	p = dpl( &l );
+	AssertTrue( check_forward_list( *p, { } ));
+	delete p;
+	
+	l.push_front( $d$5 );
+	p = dpl( &l );
+	AssertTrue( check_forward_list( *p, { $5 } ));
+	delete p;
+	
+	l.push_front( $d$4 );
+	l.push_front( $n );
+	l.push_front( $d$3 );
+	l.push_front( $d$2 );
+	l.push_front( $d$1 );
+	p = dpl( &l );
+	AssertTrue( check_forward_list( *p, { $1, $2, $3, $n, $4, $5 } ));
+	delete p;
+$}
+
+$U "heterogenious list"
+${
+	{
+		dp_forward_list<base*>	l = { &t1, &u2, &i3, &u4, &t5, &t6, &i7 };
+
+		println( l );
+
+		size_t	i = 0;
+		for ( auto a : l ) ++i;
+		AssertEqual( 7, i );
+	}
+	{
+		dr_forward_list<base*>	l = { &t1, &u2, &i3, &u4, &t5, &t6, &i7 };
+
+		println( l );
+
+		size_t	i = 0;
+		for ( auto a : l ) ++i;
+		AssertEqual( 7, i );
+	}
+$}
+

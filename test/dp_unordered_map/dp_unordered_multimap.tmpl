@@ -1,0 +1,408 @@
+$X${
+// Testdata Check Utilities
+// -----------------------------------------------------------------------------
+template <typename K, typename T>
+inline bool check_unordered_multimap( __dp_unordered_multimap<K,T> const& ls,
+				 std::initializer_list<typename __dp_unordered_multimap<K,T>::value_pointer> const& ts )
+{
+	__dp_unordered_multimap<dp_const_pointer<K>,dp_pointer<T>,dp_hash<dp_const_type<K>>>	l;
+
+	for ( auto a : ts ) l.emplace( a.first, a.second );
+
+	return ls == reinterpret_cast<__dp_unordered_multimap<K,T> const&>( l );
+}
+$}
+
+$W "constructor/assignment/destructor"
+${
+	// default constructor
+	$a		lr;
+	AssertTrue( check_unordered_multimap( lr, { } ));
+
+	// copy constructor
+	$a		p0( lr );
+	const $a	c0( lr );
+	lr.insert( { @d@1, $d$1 } );
+	$a		p1( lr );
+	const $a	c1( lr );
+	lr.insert( { @d@2, $d$2 } );
+	lr.insert( { @d@3, $d$3 } );
+	lr.insert( { @d@3, $d$4 } );
+	lr.insert( { @d@3, $d$5 } );
+	lr.insert( { @d@4, $d$4 } );
+	lr.insert( { @d@5, $d$5 } );
+	$a		p5( lr );
+	const $a	c5( lr );
+
+	AssertTrue( p0.empty());
+	AssertTrue( check_unordered_multimap( p1, {{ @1, $1 }} ));
+	AssertTrue( check_unordered_multimap( p5, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $4 }, { @3, $5 },
+						   { @4, $4 }, { @5, $5 }} ));
+	AssertTrue( c0.empty());
+	AssertTrue( check_unordered_multimap( c1, {{ @1, $1 }} ));
+	AssertTrue( check_unordered_multimap( c5, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $4 }, { @3, $5 },
+						   { @4, $4 }, { @5, $5 }} ));
+
+	// move constructor
+	{
+		$a   lx = lr;
+		$a   ly( std::move( lx ));
+
+		AssertTrue( lx.empty());
+		AssertTrue( check_unordered_multimap( ly, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $4 },
+							   { @3, $5 }, { @4, $4 }, { @5, $5 }} ));
+	}
+	// copy assignment operator
+	{
+		$a   lx;
+
+		lx = p1;
+		AssertTrue( check_unordered_multimap( lx, {{ @1, $1 }} ));
+		lx = p0;
+		AssertTrue( lx.empty());
+		lx = p5;
+		AssertTrue( check_unordered_multimap( lx, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $4 },
+							   { @3, $5 }, { @4, $4 }, { @5, $5 }} ));
+	}
+	// move assignment operator
+	{
+		$a   lx;
+
+		lr = p1;
+		lx = $a( {{ @5, $5 }, { @3, $3 }, { @3, $3 }, { @3, $3 }, { @2, $2 }} );
+
+		AssertTrue( check_unordered_multimap( lx, {{ @5, $5 }, { @3, $3 }, { @3, $3 }, { @3, $3 }, { @2, $2 }} ));
+
+		lx = std::move( lr );							// move assignment by std::move()
+		AssertTrue( check_unordered_multimap( lx, {{ @1, $1 }} ));
+		AssertTrue( check_unordered_multimap( lr, {} ));					// not mandatory
+
+		lx = std::move( lx );
+		AssertTrue( check_unordered_multimap( lx, {} ));					// not mandatory
+	}
+	// iterator constructor
+	{
+		$a   lx = p5;
+
+		for ( auto i = lx.begin(); i != lx.end(); ++i ) {
+			$a   xl( lx.begin(), i );
+			$a   xr( i, lx.end());
+			$a   x0( i, i );
+	
+			AssertEqual( xl.size() + xr.size(), 7 );
+			AssertTrue( x0.empty());
+		}		
+	}
+	// initializer constructor/assignment operator
+	{
+		$a   lx = p5;
+		$a   x0 { };
+		$a   x1 {{ @1, $1 }};
+		$a   x5 {{ @1, $1 }, { @2, $2 }, { @3, $3 },
+						      { @3, $4 }, { @3, $5 }, { @4, $4 }, { @5, $5 }};
+
+		AssertTrue( x0.empty());
+		AssertTrue( check_unordered_multimap( x1, {{ @1, $1 }} ));
+		AssertTrue( check_unordered_multimap( x5, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $4 },
+							   { @3, $5 }, { @4, $4 }, { @5, $5 }} ));
+
+		lx = { };
+		AssertTrue( lx.empty());
+		lx = {{ @1, $1 }};
+		AssertTrue( check_unordered_multimap( lx, {{ @1, $1 }} ));
+		lx = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $4 }, { @3, $5 },
+		      { @4, $4 }, { @5, $5 }};
+		AssertTrue( check_unordered_multimap( lx, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $4 },
+							   { @3, $5 }, { @4, $4 }, { @5, $5 }} ));
+	}
+$}
+
+$W "find/equal_range"
+${
+	$a	pm = {
+			{ @1, $1 }, { @2, $2 }, { @5, $5 }, { @8, $8 }, { @4, $4 }, { @2, $2 },
+			{ @3, $3 }, { @3, $4 }, { @3, $5 }, { @4, $4 }, { @5, $5 }, { @4, $4 },
+			{ @4, $4 }, { @1, $1 }, { @2, $2 }};
+	$a const& cm = pm;
+	
+	AssertTrue( check_unordered_multimap( pm, {{ @1, $1 }, { @2, $2 }, { @5, $5 }, { @8, $8 }, { @4, $4 }, { @2, $2 },
+						   { @3, $3 }, { @3, $4 }, { @3, $5 }, { @4, $4 }, { @5, $5 }, { @4, $4 },
+						   { @4, $4 }, { @1, $1 }, { @2, $2 }} ));
+	print( cm );
+
+	AssertNotEqual( pm.find( @4 ), pm.end());
+@R@N${	AssertEqual( pm.find( @4 )->first, @4 );$}$&
+@D${	AssertNotEqual( pm.find( @4 )->first, @4 );
+	AssertTrue( dp_eql<@v>()( pm.find( @4 )->first, @4 ));$}
+$R$N${	AssertEqual( pm.find( @4 )->second, $4 );$}$&
+$D${	AssertNotEqual( pm.find( @4 )->second, $4 );$}$T${
+	AssertEqual( *pm.find( @4 )->second, t4 );$}
+	AssertEqual( pm.find( @7 ), pm.end());
+
+	AssertNotEqual( cm.find( @4 ), cm.end());
+@R@N${	AssertEqual( cm.find( @4 )->first, @4 );$}$&
+@D${	AssertNotEqual( cm.find( @4 )->first, @4 );
+	AssertTrue( dp_eql<@v>()( cm.find( @4 )->first, @4 ));$}
+$R$N${	AssertEqual( cm.find( @4 )->second, $4 );$}$&
+$D${	AssertNotEqual( cm.find( @4 )->second, $4 );$}$T${
+	AssertEqual( *cm.find( @4 )->second, t4 );$}
+	AssertEqual( cm.find( @7 ), cm.end());
+
+	// equal range
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_unordered_multimap<@v,$v>	e1, e2, e3;
+
+	auto r = pm.equal_range( @1 );
+	for ( auto i = r.first; i != r.second; ++i ) e1.insert( *i );
+	AssertTrue( check_unordered_multimap( e1, {{ @1, $1 }, { @1, $1 }} ));
+	r = pm.equal_range( @7 );
+	for ( auto i = r.first; i != r.second; ++i ) e2.insert( *i );
+	AssertTrue( check_unordered_multimap( e2, { } ));
+	auto q = cm.equal_range( @3 );
+	for ( auto i = q.first; i != q.second; ++i ) e3.insert( *i );
+	AssertTrue( check_unordered_multimap( e3, {{ @3, $3 }, { @3, $4 }, { @3, $5 }} ));
+$}
+
+$W "emplace/insert/erase"
+${
+	typedef typename $a::const_iterator	const_iterator;
+	typedef typename $a::iterator		iterator;
+
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_unordered_multimap<@v,$v>	m1 = {{ @1, $1 }, { @2, $2 }};
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_unordered_multimap<@v,$v>	m2;
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_unordered_multimap<@v,$v>	m3 = {{ @2, $2 }, { @3, $3 }, { @3, $4 }, { @3, $5 }, { @5, $5 }};
+
+	// emplace
+	{
+		$a	pm;
+		$a	pi;
+		iterator			r; 
+		const_iterator			j = pi.begin();
+
+		for ( auto i = m1.begin(); i != m1.end(); ++i )
+		{
+			r = pm.emplace( i->first, i->second );
+
+			AssertEqual( i->first, r->first );	// deep compaire
+		}	
+		for ( auto i = m1.begin(); i != m1.end(); ++i )
+		{
+			j = pi.emplace_hint( j, i->first, i->second );
+
+			AssertEqual( i->first, j->first );	// deep compaire
+		}	
+	
+		AssertTrue( check_unordered_multimap( pm, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_multimap( pi, {{ @1, $1 }, { @2, $2 }} ));
+	
+		for ( auto i = m3.begin(); i != m3.end(); ++i )
+		{
+			r = pm.emplace( i->first, i->second );
+
+			AssertEqual( i->first, r->first );	
+		}	
+		for ( auto i = m3.begin(); i != m3.end(); ++i )
+		{
+			j = pi.emplace_hint( j, i->first, i->second );
+
+			AssertEqual( i->first, j->first );	
+		}	
+	
+		AssertTrue( check_unordered_multimap( pm, {{ @1, $1 }, { @2, $2 }, { @2, $2 }, { @3, $3 },
+							   { @3, $4 }, { @3, $5 }, { @5, $5 }} ));
+		AssertTrue( check_unordered_multimap( pi, {{ @1, $1 }, { @2, $2 }, { @2, $2 }, { @3, $3 },
+							   { @3, $4 }, { @3, $5 }, { @5, $5 }} ));
+	}
+	
+	// insert
+	{
+		$a	pm;
+		$a	pi;
+		$a	il;
+		$a	it;
+		iterator			r; 
+		const_iterator			j = pi.begin();
+
+		for ( auto&& p : m1 ) {
+			r = pm.insert( std::forward<decltype( p )>( p ));
+			AssertEqual( p.first, r->first );
+		}	
+		for ( auto&& p : m1 ) {
+			j = pi.insert( j, std::forward<decltype( p )>( p ));
+			AssertEqual( p.first, j->first );
+		}
+		il.insert( {{ @1, $1 }, { @2, $2 }} );
+		it.insert( m1.begin(), m1.end());
+	
+		AssertTrue( check_unordered_multimap( pm, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_multimap( pi, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_multimap( il, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_multimap( it, {{ @1, $1 }, { @2, $2 }} ));
+	
+		for ( auto&& p : m2 ) r = pm.insert( std::forward<decltype( p )>( p ));
+		for ( auto&& p : m2 ) j = pi.insert( j, std::forward<decltype( p )>( p ));
+		il.insert( { } );
+		it.insert( m2.begin(), m2.end());
+	
+		AssertTrue( check_unordered_multimap( pm, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_multimap( pi, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_multimap( il, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_multimap( it, {{ @1, $1 }, { @2, $2 }} ));
+	
+		for ( auto&& p : m3 ) {
+			r = pm.insert( std::forward<decltype( p )>( p ));
+			AssertEqual( p.first, r->first );
+		}	
+		for ( auto&& p : m3 ) {
+			j = pi.insert( j, std::forward<decltype( p )>( p ));
+			AssertEqual( p.first, j->first );
+		}
+		il.insert( {{ @2, $2 }, { @3, $3 }, { @3, $4 }, { @3, $5 }, { @5, $5 }} );
+		it.insert( m3.begin(), m3.end());
+	
+		AssertTrue( check_unordered_multimap( pm, {{ @1, $1 }, { @2, $2 }, { @2, $2 }, { @3, $3 },
+							   { @3, $4 }, { @3, $5 }, { @5, $5 }} ));
+		AssertTrue( check_unordered_multimap( pi, {{ @1, $1 }, { @2, $2 }, { @2, $2 }, { @3, $3 },
+							   { @3, $4 }, { @3, $5 }, { @5, $5 }} ));
+		AssertTrue( check_unordered_multimap( il, {{ @1, $1 }, { @2, $2 }, { @2, $2 }, { @3, $3 },
+							   { @3, $4 }, { @3, $5 }, { @5, $5 }} ));
+		AssertTrue( check_unordered_multimap( it, {{ @1, $1 }, { @2, $2 }, { @2, $2 }, { @3, $3 },
+							   { @3, $4 }, { @3, $5 }, { @5, $5 }} ));
+	}
+	
+	// erase
+	{
+
+		$a	p {{ @1, $1 }, { @5, $5 }, { @8, $8 }, { @4, $4 },
+						   { @3, $3 }, { @3, $4 }, { @3, $5 }, { @n, $n } };
+		$a	p1( p );
+		iterator			j, n;
+	
+		AssertEqual( p1.erase( @4 ), 1 );
+		AssertTrue( check_unordered_multimap( p1, {{ @1, $1 }, { @5, $5 }, { @8, $8 },
+							   { @3, $3 }, { @3, $4 }, { @3, $5 }, { @n, $n }} ));
+		AssertZero( p1.erase( @7 ));
+		while (( j = p1.find( @3 )) != p1.end()) {
+			n = p1.erase( j );
+			if ( n != p1.end()) {
+				if ( n->first ) print_element<@v>()( n->first ); else printf( "null" );
+				printf( " -> " );
+				if ( n->second ) print_element<$v>()( n->second ); else printf( "null" );
+				printf( "\n" );
+			}
+		}
+		AssertEqual( p1.erase( @8 ), 1 );
+		AssertTrue( check_unordered_multimap( p1, {{ @1, $1 }, { @5, $5 }, { @n, $n }} ));
+	
+		$a     q1( p );
+		$a     q2( p );
+		$a     q3( p );
+
+		j = q1.find( @5 );	
+		q1.erase( q1.begin(), j );
+		q1.erase( j, q1.end());
+		AssertTrue( check_unordered_multimap( q1, { } ));
+	
+		j = q2.find( @5 );	
+		q2.erase( j, j );
+		q2.erase( q2.begin(), q2.begin());
+		q2.erase( q2.end(), q2.end());
+		AssertTrue( check_unordered_multimap( q2, {{ @1, $1 }, { @5, $5 }, { @8, $8 }, { @4, $4 },
+							   { @3, $3 }, { @3, $4 }, { @3, $5 }, { @n, $n }} ));
+
+		q3.erase( q3.begin(), q3.end());
+		AssertTrue( check_unordered_multimap( q3, { } ));
+	}
+$}
+
+$W "iterator"
+${
+	$a	     pm = {{ @1, $1 }, { @2, $2 }, { @3, $3 },
+						   { @3, $4 }, { @3, $5 }, { @5, $5 }};
+	{
+		$a::iterator		i;
+		$a::const_iterator		j, k;
+		@t			y;
+		unsigned						c;
+
+		for ( i = pm.begin(), c = 0; i != pm.end(); ++i, ++c ) {
+			if ( c == 1 ) k = i;
+			if ( c == 2 ) {
+				AssertNotEqual( i, pm.end());
+				j = i;
+			}
+		}
+		AssertEqual( i, pm.end());
+		AssertEqual( c, 6 );
+		AssertTrue( k != j );
+		AssertTrue( ++k == j );
+	}
+	{
+		$a::local_iterator	i;
+		size_t						m = pm.bucket_count();
+		unsigned					c = 0;
+		
+		printf( "--- unorderd_multimap[ %lu ] -->\n", m );
+		for ( size_t n = 0; n < m; ++n ) {
+			bool	b = true;
+			for ( i = pm.begin( n ); i != pm.end( n ); ++i ) { 
+				if ( b ) {
+					printf( "  %5.5lu: ", n );
+					b = false;
+				} else {
+					printf( "         " );
+				}
+				print( i->first );
+				printf( " -> " );
+				print( i->second );
+				printf( "\n" );
+				++c;
+			}
+		}
+		printf( "<--\n" );
+		AssertEqual( c, 6 );
+	}
+$}
+
+$W "miscellaneous (swap/count/size/empty/clear)"
+${
+	$a	r1;
+	$a	r2 = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $3 }, { @3, $3 }, { @5, $5 }};
+	$a	r3 = {{ @4, $4 }, { @5, $5 }};
+
+	// swap
+	r1.swap( r2 );
+	r2.swap( r3 );
+	AssertTrue( check_unordered_multimap( r1, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $3 }, { @3, $3 }, { @5, $5 }} ));
+	AssertTrue( check_unordered_multimap( r2, {{ @4, $4 }, { @5, $5 }} ));
+	AssertTrue( check_unordered_multimap( r3, { } ));
+
+	// size, count
+	AssertEqual( r1.size(), 6 );
+	AssertEqual( r3.size(), 0 );
+	AssertEqual( r1.count( @1 ), 1 );
+	AssertEqual( r1.count( @3 ), 3 );
+	AssertEqual( r1.count( @4 ), 0 );
+
+	// empty, clear
+	AssertFalse( r1.empty());
+	r1.clear();
+	AssertTrue( r1.empty());
+	AssertTrue( check_unordered_multimap( r1, { } ));
+$}
+
+$W "relational operators"
+${
+	$a	r1 = {{ @1, $1 }, { @2, $2 }};
+	$a	r2 = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $3 }, { @5, $5 }};
+	$a	r3 = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }};
+	$a	r4 = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @3, $3 }, { @5, $5 }};
+	$a	r5;
+
+	AssertTrue( r1 != r2 );
+	AssertTrue( r2 != r3 );
+	AssertTrue( r2 == r4 );
+	AssertTrue( r1 != r4 );
+	AssertFalse( r5 == r1 );
+	AssertFalse( r2 != r4 );
+$}
+

@@ -1,0 +1,425 @@
+$X${
+// Testdata Check Utilities
+// -----------------------------------------------------------------------------
+template <typename K, typename T>
+inline bool check_unordered_map( __dp_unordered_map<K,T> const& ls,
+				 std::initializer_list<typename __dp_unordered_map<K,T>::value_pointer> const& ts )
+{
+	std::unordered_map<dp_const_pointer<K>,dp_pointer<T>,dp_hash<dp_const_type<K>>>	l;
+
+	for ( auto a : ts ) l.emplace( a.first, a.second );
+
+	return ls == reinterpret_cast<__dp_unordered_map<K,T> const&>( l );
+}
+$}
+
+$W "constructor/assignment/destructor"
+${
+	// default constructor
+	$a		lr;
+	AssertTrue( check_unordered_map( lr, { } ));
+
+	// copy constructor
+	$a		p0( lr );
+	const $a	c0( lr );
+	lr.insert( { @d@1, $d$1 } );
+	$a		p1( lr );
+	const $a	c1( lr );
+	lr.insert( { @d@2, $d$2 } );
+	lr.insert( { @d@3, $d$3 } );
+	lr.insert( { @d@4, $d$4 } );
+	lr.insert( { @d@5, $d$5 } );
+	$a		p5( lr );
+	const $a	c5( lr );
+
+	AssertTrue( p0.empty());
+	AssertTrue( check_unordered_map( p1, {{ @1, $1 }} ));
+	AssertTrue( check_unordered_map( p5, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @4, $4 }, { @5, $5 }} ));
+	AssertTrue( c0.empty());
+	AssertTrue( check_unordered_map( c1, {{ @1, $1 }} ));
+	AssertTrue( check_unordered_map( c5, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @4, $4 }, { @5, $5 }} ));
+
+	// move constructor
+	{
+		$a   lx = lr;
+		$a   ly( std::move( lx ));
+
+		AssertTrue( lx.empty());
+		AssertTrue( check_unordered_map( ly, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @4, $4 }, { @5, $5 }} ));
+	}
+	// copy assignment operator
+	{
+		$a   lx;
+
+		lx = p1;
+		AssertTrue( check_unordered_map( lx, {{ @1, $1 }} ));
+		lx = p0;
+		AssertTrue( lx.empty());
+		lx = p5;
+		AssertTrue( check_unordered_map( lx, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @4, $4 }, { @5, $5 }} ));
+	}
+	// move assignment operator
+	{
+		$a   lx;
+
+		lr = p1;
+		lx = $a( {{ @5, $5 }, { @3, $3 }, { @2, $2 }} );	// move assignment by r-value
+		AssertTrue( check_unordered_map( lx, {{ @5, $5 }, { @3, $3 }, { @2, $2 }} ));
+
+		lx = std::move( lr );							// move assignment by std::move()
+		AssertTrue( check_unordered_map( lx, {{ @1, $1 }} ));
+		AssertTrue( check_unordered_map( lr, {} ));				// not mandatory
+
+		lx = std::move( lx );
+		AssertTrue( check_unordered_map( lx, {} ));				// not mandatory
+	}
+	// iterator constructor
+	{
+		$a   lx = p5;
+
+		for ( auto i = lx.begin(); i != lx.end(); ++i ) {
+			$a   xl( lx.begin(), i );
+			$a   xr( i, lx.end());
+			$a   x0( i, i );
+	
+			AssertEqual( xl.size() + xr.size(), 5 );
+			AssertTrue( x0.empty());
+		}		
+	}
+	// initializer constructor/assignment operator
+	{
+		$a   lx = p5;
+		$a   x0 { };
+		$a   x1 {{ @1, $1 }};
+		$a   x5 {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @4, $4 }, { @5, $5 }};
+
+		AssertTrue( x0.empty());
+		AssertTrue( check_unordered_map( x1, {{ @1, $1 }} ));
+		AssertTrue( check_unordered_map( x5, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @4, $4 }, { @5, $5 }} ));
+
+		lx = { };
+		AssertTrue( lx.empty());
+		lx = {{ @1, $1 }};
+		AssertTrue( check_unordered_map( lx, {{ @1, $1 }} ));
+		lx = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @4, $4 }, { @5, $5 }};
+		AssertTrue( check_unordered_map( lx, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @4, $4 }, { @5, $5 }} ));
+	}
+$}
+
+$W "at/operator[]/find/equal_range"
+${
+	$a	pm = {{ @1, $1 }, { @2, $2 }, { @5, $5 }, { @8, $8 }, { @4, $4 }, { @2, $2 },
+				{ @3, $3 }, { @3, $3 }, { @3, $3 }, { @4, $4 }, { @5, $5 }, { @4, $4 },
+				{ @4, $4 }, { @1, $1 }, { @2, $2 }};
+	$a const& cm = pm;
+	
+	AssertTrue( check_unordered_map( pm, {{ @1, $1 }, { @2, $2 }, { @5, $5 }, { @8, $8 }, { @4, $4 }, { @3, $3 }} ));
+	print( cm );
+
+	AssertNotEqual( pm.find( @4 ), pm.end());
+@R@N${	AssertEqual( pm.find( @4 )->first, @4 );$}$&
+@D${	AssertNotEqual( pm.find( @4 )->first, @4 );
+	AssertTrue( dp_eql<@v>()( pm.find( @4 )->first, @4 ));$}
+$R$N${	AssertEqual( pm.find( @4 )->second, $4 );$}$&
+$D${	AssertNotEqual( pm.find( @4 )->second, $4 );$}$T${
+	AssertEqual( *pm.find( @4 )->second, t4 );$}
+	AssertEqual( pm.find( @7 ), pm.end());
+
+	AssertNotEqual( cm.find( @4 ), cm.end());
+@R@N${	AssertEqual( cm.find( @4 )->first, @4 );$}$&
+@D${	AssertNotEqual( cm.find( @4 )->first, @4 );
+	AssertTrue( dp_eql<@v>()( cm.find( @4 )->first, @4 ));$}
+$R$N${	AssertEqual( cm.find( @4 )->second, $4 );$}$&
+$D${	AssertNotEqual( cm.find( @4 )->second, $4 );$}$T${
+	AssertEqual( *cm.find( @4 )->second, t4 );$}
+	AssertEqual( cm.find( @7 ), cm.end());
+
+	// null key
+	AssertEqual( pm.find( @n ), pm.end());
+	AssertEqual( cm.find( @n ), cm.end());
+	pm.insert( { @n, $n } );
+	AssertNotEqual( pm.find( @n ), pm.end());
+	AssertEqual( pm.find( @n )->first, @n );
+	AssertEqual( pm.find( @n )->second, $n );
+
+$R$N${	AssertEqual( pm.at( @2 ), $2 );$}$&
+$D${	AssertNotEqual( pm.at( @2 ), $2 );
+	AssertTrue( dp_eql<$v>()( pm.at( @2 ), $2 ));$}$T${
+	AssertEqual( *pm.at( @2 ), t2 );$}
+$R$N${	AssertEqual( cm.at( @3 ), $3 );$}$&
+$D${	AssertNotEqual( cm.at( @3 ), $3 );
+	AssertTrue( dp_eql<$v>()( cm.at( @3 ), $3 ));$}$T${
+	AssertEqual( *cm.at( @3 ), t3 );$}
+	try {
+		AssertEqual( pm.at( @7 ), $7 );
+	} 
+	catch (const std::out_of_range& oor) {
+		fprintf( stderr, "--- exception out_of_range\n" );
+	}
+
+$R$N${	AssertEqual( pm[ @d@5 ] = pm.at( @8 ), $8 );$}$&
+$D${	AssertNotEqual( pm[ @d@5 ] = pm.at( @8 ), $8 );
+	AssertTrue( dp_eql<$v>()( pm.at( @5 ), $8 ));$}$T${
+	AssertEqual( *pm[ @d@5 ], t8 );$}
+$R$N${	AssertEqual( pm[ @d@7 ] = $d$7, $7 );$}$&
+$D${	AssertNotEqual( pm[ @d@7 ] = $d$7, $7 );
+	AssertTrue( dp_eql<$v>()( pm.at( @7 ), $7 ));$}$T${
+	AssertEqual( *pm[ @d@7 ], t7 );$}
+
+	pm[ @d@5 ] = $d$5;
+	AssertTrue( check_unordered_map( pm, {{ @n, $n }, { @1, $1 }, { @2, $2 }, { @5, $5 },
+					{ @8, $8 }, { @4, $4 }, { @3, $3 }, { @7, $7 }} ));
+
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_unordered_map<@v,$v>	er;
+
+	// equal range
+	auto r = pm.equal_range( @1 );
+	for ( auto i = r.first; i != r.second; ++i ) er.insert( *i );
+	AssertTrue( check_unordered_map( er, {{ @1, $1 }} ));
+$}
+
+$W "emplace/insert/erase"
+${
+	typedef typename $a::const_iterator	const_iterator;
+	typedef typename $a::iterator		iterator;
+	typedef	typename $a::value_type		pair;
+
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_unordered_map<@v,$v>	m1 = {{ @1, $1 }, { @2, $2 }};
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_unordered_map<@v,$v>	m2;
+	d$R$D${@R@D${rr$}@N${nr$}$}$N${rn$}_unordered_map<@v,$v>	m3 = {{ @2, $2 }, { @3, $3 }, { @5, $5 }};
+
+	// emplace
+	{
+		$a	pm;
+		$a	pi;
+		std::pair<iterator,bool>	r; 
+		const_iterator			j = pi.begin();
+
+		for ( auto i = m1.begin(); i != m1.end(); ++i )
+		{
+			r = pm.emplace( i->first, i->second );
+
+			AssertEqual( i->first, r.first->first );	// deep compaire
+			AssertTrue( r.second );
+		}	
+		for ( auto i = m1.begin(); i != m1.end(); ++i )
+		{
+			j = pi.emplace_hint( j, i->first, i->second );
+
+			AssertEqual( i->first, j->first );	// deep compaire
+		}	
+	
+		AssertTrue( check_unordered_map( pm, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_map( pi, {{ @1, $1 }, { @2, $2 }} ));
+	
+		for ( auto i = m3.begin(); i != m3.end(); ++i )
+		{
+			r = pm.emplace( i->first, i->second );
+
+			AssertEqual( i->first, r.first->first );	
+			AssertTrue(( dp_eql<@v>()( i->first, @1 ) ||
+				     dp_eql<@v>()( i->first, @2 )) ? !r.second : r.second );
+		}	
+		for ( auto i = m3.begin(); i != m3.end(); ++i )
+		{
+			j = pi.emplace_hint( j, i->first, i->second );
+
+			AssertEqual( i->first, j->first );	
+		}	
+	
+		AssertTrue( check_unordered_map( pm, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }} ));
+		AssertTrue( check_unordered_map( pi, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }} ));
+	}
+	
+	// insert
+	{
+		$a     pm;
+		$a     pi;
+		$a     il;
+		$a     it;
+		std::pair<iterator,bool>	r; 
+		const_iterator			j = pi.begin();
+
+		for ( auto&& p : m1 ) {
+			r = pm.insert( std::forward<decltype( p )>( p ));
+			AssertEqual( p.first, r.first->first );
+			AssertTrue( r.second );
+		}	
+		for ( auto&& p : m1 ) {
+			j = pi.insert( j, std::forward<decltype( p )>( p ));
+			AssertEqual( p.first, j->first );
+		}
+		il.insert( {{ @1, $1 }, { @2, $2 }} );
+		it.insert( m1.begin(), m1.end());
+	
+		AssertTrue( check_unordered_map( pm, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_map( pi, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_map( il, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_map( it, {{ @1, $1 }, { @2, $2 }} ));
+	
+		for ( auto&& p : m2 ) r = pm.insert( std::forward<decltype( p )>( p ));
+		for ( auto&& p : m2 ) j = pi.insert( j, std::forward<decltype( p )>( p ));
+		il.insert( { } );
+		it.insert( m2.begin(), m2.end());
+	
+		AssertTrue( check_unordered_map( pm, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_map( pi, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_map( il, {{ @1, $1 }, { @2, $2 }} ));
+		AssertTrue( check_unordered_map( it, {{ @1, $1 }, { @2, $2 }} ));
+	
+		for ( auto&& p : m3 ) {
+			r = pm.insert( std::forward<decltype( p )>( p ));
+			AssertEqual( p.first, r.first->first );
+			AssertTrue(( dp_eql<@v>()( p.first, @1 ) ||
+				     dp_eql<@v>()( p.first, @2 )) ? !r.second : r.second );
+		}	
+		for ( auto&& p : m3 ) {
+			j = pi.insert( j, std::forward<decltype( p )>( p ));
+			AssertEqual( p.first, j->first );
+		}
+		il.insert( {{ @2, $2 }, { @3, $3 }, { @3, $4 }, { @3, $5 }, { @5, $5 }} );
+		it.insert( m3.begin(), m3.end());
+	
+		AssertTrue( check_unordered_map( pm, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }} ));
+		AssertTrue( check_unordered_map( pi, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }} ));
+		AssertTrue( check_unordered_map( il, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }} ));
+		AssertTrue( check_unordered_map( it, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }} ));
+	}
+	
+	// erase
+	{
+		typename $a::iterator		j;
+
+		$a     p {{ @1, $1 }, { @5, $5 }, { @8, $8 },
+					{ @4, $4 }, { @3, $3 }, { @n, $n } };
+	
+		$a     p1( p );
+	
+		AssertEqual( p1.erase( @4 ), 1 );
+		AssertTrue( check_unordered_map( p1, {{ @1, $1 }, { @5, $5 }, { @8, $8 }, { @3, $3 }, { @n, $n }} ));
+		AssertZero( p1.erase( @7 ));
+		for ( auto i = p1.begin(); i != p1.end(); ++i ) {
+			if ( i->first == @n ) {
+				auto j = i;
+				AssertEqual( p1.erase( i ), ++j );
+				break;
+			}
+		}
+		AssertEqual( p1.erase( @8 ), 1 );
+		AssertTrue( check_unordered_map( p1, {{ @1, $1 }, { @5, $5 }, { @3, $3 }} ));
+	
+		$a     q1( p );
+		$a     q2( p );
+		$a     q3( p );
+
+		j = q1.find( @5 );	
+		q1.erase( q1.begin(), j );
+		q1.erase( j, q1.end());
+		AssertTrue( check_unordered_map( q1, { } ));
+	
+		j = q2.find( @5 );	
+		q2.erase( j, j );
+		q2.erase( q2.begin(), q2.begin());
+		q2.erase( q2.end(), q2.end());
+		AssertTrue( check_unordered_map( q2, {{ @1, $1 }, { @5, $5 }, { @8, $8 }, { @4, $4 }, { @3, $3 }, { @n, $n }} ));
+
+		q3.erase( q3.begin(), q3.end());
+		AssertTrue( check_unordered_map( q3, { } ));
+	}
+$}
+
+$W "iterator"
+${
+	$a	pm = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }};
+	{
+		$a::iterator		i;
+		$a::const_iterator	j, k;
+		@t			y;
+		unsigned					c;
+
+		for ( i = pm.begin(), c = 0; i != pm.end(); ++i, ++c ) {
+			if ( c == 1 ) k = i;
+			if ( c == 2 ) {
+				AssertNotEqual( i, pm.end());
+				y = i->first;
+				j = i;
+			}
+		}
+		AssertEqual( i, pm.end());
+		AssertEqual( c, 4 );
+		AssertEqual( pm.find( y ), j );
+		AssertTrue( k != j );
+		AssertTrue( ++k == j );
+	}
+	{
+		$a::local_iterator	i;
+		size_t						m = pm.bucket_count();
+		unsigned					c = 0;
+		
+		printf( "--- unorderd_map[ %lu ] -->\n", m );
+		for ( size_t n = 0; n < m; ++n ) {
+			bool	b = true;
+			for ( i = pm.begin( n ); i != pm.end( n ); ++i ) { 
+				if ( b ) {
+					printf( "  %5.5lu: ", n );
+					b = false;
+				}
+				print( i->first );
+				printf( " -> " );
+				print( i->second );
+				printf( "\n" );
+				++c;
+			}
+		}
+		printf( "<--\n" );
+		AssertEqual( c, 4 );
+	}
+$}
+
+$W "miscellaneous (swap/count/size/empty/clear)"
+${
+	$a	r1;
+	$a	r2 = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }};
+	$a	r3 = {{ @4, $4 }, { @5, $5 }};
+
+	// swap
+	r1.swap( r2 );
+	r2.swap( r3 );
+	AssertTrue( check_unordered_map( r1, {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }} ));
+	AssertTrue( check_unordered_map( r2, {{ @4, $4 }, { @5, $5 }} ));
+	AssertTrue( check_unordered_map( r3, { } ));
+
+	// size, count
+	AssertEqual( r1.size(), 4 );
+	AssertEqual( r3.size(), 0 );
+	AssertEqual( r1.count( @1 ), 1 );
+	AssertEqual( r1.count( @3 ), 1 );
+	AssertEqual( r1.count( @4 ), 0 );
+
+	// empty, clear
+	AssertFalse( r1.empty());
+	r1.clear();
+	AssertTrue( r1.empty());
+	AssertTrue( check_unordered_map( r1, { } ));
+
+	// print ( udata.hpp )
+	$a	m = {{ @1, $1 }, { @2, $2 }, { @3, $3 }};
+	print( m );
+$}
+
+$W "relational operators"
+${
+	$a	r1 = {{ @1, $1 }, { @2, $2 }};
+	$a	r2 = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }};
+	$a	r3 = {{ @1, $1 }, { @3, $3 }, { @2, $2 }};
+	$a	r4 = {{ @1, $1 }, { @2, $2 }, { @3, $3 }, { @5, $5 }};
+	$a	r5;
+
+	AssertTrue( r1 != r2 );
+	AssertTrue( r2 != r3 );
+	AssertTrue( r2 == r4 );
+	AssertTrue( r1 != r4 );
+	AssertFalse( r5 == r1 );
+	AssertFalse( r2 != r4 );
+$}
+
