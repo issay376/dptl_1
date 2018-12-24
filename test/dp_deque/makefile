@@ -7,7 +7,7 @@ all : dp_dequetest
 
 # -- temporal --
 dp_dequetest.cpp : ${DPTLBIN}/gendptest dp_deque.tmpl
-	${DPTLBIN}/gendptest -s -p dp_deque dp_deque.tmpl dp_dequetest.cpp
+	${DPTLBIN}/gendptest dp_deque.tmpl dp_dequetest.cpp
 
 dp_dequetest : dp_dequetest.cpp\
 	${DPTLSRC}/include/deep_ptr.hpp\

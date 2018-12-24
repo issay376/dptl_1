@@ -7,7 +7,7 @@ all : dp_maptest dp_multimaptest
 
 # -- temporal --
 dp_maptest.cpp : ${DPTLBIN}/gendptest dp_map.tmpl
-	${DPTLBIN}/gendptest -s -p dp_map dp_map.tmpl dp_maptest.cpp
+	${DPTLBIN}/gendptest +s dp_map.tmpl dp_maptest.cpp
 
 dp_maptest : dp_maptest.cpp\
 	${DPTLSRC}/include/deep_ptr.hpp\
@@ -17,7 +17,7 @@ dp_maptest : dp_maptest.cpp\
 	${CCPP} -o dp_maptest -I${DPTLINC} ${CFLAGS} dp_maptest.cpp
 
 dp_multimaptest.cpp : ${DPTLBIN}/gendptest dp_multimap.tmpl
-	${DPTLBIN}/gendptest -s -p dp_multimap dp_multimap.tmpl dp_multimaptest.cpp
+	${DPTLBIN}/gendptest +s dp_multimap.tmpl dp_multimaptest.cpp
 
 dp_multimaptest : dp_multimaptest.cpp\
 	${DPTLSRC}/include/deep_ptr.hpp\

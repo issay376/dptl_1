@@ -1,5 +1,5 @@
 //
-// test implementation of policy based std::map
+// dp_map.hpp - sample customization of std::map/multimap for deep pointer
 //
 //
 //

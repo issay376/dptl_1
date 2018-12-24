@@ -2,18 +2,16 @@
 
 all :
 	make -C util install
-	make -C src
 	make -C test
 
 install :
-	make -C src install
+	make -C util install
 
 uninstall :
-	make -C src uninstall
+	make -C util uninstall
 
 clean :
 	make -C util clean
-	make -C src clean
 	make -C test clean
 
 utest :

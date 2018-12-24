@@ -10,7 +10,7 @@ dptest : dptest.cpp\
 	${DPTLSRC}/include/deep_ptr.hpp\
 	${DPTLSRC}/include/utest.hpp\
 	${DPTLSRC}/include/udata.hpp
-	${CCPP} -o dptest -I${DPTLINC} ${CFLAGS} dptest.cpp
+	${CCPP} -o dptest -I${DPTLINC} -D_DEBUG_ALLOC ${CFLAGS} dptest.cpp
 
 test : dptest
 	./dptest 

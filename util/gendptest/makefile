@@ -3,12 +3,9 @@
 
 all : gendptest
 
-PCTLDIR = /Users/issay/work/pctl
-PCTLSRC = ${PCTLDIR}/src
-PCTLINC = ${PCTLDIR}/include
-PCTLBIN = ${PCTLDIR}/bin
-
 DPTLDIR = /Users/issay/work/dptl
+DPTLSRC = ${DPTLDIR}/src
+DPTLINC = ${DPTLDIR}/include
 DPTLBIN = ${DPTLDIR}/bin
 
 CCPP = clang++
@@ -19,9 +16,9 @@ RM = rm -f
 AR = ar -cr
 
 gendptest : gendptest.cpp \
-	${PCTLSRC}/include/pcontainer.h \
-	${PCTLSRC}/include/plist.h
-	${CCPP} -o gendptest -I${PCTLINC} ${CFLAGS} gendptest.cpp 
+	${DPTLSRC}/include/deep_ptr.hpp \
+	${DPTLSRC}/include/dp_list.hpp
+	${CCPP} -o gendptest -I${DPTLINC} ${CFLAGS} gendptest.cpp 
 
 install : gendptest
 	${CP} gendptest ${DPTLBIN}

@@ -1,0 +1,394 @@
+$X${
+// Testdata Check Utilities
+// -----------------------------------------------------------------------------
+template <typename T>
+inline bool check_unordered_multiset( dp_unordered_multiset<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+        dr_unordered_multiset<T>     l;
+
+        for ( auto&& a : ts ) l.emplace( a );
+
+        return ls == reinterpret_cast<dp_unordered_multiset<T> const&>( l );
+}
+
+template <typename T>
+inline bool check_unordered_multiset( dr_unordered_multiset<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+        dr_unordered_multiset<T>     l;
+
+        for ( auto&& a : ts ) l.emplace( a );
+
+        return ls == l;
+}
+
+template <typename T>
+inline bool check_unordered_multiset( std::unordered_multiset<T> const& ls, std::initializer_list<T> const& ts )
+{
+        std::unordered_multiset<T>   l;
+
+        for ( auto a : ts ) l.emplace( a );
+
+        return ls == l;
+}
+$}
+
+$V "constructor/assignment/destructor"
+${
+	// default constructor
+	$a		lr;
+	AssertTrue( check_unordered_multiset( lr, { } ));
+
+	// copy constructor
+	$a		p0( lr );
+	const $a	c0( lr );
+	lr.insert( $d$1 );
+	$a		p1( lr );
+	const $a	c1( lr );
+	lr.insert( $d$2 );
+	lr.insert( $d$3 );
+	lr.insert( $d$3 );
+	lr.insert( $d$3 );
+	lr.insert( $d$4 );
+	lr.insert( $d$5 );
+	$a		p5( lr );
+	const $a	c5( lr );
+
+	AssertTrue( p0.empty());
+	AssertTrue( check_unordered_multiset( p1, { $1 } ));
+	AssertTrue( check_unordered_multiset( p5, { $1, $2, $3, $3, $3, $4, $5 } ));
+	AssertTrue( c0.empty());
+	AssertTrue( check_unordered_multiset( c1, { $1 } ));
+	AssertTrue( check_unordered_multiset( c5, { $1, $2, $3, $3, $3, $4, $5 } ));
+
+	// move constructor
+	{
+		$a   lx = lr;
+		$a   ly( std::move( lx ));
+
+		AssertTrue( lx.empty());
+		AssertTrue( check_unordered_multiset( ly, { $1, $2, $3, $3, $3, $4, $5 } ));
+	}
+	// copy assignment operator
+	{
+		$a   lx;
+
+		lx = p1;
+		AssertTrue( check_unordered_multiset( lx, { $1 } ));
+		lx = p0;
+		AssertTrue( lx.empty());
+		lx = p5;
+		AssertTrue( check_unordered_multiset( lx, { $1, $2, $3, $3, $3, $4, $5 } ));
+	}
+	// move assignment operator
+	{
+		$a   lx;
+
+		lr = p1;
+		lx = $a( { $5, $3, $3, $3, $2 } );
+
+		AssertTrue( check_unordered_multiset( lx, { $5, $3, $3, $3, $2 } ));
+
+		lx = std::move( lr );						// move assignment by std::move()
+		AssertTrue( check_unordered_multiset( lx, { $1 } ));
+		AssertTrue( check_unordered_multiset( lr, {} ));		// not mandatory
+
+		lx = std::move( lx );
+		AssertTrue( check_unordered_multiset( lx, {} ));		// not mandatory
+	}
+	// iterator constructor
+	{
+		$a   lx = p5;
+
+		for ( auto i = lx.begin(); i != lx.end(); ++i ) {
+			$a   xl( lx.begin(), i );
+			$a   xr( i, lx.end());
+			$a   x0( i, i );
+	
+			AssertEqual( xl.size() + xr.size(), 7 );
+			AssertTrue( x0.empty());
+		}		
+	}
+	// initializer constructor/assignment operator
+	{
+		$a   lx = p5;
+		$a   x0 { };
+		$a   x1 { $1 };
+		$a   x5 { $1, $2, $3, $3, $3, $4, $5 };
+
+		AssertTrue( x0.empty());
+		AssertTrue( check_unordered_multiset( x1, { $1 } ));
+		AssertTrue( check_unordered_multiset( x5, { $1, $2, $3, $3, $3, $4, $5 } ));
+
+		lx = { };
+		AssertTrue( lx.empty());
+		lx = { $1 };
+		AssertTrue( check_unordered_multiset( lx, { $1 } ));
+		lx = { $1, $2, $3, $3, $3, $4, $5 };
+		AssertTrue( check_unordered_multiset( lx, { $1, $2, $3, $3, $3, $4, $5 } ));
+	}
+$}
+
+$V "find/equal_range"
+${
+	$a	pm = { $1, $2, $5, $8, $4, $2, $3, $3, $3, $4, $5, $4, $4, $1, $2 };
+	$a const& cm = pm;
+	
+	AssertTrue( check_unordered_multiset( pm, { $1, $2, $5, $8, $4, $2, $3, $3, $3, $4, $5, $4, $4, $1, $2 } ));
+	print( cm );
+
+	AssertNotEqual( pm.find( $4 ), pm.end());
+$R$N${	AssertEqual( *pm.find( $4 ), $4 );$}$&
+$D${	AssertNotEqual( *pm.find( $4 ), $4 );$}$T${
+	AssertEqual( **pm.find( $4 ), t4 );$}
+	AssertEqual( pm.find( $7 ), pm.end());
+
+	AssertNotEqual( cm.find( $4 ), cm.end());
+$R$N${	AssertEqual( *cm.find( $4 ), $4 );$}$&
+$D${	AssertNotEqual( *cm.find( $4 ), $4 );$}$T${
+	AssertEqual( **cm.find( $4 ), t4 );$}
+	AssertEqual( cm.find( $7 ), cm.end());
+
+	// equal range
+$D$R${	dr_unordered_multiset<$v>	e1, e2, e3;$}$&
+$N${	std::unordered_multiset<$v>	e1, e2, e3;$}
+
+	auto r = pm.equal_range( $1 );
+	for ( auto i = r.first; i != r.second; ++i ) e1.insert( *i );
+	AssertTrue( check_unordered_multiset( e1, { $1, $1 } ));
+	r = pm.equal_range( $7 );
+	for ( auto i = r.first; i != r.second; ++i ) e2.insert( *i );
+	AssertTrue( check_unordered_multiset( e2, { } ));
+	auto q = cm.equal_range( $3 );
+	for ( auto i = q.first; i != q.second; ++i ) e3.insert( *i );
+	AssertTrue( check_unordered_multiset( e3, { $3, $3, $3 } ));
+$}
+
+$V "emplace/insert/erase"
+${
+$D$R${	dr_unordered_multiset<$v>	m1 = { $1, $2 };
+	dr_unordered_multiset<$v>	m2;
+	dr_unordered_multiset<$v>	m3 = { $2, $3, $3, $3, $5 };$}$&
+$N${	std::unordered_multiset<$v>	m1 = { $1, $2 };
+	std::unordered_multiset<$v>	m2;
+	std::unordered_multiset<$v>	m3 = { $2, $3, $3, $3, $5 };$}
+
+	// emplace
+	{
+		$a	pm;
+		$a	pi;
+		typename $a::iterator		r; 
+		typename $a::const_iterator	j = pi.begin();
+
+		for ( auto i = m1.begin(); i != m1.end(); ++i )
+		{
+			r = pm.emplace( $D${dp_dup<$v>()( $}*i $D${)$});
+
+			AssertEqual( *i, *r );	// deep compaire
+		}	
+		for ( auto i = m1.begin(); i != m1.end(); ++i )
+		{
+			j = pi.emplace_hint( j, $D${dp_dup<$v>()( $}*i $D${)$});
+
+			AssertEqual( *i, *j );	// deep compaire
+		}	
+	
+		AssertTrue( check_unordered_multiset( pm, { $1, $2 } ));
+		AssertTrue( check_unordered_multiset( pi, { $1, $2 } ));
+	
+		for ( auto i = m3.begin(); i != m3.end(); ++i )
+		{
+			r = pm.emplace( $D${dp_dup<$v>()( $}*i $D${)$});
+
+			AssertEqual( *i, *r );	
+		}	
+		for ( auto i = m3.begin(); i != m3.end(); ++i )
+		{
+			j = pi.emplace_hint( j, $D${dp_dup<$v>()( $}*i $D${)$});
+
+			AssertEqual( *i, *j );	
+		}	
+	
+		AssertTrue( check_unordered_multiset( pm, { $1, $2, $2, $3, $3, $3, $5 } ));
+		AssertTrue( check_unordered_multiset( pi, { $1, $2, $2, $3, $3, $3, $5 } ));
+	}
+	
+	// insert
+	{
+		$a	pm;
+		$a	pi;
+		$a	il;
+		$a	it;
+		typename $a::iterator		r; 
+		typename $a::const_iterator	j = pi.begin();
+
+		for ( auto p : m1 ) {
+			r = pm.insert( $D${dp_dup<$v>()( $}p $D${)$});
+			AssertEqual( p, *r );
+		}	
+		for ( auto p : m1 ) {
+			j = pi.insert( j, $D${dp_dup<$v>()( $}p $D${)$});
+			AssertEqual( p, *j );
+		}
+		il.insert( { $1, $2 } );
+		it.insert( m1.begin(), m1.end());
+	
+		AssertTrue( check_unordered_multiset( pm, { $1, $2 } ));
+		AssertTrue( check_unordered_multiset( pi, { $1, $2 } ));
+		AssertTrue( check_unordered_multiset( il, { $1, $2 } ));
+		AssertTrue( check_unordered_multiset( it, { $1, $2 } ));
+	
+		for ( auto p : m2 ) r = pm.insert( $D${dp_dup<$v>()( $}p $D${)$});
+		for ( auto p : m2 ) j = pi.insert( j, $D${dp_dup<$v>()( $}p $D${)$});
+		il.insert( { } );
+		it.insert( m2.begin(), m2.end());
+	
+		AssertTrue( check_unordered_multiset( pm, { $1, $2 } ));
+		AssertTrue( check_unordered_multiset( pi, { $1, $2 } ));
+		AssertTrue( check_unordered_multiset( il, { $1, $2 } ));
+		AssertTrue( check_unordered_multiset( it, { $1, $2 } ));
+	
+		for ( auto p : m3 ) {
+			r = pm.insert( $D${dp_dup<$v>()( $}p $D${)$});
+			AssertEqual( p, *r );
+		}	
+		for ( auto p : m3 ) {
+			j = pi.insert( j, $D${dp_dup<$v>()( $}p $D${)$});
+			AssertEqual( p, *j );
+		}
+		il.insert( { $2, $3, $3, $3, $5 } );
+		it.insert( m3.begin(), m3.end());
+	
+		AssertTrue( check_unordered_multiset( pm, { $1, $2, $2, $3, $3, $3, $5 } ));
+		AssertTrue( check_unordered_multiset( pi, { $1, $2, $2, $3, $3, $3, $5 } ));
+		AssertTrue( check_unordered_multiset( il, { $1, $2, $2, $3, $3, $3, $5 } ));
+		AssertTrue( check_unordered_multiset( it, { $1, $2, $2, $3, $3, $3, $5 } ));
+	}
+	
+	// erase
+	{
+		$a	p { $1, $5, $8, $4, $3, $3, $3, $n };
+		$a	p1( p );
+		typename $a::iterator		j, n;
+	
+		AssertEqual( p1.erase( $4 ), 1 );
+		AssertTrue( check_unordered_multiset( p1, { $1, $5, $8, $3, $3, $3, $n } ));
+		AssertZero( p1.erase( $7 ));
+		while (( j = p1.find( $3 )) != p1.end()) {
+			n = p1.erase( j );
+			if ( n != p1.end()) {
+				if ( *n ) print_element<$v>()( *n ); else printf( "null" );
+				printf( "\n" );
+			}
+		}
+		AssertEqual( p1.erase( $8 ), 1 );
+		AssertTrue( check_unordered_multiset( p1, { $1, $5, $n } ));
+	
+		$a     q1( p );
+		$a     q2( p );
+		$a     q3( p );
+
+		j = q1.find( $5 );	
+		q1.erase( q1.begin(), j );
+		q1.erase( j, q1.end());
+		AssertTrue( check_unordered_multiset( q1, { } ));
+	
+		j = q2.find( $5 );	
+		q2.erase( j, j );
+		q2.erase( q2.begin(), q2.begin());
+		q2.erase( q2.end(), q2.end());
+		AssertTrue( check_unordered_multiset( q2, { $1, $5, $8, $4, $3, $3, $3, $n } ));
+
+		q3.erase( q3.begin(), q3.end());
+		AssertTrue( check_unordered_multiset( q3, { } ));
+	}
+$}
+
+$V "iterator"
+${
+	$a	     pm = { $1, $2, $3, $3, $3, $5 };
+	{
+		$a::iterator		i;
+		$a::const_iterator	j, k;
+		$c		y;
+		unsigned					c;
+
+		for ( i = pm.begin(), c = 0; i != pm.end(); ++i, ++c ) {
+			if ( c == 1 ) k = i;
+			if ( c == 2 ) {
+				AssertNotEqual( i, pm.end());
+				j = i;
+			}
+		}
+		AssertEqual( i, pm.end());
+		AssertEqual( c, 6 );
+		AssertTrue( k != j );
+		AssertTrue( ++k == j );
+	}
+	{
+		$a::local_iterator	i;
+		size_t						m = pm.bucket_count();
+		unsigned					c = 0;
+		
+		printf( "--- unorderd_multiset[ %lu ] -->\n", m );
+		for ( size_t n = 0; n < m; ++n ) {
+			bool	b = true;
+			for ( i = pm.begin( n ); i != pm.end( n ); ++i ) { 
+				if ( b ) {
+					printf( "  %5.5lu: ", n );
+					b = false;
+				} else {
+					printf( "         " );
+				}
+				print( *i );
+				printf( "\n" );
+				++c;
+			}
+		}
+		printf( "<--\n" );
+		AssertEqual( c, 6 );
+	}
+$}
+
+$V "miscellaneous (swap/count/size/empty/clear)"
+${
+	$a	r1;
+	$a	r2 = { $1, $2, $3, $3, $3, $5 };
+	$a	r3 = { $4, $5 };
+
+	// swap
+	r1.swap( r2 );
+	r2.swap( r3 );
+	AssertTrue( check_unordered_multiset( r1, { $1, $2, $3, $3, $3, $5 } ));
+	AssertTrue( check_unordered_multiset( r2, { $4, $5 } ));
+	AssertTrue( check_unordered_multiset( r3, { } ));
+
+	// size, count
+	AssertEqual( r1.size(), 6 );
+	AssertEqual( r3.size(), 0 );
+	AssertEqual( r1.count( $1 ), 1 );
+	AssertEqual( r1.count( $3 ), 3 );
+	AssertEqual( r1.count( $4 ), 0 );
+
+	// empty, clear
+	AssertFalse( r1.empty());
+	r1.clear();
+	AssertTrue( r1.empty());
+	AssertTrue( check_unordered_multiset( r1, { } ));
+$}
+
+$V "relational operators"
+${
+	$a	r1 = { $1, $2 };
+	$a	r2 = { $1, $2, $3, $3, $5 };
+	$a	r3 = { $1, $2, $3, $5 };
+	$a	r4 = { $1, $2, $3, $3, $5 };
+	$a	r5;
+
+	AssertTrue( r1 != r2 );
+	AssertTrue( r2 != r3 );
+	AssertTrue( r2 == r4 );
+	AssertTrue( r1 != r4 );
+	AssertFalse( r5 == r1 );
+	AssertFalse( r2 != r4 );
+$}
+

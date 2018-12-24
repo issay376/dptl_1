@@ -7,7 +7,7 @@ all : dp_settest dp_multisettest
 
 # -- temporal --
 dp_settest.cpp : ${DPTLBIN}/gendptest dp_set.tmpl
-	${DPTLBIN}/gendptest -s -p dp_set dp_set.tmpl dp_settest.cpp
+	${DPTLBIN}/gendptest dp_set.tmpl dp_settest.cpp
 
 dp_settest : dp_settest.cpp\
 	${DPTLSRC}/include/deep_ptr.hpp\
@@ -17,7 +17,7 @@ dp_settest : dp_settest.cpp\
 	${CCPP} -o dp_settest -I${DPTLINC} ${CFLAGS} dp_settest.cpp
 
 dp_multisettest.cpp : ${DPTLBIN}/gendptest dp_multiset.tmpl
-	${DPTLBIN}/gendptest -s -p dp_multiset dp_multiset.tmpl dp_multisettest.cpp
+	${DPTLBIN}/gendptest dp_multiset.tmpl dp_multisettest.cpp
 
 dp_multisettest : dp_multisettest.cpp\
 	${DPTLSRC}/include/deep_ptr.hpp\

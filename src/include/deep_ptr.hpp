@@ -566,7 +566,7 @@ class deep_ptr<T*> : public dp_base<T*>
 
 	deep_ptr() = default;
 
-#ifndef _DEBUG
+#ifndef _DEBUG_ALLOC
 	deep_ptr( deep_ptr const& p ) : dp_base<T*>( dp_dup<T*>()( p.get())) { }
 	deep_ptr( deep_ptr&& p )      : dp_base<T*>( p.release()) { }
 	deep_ptr& operator=( deep_ptr const& p ) { this->copy( p.get()); return *this; }

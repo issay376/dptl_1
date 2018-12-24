@@ -64,7 +64,7 @@ class __dp_deque : public std::deque<T>
 	__dp_deque( std::initializer_list<value_pointer> il,
 		 const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
-		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )&>( p ));
+		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )>( p ));
 	}
 
 #elif defined(__cplusplus) && (__cplusplus >= 201103)
@@ -87,7 +87,7 @@ class __dp_deque : public std::deque<T>
 	__dp_deque( std::initializer_list<value_pointer> il,
 		 const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
-		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )&>( p ));
+		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )>( p ));
 	}
 #else
 #error "c++11 up required"
@@ -98,7 +98,7 @@ class __dp_deque : public std::deque<T>
 	__dp_deque& operator=( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
-		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )&>( p ));
+		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )>( p ));
 		return *this;
 	}
 
@@ -116,7 +116,7 @@ class __dp_deque : public std::deque<T>
 	void assign( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
-		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )&>( p ));
+		for ( auto&& p : il ) super::push_back( std::forward<decltype( p )>( p ));
 	}
 
 	template <typename... Args> iterator emplace( const_iterator pos, Args&&... args )

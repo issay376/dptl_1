@@ -105,9 +105,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <pctl/plist.h>
+#include <dptl/dp_list.hpp>
 
-using namespace pctl;
+using namespace dptl;
 
 //
 // --- specification ---
@@ -344,10 +344,8 @@ inline const char* mode_literal( mode md )
 // --------------------------------------------------------------------------------
 class token
 {
-    public:
-
     protected:
-	type	m_type;
+	type			m_type;
 
     public:
 	explicit token( type t ) : m_type( t ) { }
@@ -473,11 +471,11 @@ class token_dup : public token
 class token_lst : public token
 {
     protected:
-	pslist<token*>			m_lst;
+	dp_list<token*>			m_lst;
 	token*				m_end;
 	char*				m_sub;
 	int				m_ut;
-	pslist<token*>::iterator	m_i;
+	dp_list<token*>::iterator	m_i;
 
     public:
 	explicit token_lst( const char* s = nullptr )
@@ -490,12 +488,12 @@ class token_lst : public token
 		if ( m_sub ) delete [] m_sub;
 	} 
 
-	void store( token* p ) override { m_lst.enq( p ); }
+	void store( token* p ) override { m_lst.push_back( std::move( p )); }
 	void end( token* p ) override   { m_end = p; }
 
 	void init() { m_i = m_lst.begin(); } 
-	token* next() { return m_i ? *m_i++ : nullptr; }
-	token* get() override { return m_i ? *m_i : nullptr; }
+	token* next() { return ( m_i != m_lst.end()) ? static_cast<token*>( *m_i++ ) : nullptr; }
+	token* get() override { return ( m_i != m_lst.end()) ? static_cast<token*>( *m_i ) : nullptr; }
 	const char* subtitle() const { return m_sub; }
 
 	void set_type( int ut ) { m_ut = ut; }
@@ -521,8 +519,8 @@ class parser
 	FILE*				m_in;
 	unsigned			m_line;
 	char				m_buf[ LINESIZE ];
-	pslist<token_lst*>		m_units;
-	pslist<token_lst*>::iterator	m_i;
+	dp_list<token_lst*>		m_units;
+	dp_list<token_lst*>::iterator	m_i;
 	token*				m_unget;
 
     public:
@@ -553,8 +551,8 @@ class parser
 
 	// retreival	
 	void init() 	 { m_i = m_units.begin(); }
-	token_lst* get() { return m_i ? *m_i++ : nullptr; }
-	const pslist<token_lst*>& units() const { return m_units; }
+	token_lst* get() { return ( m_i != m_units.end()) ? static_cast<token_lst*>( *m_i++ ) : nullptr; }
+	const dp_list<token_lst*>& units() const { return m_units; }
 
 	unsigned unit_count() const { return m_units.size(); }
 
@@ -605,7 +603,7 @@ class writer
 	}
 	~writer() { if ( m_out != stdout ) fclose( m_out ); }
 
-	void write_header( const pslist<token_lst*>& us, bool keyed );
+	void write_header( const dp_list<token_lst*>& us, bool keyed, int stl );
 	void write_footer();
 
 	void write_unit( token_lst* ut, mode vp = md_null, data vt = dt_null, mode kp = md_null, data kt = dt_null );
@@ -915,11 +913,11 @@ void parser::parse()
 	m_line = 1;
 
 	while ( token* p = get_token()) {
-		if      ( p->is( tk_unit ))		m_units.enq( parse_unit( ut_test ));
-		else if ( p->is( tk_key_unit ))		m_units.enq( parse_unit( ut_key ));
-		else if ( p->is( tk_value_unit ))	m_units.enq( parse_unit( ut_value ));
-		else if ( p->is( tk_key_value_unit ))	m_units.enq( parse_unit( ut_key_value ));
-		else if ( p->is( tk_auxiliary ))	m_units.enq( parse_auxiliary());
+		if      ( p->is( tk_unit ))		m_units.push_back( parse_unit( ut_test ));
+		else if ( p->is( tk_key_unit ))		m_units.push_back( parse_unit( ut_key ));
+		else if ( p->is( tk_value_unit ))	m_units.push_back( parse_unit( ut_value ));
+		else if ( p->is( tk_key_value_unit ))	m_units.push_back( parse_unit( ut_key_value ));
+		else if ( p->is( tk_auxiliary ))	m_units.push_back( parse_auxiliary());
 		else if ( p->is( tk_constant ))		delete p;
 		else error( "parse: unit $U required" );
 	}
@@ -1060,7 +1058,7 @@ void parser::error( const char* msg, ... )
 
 // writer
 // --------------------------------------------------------------------------------
-void writer::write_header( const pslist<token_lst*>& us, bool keyed )
+void writer::write_header( const dp_list<token_lst*>& us, bool keyed, int stl )
 {
 	char		date[ 16 ];
 	time_t		t = time( nullptr );
@@ -1095,10 +1093,10 @@ void writer::write_header( const pslist<token_lst*>& us, bool keyed )
 		if ((*u)->is_test()) ts += 1;
 		if ( keyed ) {
 			if ((*u)->value_test() && (*u)->key_test()) ts += 3;
-			if ((*u)->value_test()) ts += 7;
-			if ((*u)->key_test()) ts += 7;
+			if ((*u)->value_test()) ts += ( stl > 0 ) ? 7 : 6;
+			if ((*u)->key_test()) ts += ( stl > 0 ) ? 7 : 6;
 		} else {
-			if ((*u)->value_test()) ts += 8;
+			if ((*u)->value_test()) ts += ( stl >= 0 ) ? 8 : 7;
 		}
 		if ( 0 < ts ) {
 			if ( const char* sb = (*u)->subtitle()) fprintf( m_out, "\t// --- %s ---\n", sb );
@@ -1317,7 +1315,7 @@ void generator::generate()
 
 	m_p.init();
 
-	m_w.write_header( m_p.units(), m_keyed );
+	m_w.write_header( m_p.units(), m_keyed, m_stl );
 
 	if ( m_keyed ) 
 		key_value_test();
@@ -1348,7 +1346,7 @@ void generator::key_value_test()
 				m_w.write_unit( u, md_rptr, dt_farray, md_rptr, dt_cstring );
 				m_w.write_unit( u, md_dptr, dt_farray, md_rptr, dt_cstring );
 		
-				m_w.write_unit( u, md_data, dt_int, md_rptr, dt_cstring );	// 11
+				if ( m_stl > 0 ) m_w.write_unit( u, md_data, dt_int, md_rptr, dt_cstring );	// 11
 			}	
 			if ( u->key_test()) {
 				m_w.write_unit( u, md_dptr, dt_pointer, md_rptr, dt_cstring );	// 12
@@ -1360,7 +1358,7 @@ void generator::key_value_test()
 				m_w.write_unit( u, md_dptr, dt_pointer, md_rptr, dt_farray );
 				m_w.write_unit( u, md_dptr, dt_pointer, md_dptr, dt_farray );
 				
-				m_w.write_unit( u, md_dptr, dt_pointer, md_data, dt_int );	// 18
+				if ( m_stl > 0 ) m_w.write_unit( u, md_dptr, dt_pointer, md_data, dt_int );	// 18
 			}
 
 		} else if ( u->is_test()) {
@@ -1389,7 +1387,7 @@ void generator::value_test()
 			m_w.write_unit( u, md_rptr, dt_farray );
 			m_w.write_unit( u, md_dptr, dt_farray );
 	
-			m_w.write_unit( u, md_data, dt_int );		// 9
+			if ( m_stl >= 0 ) m_w.write_unit( u, md_data, dt_int );		// 9
 
 		} else if ( u->is_test()) {
 			m_w.write_unit( u );
@@ -1412,7 +1410,10 @@ int main( int argc, char** argv )
 	const char*	pc = nullptr;
 	const char*	fin = nullptr;
 	const char*	fout = nullptr;
-	const char*	pcontainer[] = { "plist", "phash", "pmultimap", "pmap", "pmultiset", "pset", "pvector", nullptr };
+	const char*	pcontainer[] = { "dp_array", "dp_deque", "dp_forward_list", "dp_list",
+					 "dp_multimap", "dp_map", "dp_multiset", "dp_set", 
+					 "dp_unordered_multimap", "dp_unordered_map",
+					 "dp_unordered_multiset", "dp_unordered_set", "dp_vector", nullptr };
 	bool		debug = false;
 	int		stl = 0;
 

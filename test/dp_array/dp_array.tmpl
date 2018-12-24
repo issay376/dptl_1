@@ -1,0 +1,330 @@
+$X${
+// Testdata Check Utilities
+// -----------------------------------------------------------------------------
+template <typename T, size_t N>
+inline bool check_array( dp_array<T,N> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+	dr_array<T,N>			l;
+	size_t				i = 0;
+
+	for ( auto p = ts.begin(); i < N; ++p, ++i ) {
+		if ( p == ts.end()) break;
+		l[ i ] = *p;
+	}
+	return ls == reinterpret_cast<dp_array<T,N> const&>( l );
+}
+
+template <typename T, size_t N>
+inline bool check_array( dr_array<T,N> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+	dr_array<T,N>			l;
+	size_t				i = 0;
+
+	for ( auto p = ts.begin(); i < N; ++p, ++i ) {
+		if ( p == ts.end()) break;
+		l[ i ] = *p;
+	}
+	return ls == l;
+}
+$}
+
+$V "constructor/assignment/destructor"
+${
+	// default constructor
+	d$p_array<$v,16>		lr;
+	AssertTrue( check_array( lr, { } ));
+
+	// copy constructor
+	d$p_array<$v,16>		p0( lr );
+	const d$p_array<$v,16>	c0( lr );
+	lr[ 0 ] = $d$1;
+	d$p_array<$v,16>		p1( lr );
+	const d$p_array<$v,16>	c1( lr );
+	lr[ 1 ] = $d$2;
+	lr[ 2 ] = $d$3;
+	lr[ 3 ] = $d$4;
+	lr[ 4 ] = $d$5;
+	d$p_array<$v,16>		p5( lr );
+	const d$p_array<$v,16>	c5( lr );
+
+	AssertTrue( check_array( p0, { } ));
+	AssertTrue( check_array( p1, { $1 } ));
+	AssertTrue( check_array( p5, { $1, $2, $3, $4, $5 } ));
+	AssertTrue( check_array( c0, { } ));
+	AssertTrue( check_array( c1, { $1 } ));
+	AssertTrue( check_array( c5, { $1, $2, $3, $4, $5 } ));
+
+	// move constructor
+	{
+		d$p_array<$v,16>	lx = lr;
+		d$p_array<$v,16>	ly( std::move( lx ));
+
+		//AssertTrue( check_array( lx, { } ));		// not mandatory
+		AssertTrue( check_array( ly, { $1, $2, $3, $4, $5 } ));
+	}
+	// copy assignment operator
+	{
+		d$p_array<$v,16>	lx;
+
+		lx = p1;
+		AssertTrue( check_array( lx, { $1 } ));
+		lx = p0;
+		AssertTrue( check_array( lx, { } ));
+		lx = p5;
+		AssertTrue( check_array( lx, { $1, $2, $3, $4, $5 } ));
+	}
+	// move assignment operator
+	{
+		d$p_array<$v,16>	lx;
+
+		lr = p1;
+		lx = d$p_array<$v,16>( { $5, $3, $2 } );	// move assignment by r-value
+		AssertTrue( check_array( lx, { $5, $3, $2 } ));
+
+		lx = std::move( lr );				// move assignment by std::move()
+		AssertTrue( check_array( lx, { $1 } ));
+		//AssertTrue( check_array( lr, { } ));		// not mandatory
+
+		lx = std::move( lx );
+		AssertTrue( check_array( lx, { $1 } ));		// not mandatory
+	}
+	// initializer constructor/assignment operator
+	{
+		d$p_array<$v,16>	lx = p5;
+		d$p_array<$v,16>	x0 { };
+		d$p_array<$v,16>	x1 { $1 };
+		d$p_array<$v,16>	x5 { $1, $2, $3, $4, $5 };
+
+		AssertTrue( check_array( x0, { } ));
+		AssertTrue( check_array( x1, { $1 } ));
+		AssertTrue( check_array( x5, { $1, $2, $3, $4, $5 } ));
+
+		lx = { };
+		AssertTrue( check_array( lx, { } ));
+		lx = { $1 };
+		AssertTrue( check_array( lx, { $1 } ));
+		lx = { $1, $2, $3, $4, $5 };
+		AssertTrue( check_array( lx, { $1, $2, $3, $4, $5 } ));
+	}
+$}
+
+$V "array operations (accessor)"
+${	
+	fprintf( stderr, "--- at/operator[] ---\n" );
+	{
+		d$p_array<$v,16>       l$p = { $1, $2, $3, $4, $5 };
+		d$p_array<$v,16> const&     c$p = l$p;
+
+$T${		AssertEqual( *l$p[ 0 ], t1 );
+		AssertEqual( *l$p.at( 1 ), t2 );
+		AssertEqual( l$p.at( 2 )->num(), 3 );
+		AssertEqual( l$p[ 3 ]->num(), 4 );
+		AssertZero( strcmp( l$p[ 4 ]->cstr(), s5 ));$}$&
+$Z${		AssertZero( strcmp( l$p[ 0 ], $1 ));
+		AssertZero( strcmp( l$p.at( 2 ), $3 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( l$p[ 0 ], $1 ));
+		AssertTrue( dp_eql<$v>()( l$p.at( 2 ), $3 ));$}
+
+$T${		AssertEqual( *c$p[ 0 ], t1 );
+		AssertEqual( *c$p.at( 1 ), t2 );
+		AssertEqual( c$p.at( 2 )->num(), 3 );
+		AssertEqual( c$p[ 3 ]->num(), 4 );
+		AssertZero( strcmp( c$p[ 4 ]->cstr(), s5 ));$}$&
+$Z${		AssertZero( strcmp( c$p[ 0 ], $1 ));
+		AssertZero( strcmp( c$p.at( 2 ), $3 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( c$p[ 0 ], $1 ));
+		AssertTrue( dp_eql<$v>()( c$p.at( 2 ), $3 ));$}
+
+		l$p[ 1 ] = $d$4;
+		AssertTrue( check_array( l$p, { $1, $4, $3, $4, $5 } ));
+		l$p[ 3 ] = l$p[ 2 ];			$R${// both refer a3$}
+		AssertTrue( check_array( l$p, { $1, $4, $3, $3, $5 } ));
+$T${
+		test    bk = *l$p[ 2 ];
+		*l$p[ 2 ] = t7;
+$R${		AssertTrue( check_array( l$p, { $1, $4, $7, $7, $5 } ));     // different result for deep pointer$}$&
+$D${		AssertTrue( check_array( l$p, { $1, $4, $7, $3, $5 } ));     // different result for dref pointer$}
+		*l$p[ 2 ] = bk;
+$}
+		try {
+			AssertEqual( l$p.at( 16 ), $0 );
+		}
+			catch ( typename std::exception& e ) {
+			fprintf( stderr, "*** exception: %s\n", e.what() );
+		}
+	}
+	fprintf( stderr, "--- front/back ---\n" );
+	{
+		d$p_array<$v,16>		l$p;
+		d$p_array<$v,16> const&	c$p = l$p;
+
+		l$p = { $1, $2, $3, $1, $4, $5 };
+$R${		AssertEqual( static_cast<$t>( l$p.front()), $1 );$}$&
+$D${		AssertNotEqual( static_cast<$t>( l$p.front()), $1 );$}
+$T${		AssertEqual( *l$p.front(), t1 );
+		AssertEqual( l$p.front()->num(), 1 );$}$&
+$Z${		AssertZero( strcmp( l$p.front(), $1 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( l$p.front(), $1 ));$}
+$T${
+		test	bk = *l$p.front();
+		*l$p.front() = t7;
+$R${		AssertTrue( check_array( l$p, { $7, $2, $3, $7, $4, $5 } ));$}$&
+$D${		AssertTrue( check_array( l$p, { $7, $2, $3, $1, $4, $5 } ));$}
+		*l$p.front() = bk;
+$}
+		AssertEqual( l$p.back(), $n );
+
+$R${		AssertEqual( static_cast<$c>( c$p.front()), $1 );$}$&
+$D${		AssertNotEqual( static_cast<$c>( c$p.front()), $1 );$}
+$T${		AssertEqual( *c$p.front(), t1 );
+		AssertEqual( c$p.front()->num(), 1 );$}$&
+$Z${		AssertZero( strcmp( c$p.front(), $1 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( c$p.front(), $1 ));$}
+
+		AssertEqual( c$p.back(), $n );
+
+		l$p.back() = l$p.front();			
+$R${		AssertEqual( static_cast<$t>( l$p.back()), $1 );	// the first and the last both refer $1$}$&
+$D${		AssertNotEqual( static_cast<$t>( l$p.back()), $1 );	// $1 will be copy assigned$}
+		AssertTrue( check_array( l$p, { $1, $2, $3, $1, $4, $5, $n, $n, $n, $n, $n, $n, $n, $n, $n, $1 } ));
+	}
+$}
+
+$V "stl iterator"
+${
+	fprintf( stderr, "--- iterator ---\n" );
+	{
+		d$p_array<$v,16>		lr;
+		d$p_array<$v,16>::iterator	i, j;
+		unsigned			n;
+
+		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
+		AssertEqual( n, 16 );
+
+		lr = { $1, $2, $3, $4, $5 };
+		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
+		AssertEqual( n, 16 );
+
+		i = lr.begin();
+		j = i + 2;
+		while ( i != lr.end()) {
+			if ( i == j ) *i = $d$7;
+			println( *i );
+			++i;
+		}
+		AssertTrue( check_array( lr, { $1, $2, $7, $4, $5 } ));
+
+		for ( $t const& p : lr ) println( p );
+	}
+	fprintf( stderr, "--- const_iterator ---\n" );
+	{
+		const d$p_array<$v,16>		lr = { $1, $2, $3, $4, $5 };
+		unsigned			n = 0;
+
+		for ( auto i = lr.begin(); i != lr.end(); ++i, ++n ) println( *i );
+		AssertEqual( n, 16 );
+
+$T${		AssertEqual( **( lr.begin() + 3 ), t4 );$}$&
+$Z${		AssertZero( strcmp( *( lr.begin() + 3 ), $4 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( *( lr.begin() + 3 ), $4 ));$}
+
+		n = 0;
+$T${		for ( auto i = lr.begin(); i != lr.end(); ++i ) if ( *i ) n += ( *i )->num();
+		AssertEqual( n, 15 );$}$&
+$Z${		for ( auto i = lr.begin(); i != lr.end(); ++i ) if ( *i ) n += strlen( *i );
+		AssertEqual( n, 30 );$}$&
+$A$F${		for ( auto i = lr.begin(); i != lr.end(); ++i ) if ( *i ) n += ( *i )[ 0 ].num();
+		AssertEqual( n, 15 );$}
+
+		for ( $c const& p : lr ) println( p );
+	}
+$}
+
+$V "array operations (capacity)"
+${
+	d$p_array<$v,16>	r0;
+	d$p_array<$v,16>	r1 = { $1 };
+	d$p_array<$v,16>	r5 = { $1, $2, $3, $4, $5 };
+
+	fprintf( stderr, "--- empty() ---\n" );
+	AssertFalse( r0.empty());
+	AssertFalse( r1.empty());
+	AssertFalse( r5.empty());
+
+	fprintf( stderr, "--- size() ---\n" );
+	AssertEqual( r0.size(), 16 );
+	AssertEqual( r1.size(), 16 );
+	AssertEqual( r5.size(), 16 );
+
+	fprintf( stderr, "--- max_size() ---\n" );
+	AssertEqual( r0.max_size(), 16 );
+	AssertEqual( r1.max_size(), 16 );
+	AssertEqual( r5.max_size(), 16 );
+$}
+
+$V "array operations (miscellaneous)"
+${
+	d$p_array<$v,16>	l$p = { $1, $2, $3, $4, $5 };
+	fprintf( stderr, "--- swap, fill ---\n" );
+	{
+		d$p_array<$v,16>	  lx;
+		d$p_array<$v,16>	  ly;
+
+		lx.swap( ly );
+		AssertTrue( check_array( lx, { } ));
+		AssertTrue( check_array( ly, { } ));
+		lx = l$p;
+		lx.swap( ly );
+		AssertTrue( check_array( lx, { } ));
+		AssertTrue( check_array( ly, { $1, $2, $3, $4, $5 } ));
+		lx.swap( ly );
+		AssertTrue( check_array( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( check_array( ly, { } ));
+
+		lx.fill( $4 );
+		AssertTrue( check_array( lx, { $4, $4, $4, $4, $4, $4, $4, $4, $4, $4, $4, $4, $4, $4, $4, $4 } ));
+		lx.fill( $n );
+		AssertTrue( check_array( lx, { $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n, $n } ));
+	}
+$}
+
+$V "array duplication"
+${
+	d$p_array<$v,16>	l;
+	d$p_array<$v,16>*  p;
+	
+	p = dpl( &l );
+	AssertTrue( check_array( *p, { } ));
+	delete p;
+	
+	l[ 0 ] = $d$1;
+	p = dpl( &l );
+	AssertTrue( check_array( *p, { $1 } ));
+	delete p;
+	
+	l[ 1 ] = $d$2;
+	l[ 2 ] = $d$3;
+	l[ 3 ] = $n;
+	l[ 4 ] = $d$4;
+	l[ 5 ] = $d$5;
+	p = dpl( &l );
+	AssertTrue( check_array( *p, { $1, $2, $3, $n, $4, $5 } ));
+	delete p;
+$}
+
+$U "heterogenious array"
+${
+	{
+		dp_array<base*,16>	l = { &t1, &u2, &i3, &u4, &t5, &t6, &i7 };
+
+		println( l );
+		AssertEqual( l.size(), 16 );
+	}
+	{
+		dr_array<base*,16>	l = { &t1, &u2, &i3, &u4, &t5, &t6, &i7 };
+
+		println( l );
+		AssertEqual( l.size(), 16 );
+	}
+$}
+

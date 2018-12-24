@@ -1,5 +1,5 @@
 //
-// trial implementation of policy based std::unordered_map
+// dp_unordered_map.hpp - sample customization of std::unordered_map/_multimap for deep pointer
 //
 //
 //

@@ -71,12 +71,12 @@ class __dp_set : public std::set<dp_const<K>>
 		 const key_compare& comp,
 		 const allocator_type& alloc = allocator_type()) : super( comp, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 	__dp_set( std::initializer_list<value_pointer> il,
 		 const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 
 #elif defined(__cplusplus) && (__cplusplus >= 201103)
@@ -98,7 +98,7 @@ class __dp_set : public std::set<dp_const<K>>
 		 const key_compare& comp = key_compare(),
 		 const allocator_type& alloc = allocator_type()) : super( comp, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 #else
 #error "c++11 up required"
@@ -109,7 +109,7 @@ class __dp_set : public std::set<dp_const<K>>
 	__dp_set& operator=( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 		return *this;
 	}
 
@@ -147,7 +147,7 @@ class __dp_set : public std::set<dp_const<K>>
 	}
 	void insert( std::initializer_list<value_pointer> il )
 	{
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 
 	// wrapper for appropriate casting of raw pointer avoiding unnecessary duplication
@@ -253,12 +253,12 @@ class __dp_multiset : public std::multiset<dp_const<K>>
 		 const key_compare& comp,
 		 const allocator_type& alloc = allocator_type()) : super( comp, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 	__dp_multiset( std::initializer_list<value_pointer> il,
 		 const allocator_type& alloc = allocator_type()) : super( alloc )
 	{
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 
 #elif defined(__cplusplus) && (__cplusplus >= 201103)
@@ -280,7 +280,7 @@ class __dp_multiset : public std::multiset<dp_const<K>>
 		 const key_compare& comp = key_compare(),
 		 const allocator_type& alloc = allocator_type()) : super( comp, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 #else
 #error "c++11 up required"
@@ -291,7 +291,7 @@ class __dp_multiset : public std::multiset<dp_const<K>>
 	__dp_multiset& operator=( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 		return *this;
 	}
 
@@ -329,7 +329,7 @@ class __dp_multiset : public std::multiset<dp_const<K>>
 	}
 	void insert( std::initializer_list<value_pointer> il )
 	{
-		for ( auto&& p : il ) super::emplace( p );
+		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 
 	// wrapper for appropriate casting of raw pointer avoiding unnecessary duplication

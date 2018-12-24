@@ -1,0 +1,522 @@
+$X${
+// Testdata Check Utilities
+// -----------------------------------------------------------------------------
+template <typename T>
+inline bool check_vector( dp_vector<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+	dr_vector<T>	l;
+
+	for ( auto&& a : ts ) l.push_back( a );
+
+	return ls == reinterpret_cast<dp_vector<T> const&>( l );
+}
+
+template <typename T>
+inline bool check_vector( dr_vector<T> const& ls, std::initializer_list<typename value_p<T>::t> const& ts )
+{
+	dr_vector<T>	l;
+
+	for ( auto&& a : ts ) l.push_back( a );
+
+	return ls == l;
+}
+$}
+
+$V "constructor/assignment/destructor"
+${
+	// default constructor
+	$a		lr;
+	AssertTrue( check_vector( lr, { } ));
+
+	// copy constructor
+	$a		p0( lr );
+	const $a	c0( lr );
+	lr.push_back( $d$1 );
+	$a		p1( lr );
+	const $a	c1( lr );
+	lr.push_back( $d$2 );
+	lr.push_back( $d$3 );
+	lr.push_back( $d$4 );
+	lr.push_back( $d$5 );
+	$a		p5( lr );
+	const $a	c5( lr );
+
+	AssertTrue( check_vector( p0, { } ));
+	AssertTrue( check_vector( p1, { $1 } ));
+	AssertTrue( check_vector( p5, { $1, $2, $3, $4, $5 } ));
+	AssertTrue( check_vector( c0, { } ));
+	AssertTrue( check_vector( c1, { $1 } ));
+	AssertTrue( check_vector( c5, { $1, $2, $3, $4, $5 } ));
+
+	// move constructor
+	{
+		$a	lx = lr;
+		$a	ly( std::move( lx ));
+
+		AssertTrue( check_vector( lx, { } ));
+		AssertTrue( check_vector( ly, { $1, $2, $3, $4, $5 } ));
+	}
+	// copy assignment operator
+	{
+		$a	lx;
+
+		lx = p1;
+		AssertTrue( check_vector( lx, { $1 } ));
+		lx = p0;
+		AssertTrue( check_vector( lx, { } ));
+		lx = p5;
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+	}
+	// move assignment operator
+	{
+		$a	lx;
+
+		lr = p1;
+		lx = $a( { $5, $3, $2 } );		// move assignment by r-value
+		AssertTrue( check_vector( lx, { $5, $3, $2 } ));
+
+		lx = std::move( lr );					// move assignment by std::move()
+		AssertTrue( check_vector( lx, { $1 } ));
+		AssertTrue( check_vector( lr, { } ));			// not mandatory
+
+		lx = std::move( lx );
+		AssertTrue( check_vector( lx, { } ));			// not mandatory
+	}
+	// iterator constructor
+	{
+		$a	lx = p5;
+
+		$a	x3( lx.begin(), lx.begin() + 3 );
+		AssertTrue( check_vector( x3, { $1, $2, $3 } ));
+		$a	x0( lx.begin() + 2, lx.begin() + 2 );
+		AssertTrue( check_vector( x0, { } ));
+		$a	x1( lx.begin() + 3, lx.end());
+		AssertTrue( check_vector( x1, { $4, $5 } ));
+	}
+	// fill constructor
+	{
+		$a    x0( 3 );
+		AssertTrue( check_vector( x0, { $n, $n, $n } ));
+		$a    x1( 2, $n );
+		AssertTrue( check_vector( x1, { $n, $n } ));
+		$a    x2( 4, $3 );
+		AssertTrue( check_vector( x2, { $3, $3, $3, $3 } ));
+	}
+	// initializer constructor/assignment operator
+	{
+		$a	lx = p5;
+		$a	x0 { };
+		$a	x1 { $1 };
+		$a	x5 { $1, $2, $3, $4, $5 };
+
+		AssertTrue( check_vector( x0, { } ));
+		AssertTrue( check_vector( x1, { $1 } ));
+		AssertTrue( check_vector( x5, { $1, $2, $3, $4, $5 } ));
+
+		lx = { };
+		AssertTrue( check_vector( lx, { } ));
+		lx = { $1 };
+		AssertTrue( check_vector( lx, { $1 } ));
+		lx = { $1, $2, $3, $4, $5 };
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+	}
+$}
+
+$V "vector operations (modifier)"
+${	
+	$a	lp = { $1, $2, $3, $4, $5 };
+	$a	l0;
+
+	fprintf( stderr, "--- push_back/pop_back ---\n" );
+	{       
+		$a	x$p;
+		
+		x$p.push_back( $d$1 );
+		x$p.push_back( $d$2 );
+		x$p.push_back( $d$3 );
+		AssertTrue( check_vector( x$p, { $1, $2, $3 } ));
+		x$p.pop_back();
+		x$p.pop_back();
+		x$p.pop_back(); 
+		AssertTrue( x$p.empty());
+	}
+	fprintf( stderr, "--- assign ---\n" );
+	{
+		$a	lx;
+
+		lx.assign( 3, $n );
+		AssertTrue( check_vector( lx, { $n, $n, $n } ));
+		lx.assign( 7, $4 );
+		AssertTrue( check_vector( lx, { $4, $4, $4, $4, $4, $4, $4 } ));
+		lx.assign( lp.begin() + 2, lp.end());
+		AssertTrue( check_vector( lx, { $3, $4, $5 } ));
+		lx.assign( lp.begin() + 1, lp.begin() + 1 );
+		AssertTrue( check_vector( lx, { } ));
+		lx.assign( { $1, $2, $3, $4, $5 } );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+		lx.assign( { } );
+		AssertTrue( check_vector( lx, { } ));
+	}
+	fprintf( stderr, "--- emplace ---\n" );
+	{
+		$a		lx = { $2, $3 };
+		$a::iterator	r;
+
+		r = lx.emplace( lx.begin(), $d$1 );
+		AssertTrue( check_vector( lx, { $1, $2, $3 } ));
+		lx.emplace_back( $d$5 );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $5 } ));
+		r = lx.emplace( lx.begin() + 3, $d$4 );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+		AssertEqual( r, lx.begin() + 3 );
+		lx.emplace_back( $d$6 );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5, $6 } ));
+	}
+	fprintf( stderr, "--- insert ---\n" );
+	{
+		$a		lx = { $2, $3, $5 };
+		$a::iterator		r;
+
+		r = lx.insert( lx.begin(), $d$1 );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $5 } ));
+		AssertTrue( r == lx.begin());
+		r = lx.insert( lx.begin() + 3, $d$4 );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 3 );
+		r = lx.insert( lx.end(), $d$6 );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5, $6 } ));
+		AssertTrue( r == lx.begin() + 5 );
+
+		r = lx.insert( lx.begin(), { $1, $0 } );
+		AssertTrue( check_vector( lx, { $1, $0, $1, $2, $3, $4, $5, $6 } ));
+		AssertTrue( r == lx.begin());
+		r = lx.insert( lx.begin() + 6, { $2, $0 } );
+		AssertTrue( check_vector( lx, { $1, $0, $1, $2, $3, $4, $2, $0, $5, $6 } ));
+		AssertTrue( r == lx.begin() + 6 );
+		r = lx.insert( lx.begin() + 2, { } );
+		AssertTrue( check_vector( lx, { $1, $0, $1, $2, $3, $4, $2, $0, $5, $6 } ));
+		AssertTrue( r == lx.begin() + 2 );
+		r = lx.insert( lx.end(), { $3, $0 } );
+		AssertTrue( check_vector( lx, { $1, $0, $1, $2, $3, $4, $2, $0, $5, $6, $3, $0 } ));
+		AssertTrue( r == lx.begin() + 10 );
+
+		lx.clear();
+		r = lx.insert( lx.begin(), 4, $1 );
+		AssertTrue( check_vector( lx, { $1, $1, $1, $1 } ));
+		AssertTrue( r == lx.begin());
+		r = lx.insert( lx.begin() + 2, 2, $2 );
+		AssertTrue( check_vector( lx, { $1, $1, $2, $2, $1, $1 } ));
+		AssertTrue( r == lx.begin() + 2 );
+
+		lx.clear();
+		r = lx.insert( lx.begin(), lp.begin(), lp.end());
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin());
+		r = lx.insert( lx.begin(), l0.begin(), l0.end());
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin());
+		r = lx.insert( lx.begin() + 3, l0.begin(), l0.end());
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 3 );
+		r = lx.insert( lx.end(), l0.begin(), l0.end());
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.end());
+		r = lx.insert( lx.begin(), lp.begin(), lp.begin() + 2 );
+		AssertTrue( check_vector( lx, { $1, $2, $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin());
+		r = lx.insert( lx.begin() + 3, lp.begin() + 1, lp.begin() + 4 );
+		AssertTrue( check_vector( lx, { $1, $2, $1, $2, $3, $4, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 3 );
+		r = lx.insert( lx.end(), lp.begin() + 3, lp.end());
+		AssertTrue( check_vector( lx, { $1, $2, $1, $2, $3, $4, $2, $3, $4, $5, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 10 );
+
+		lx.clear();
+		r = lx.insert( lx.begin(), { $1, $5 } );
+		AssertTrue( check_vector( lx, { $1, $5 } ));
+		AssertTrue( r == lx.begin());
+		r = lx.insert( lx.begin() + 1, { $2, $3, $4 } );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 1 );
+
+		// self insertion
+		r = lx.insert( lx.end(), lx.begin(), lx.begin() + 3 );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5, $1, $2, $3 } ));
+		AssertTrue( r == lx.begin() + 5 );
+		//r = lx.insert( lx.begin() + 4, lx.begin() + 2, lx.begin() + 5 );
+		//AssertTrue( check_vector( lx, { $1, $2, $3, $4, $3, $4, $5, $5, $1, $2, $3 } ));
+		//AssertTrue( r == lx.begin() + 4 );
+	}
+	fprintf( stderr, "--- erase ---\n" );
+	{
+		$a		lx = lp;
+		$a::iterator	r = lx.begin();
+
+		r = lx.erase( r );
+		AssertTrue( check_vector( lx, { $2, $3, $4, $5 } ));
+		AssertTrue( r == lx.begin());
+		++r;
+		r = lx.erase( r );
+		AssertTrue( check_vector( lx, { $2, $4, $5 } ));
+		AssertTrue( r == lx.begin() + 1 );
+		++r;
+		r = lx.erase( r );
+		AssertTrue( check_vector( lx, { $2, $4 } ));
+		AssertTrue( r == lx.end());
+
+		lx = lp;
+		r = lx.erase( lx.begin(), lx.begin() + 2 );
+		AssertTrue( check_vector( lx, { $3, $4, $5 } ));
+		AssertTrue( r == lx.begin());
+		lx = lp;
+		r = lx.erase( lx.begin() + 1, lx.begin() + 4 );
+		AssertTrue( check_vector( lx, { $1, $5 } ));
+		AssertTrue( r == lx.begin() + 1 );
+		lx = lp;
+		r = lx.erase( lx.begin() + 3, lx.end());
+		AssertTrue( check_vector( lx, { $1, $2, $3 } ));
+		AssertTrue( r == lx.end());
+	}
+$}
+
+$V "vector operations (accessor)"
+${	
+	fprintf( stderr, "--- at/operator[] ---\n" );
+	{
+		$a       lp = { $1, $2, $3, $4, $5 };
+		$a const&     c$p = lp;
+
+$T${		AssertEqual( *lp[ 0 ], t1 );
+		AssertEqual( *lp.at( 1 ), t2 );
+		AssertEqual( lp.at( 2 )->num(), 3 );
+		AssertEqual( lp[ 3 ]->num(), 4 );
+		AssertZero( strcmp( lp[ 4 ]->cstr(), s5 ));$}$&
+$Z${		AssertZero( strcmp( lp[ 0 ], $1 ));
+		AssertZero( strcmp( lp.at( 2 ), $3 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( lp[ 0 ], $1 ));
+		AssertTrue( dp_eql<$v>()( lp.at( 2 ), $3 ));$}
+
+$T${		AssertEqual( *c$p[ 0 ], t1 );
+		AssertEqual( *c$p.at( 1 ), t2 );
+		AssertEqual( c$p.at( 2 )->num(), 3 );
+		AssertEqual( c$p[ 3 ]->num(), 4 );
+		AssertZero( strcmp( c$p[ 4 ]->cstr(), s5 ));$}$&
+$Z${		AssertZero( strcmp( c$p[ 0 ], $1 ));
+		AssertZero( strcmp( c$p.at( 2 ), $3 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( c$p[ 0 ], $1 ));
+		AssertTrue( dp_eql<$v>()( c$p.at( 2 ), $3 ));$}
+
+		lp[ 1 ] = $d$4;
+		AssertTrue( check_vector( lp, { $1, $4, $3, $4, $5 } ));
+		lp[ 3 ] = lp[ 2 ];			$R${// both refer a3$}
+		AssertTrue( check_vector( lp, { $1, $4, $3, $3, $5 } ));
+$T${
+		test    bk = *lp[ 2 ];
+		*lp[ 2 ] = t7;
+$R${		AssertTrue( check_vector( lp, { $1, $4, $7, $7, $5 } ));$}$&
+$D${		AssertTrue( check_vector( lp, { $1, $4, $7, $3, $5 } ));$}
+		*lp[ 2 ] = bk;
+$}
+		try {
+			AssertEqual( lp.at( 5 ), $0 );
+		}
+			catch ( typename std::exception& e ) {
+			fprintf( stderr, "*** exception: %s\n", e.what() );
+		}
+	}
+	fprintf( stderr, "--- front/back ---\n" );
+	{
+		$a		lp;
+		$a const&	c$p = lp;
+
+		lp = { $1, $2, $3, $1, $4, $5 };
+$R${		AssertEqual( static_cast<$t>( lp.front()), $1 );$}$&
+$D${		AssertNotEqual( static_cast<$t>( lp.front()), $1 );$}
+$T${		AssertEqual( *lp.front(), t1 );
+		AssertEqual( lp.front()->num(), 1 );$}$&
+$Z${		AssertZero( strcmp( lp.front(), $1 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( lp.front(), $1 ));$}
+$T${
+		test	bk = *lp.front();
+		*lp.front() = t7;
+$R${		AssertTrue( check_vector( lp, { $7, $2, $3, $7, $4, $5 } ));$}$&
+$D${		AssertTrue( check_vector( lp, { $7, $2, $3, $1, $4, $5 } ));$}
+		*lp.front() = bk;
+$}
+$R${		AssertEqual( static_cast<$t>( lp.back()), $5 );$}$&
+$D${		AssertNotEqual( static_cast<$t>( lp.back()), $5 );$}
+$T${		AssertEqual( *lp.back(), t5 );
+		AssertEqual( lp.back()->num(), 5 );$}$&
+$Z${		AssertZero( strcmp( lp.back(), $5 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( lp.back(), $5 ));$}
+
+$R${		AssertEqual( static_cast<$c>( c$p.front()), $1 );$}$&
+$D${		AssertNotEqual( static_cast<$c>( c$p.front()), $1 );$}
+$T${		AssertEqual( *c$p.front(), t1 );
+		AssertEqual( c$p.front()->num(), 1 );$}$&
+$Z${		AssertZero( strcmp( c$p.front(), $1 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( c$p.front(), $1 ));$}
+		AssertTrue( static_cast<bool>( c$p.back() ));
+$R${		AssertEqual( static_cast<$c>( c$p.back()), $5 );$}$&
+$D${		AssertNotEqual( static_cast<$c>( c$p.back()), $5 );$}
+$T${		AssertEqual( *c$p.back(), t5 );
+		AssertEqual( c$p.back()->num(), 5 );$}$&
+$Z${		AssertZero( strcmp( c$p.back(), $5 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( c$p.back(), $5 ));$}
+
+		lp.back() = lp.front();			
+$R${		AssertEqual( static_cast<$t>( lp.back()), $1 );	// the first and the last both refer $1$}$&
+$D${		AssertNotEqual( static_cast<$t>( lp.back()), $1 );	// $1 will be copy assigned$}
+		AssertTrue( check_vector( lp, { $1, $2, $3, $1, $4, $1 } ));
+	}
+$}
+
+$V "stl iterator"
+${
+	fprintf( stderr, "--- iterator ---\n" );
+	{
+		$a		lr;
+		$a::iterator	i, j;
+		unsigned			n;
+
+		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
+		AssertZero( n );
+
+		lr = { $1, $2, $3, $4, $5 };
+		for ( i = lr.begin(), n = 0; i != lr.end(); ++i, ++n ) println( *i );
+		AssertEqual( n, 5 );
+
+		i = lr.begin();
+		j = i + 2;
+		while ( i != lr.end()) {
+			if ( i == j ) *i = $d$7;
+			println( *i );
+			++i;
+		}
+		AssertTrue( check_vector( lr, { $1, $2, $7, $4, $5 } ));
+
+		for ( $t const& p : lr ) println( p );
+	}
+	fprintf( stderr, "--- const_iterator ---\n" );
+	{
+		const $a		lr = { $1, $2, $3, $4, $5 };
+		unsigned			n = 0;
+
+		for ( auto i = lr.begin(); i != lr.end(); ++i, ++n ) println( *i );
+		AssertEqual( n, 5 );
+
+$T${		AssertEqual( **( lr.begin() + 3 ), t4 );$}$&
+$Z${		AssertZero( strcmp( *( lr.begin() + 3 ), $4 ));$}$&
+$A$F${		AssertTrue( dp_eql<$v>()( *( lr.begin() + 3 ), $4 ));$}
+
+		n = 0;
+$T${		for ( auto i = lr.begin(); i != lr.end(); ++i ) n += ( *i )->num();
+		AssertEqual( n, 15 );$}$&
+$Z${		for ( auto i = lr.begin(); i != lr.end(); ++i ) n += strlen( *i );
+		AssertEqual( n, 30 );$}$&
+$A$F${		for ( auto i = lr.begin(); i != lr.end(); ++i ) n += ( *i )[ 0 ].num();
+		AssertEqual( n, 15 );$}
+
+		for ( $c const& p : lr ) println( p );
+	}
+$}
+
+$V "vector operations (capacity)"
+${
+	$a	r0;
+	$a	r1 = { $1 };
+	$a	r5 = { $1, $2, $3, $4, $5 };
+
+	fprintf( stderr, "--- empty() ---\n" );
+	AssertTrue( r0.empty());
+	AssertFalse( r1.empty());
+	AssertFalse( r5.empty());
+
+	fprintf( stderr, "--- size() ---\n" );
+	AssertEqual( r0.size(), 0 );
+	AssertEqual( r1.size(), 1 );
+	AssertEqual( r5.size(), 5 );
+
+	fprintf( stderr, "--- resize() ---\n" );
+	{
+		$a	l5 = r5;
+		l5.resize( 3 );
+		AssertTrue( check_vector( l5, { $1, $2, $3 } ));
+		l5.resize( 0 );
+		AssertTrue( check_vector( l5, { } ));
+		$a	l1 = r1;
+		l1.resize( 3 );
+		AssertTrue( check_vector( l1, { $1, $n, $n } ));
+		$a	l0 = r0;
+		l0.resize( 3, $4 );
+		AssertTrue( check_vector( l0, { $4, $4, $4 } ));
+	}
+$}
+
+$V "vector operations (miscellaneous)"
+${
+	$a	lp = { $1, $2, $3, $4, $5 };
+	fprintf( stderr, "--- swap, clear ---\n" );
+	{
+		$a	  lx;
+		$a	  ly;
+
+		lx.swap( ly );
+		AssertTrue( check_vector( lx, { } ));
+		AssertTrue( check_vector( ly, { } ));
+		lx = lp;
+		lx.swap( ly );
+		AssertTrue( check_vector( lx, { } ));
+		AssertTrue( check_vector( ly, { $1, $2, $3, $4, $5 } ));
+		lx.swap( ly );
+		AssertTrue( check_vector( lx, { $1, $2, $3, $4, $5 } ));
+		AssertTrue( check_vector( ly, { } ));
+
+		lx = lp;
+		lx.clear();
+		AssertTrue( check_vector( lx, { } ));
+		lx.clear();
+		AssertTrue( check_vector( lx, { } ));
+	}
+$}
+
+$V "vector duplication"
+${
+	$a	l;
+	$a*	p;
+	
+	p = dpl( &l );
+	AssertTrue( check_vector( *p, { } ));
+	delete p;
+	
+	l.push_back( $d$1 );
+	p = dpl( &l );
+	AssertTrue( check_vector( *p, { $1 } ));
+	delete p;
+	
+	l.push_back( $d$2 );
+	l.push_back( $d$3 );
+	l.push_back( $n );
+	l.push_back( $d$4 );
+	l.push_back( $d$5 );
+	p = dpl( &l );
+	AssertTrue( check_vector( *p, { $1, $2, $3, $n, $4, $5 } ));
+	delete p;
+$}
+
+$U "heterogenious vector"
+${
+	{
+		dp_vector<base*>	l = { &t1, &u2, &i3, &u4, &t5, &t6, &i7 };
+
+		println( l );
+		AssertEqual( 7, l.size());
+	}
+	{
+		dr_vector<base*>	l = { &t1, &u2, &i3, &u4, &t5, &t6, &i7 };
+
+		println( l );
+		AssertEqual( 7, l.size());
+	}
+$}
+

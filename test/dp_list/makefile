@@ -7,7 +7,7 @@ all : dp_listtest
 
 # -- temporal --
 dp_listtest.cpp : ${DPTLBIN}/gendptest dp_list.tmpl
-	${DPTLBIN}/gendptest -s -p dp_list dp_list.tmpl dp_listtest.cpp
+	${DPTLBIN}/gendptest dp_list.tmpl dp_listtest.cpp
 
 dp_listtest : dp_listtest.cpp\
 	${DPTLSRC}/include/deep_ptr.hpp\
