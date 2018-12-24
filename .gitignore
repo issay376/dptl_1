@@ -28,4 +28,4 @@ test/dp_unordered_set/dp_unordered_multisettest
 test/dp_unordered_set/dp_unordered_multisettest.cpp
 test/dp_vector/dp_vectortest
 test/dp_vector/dp_vectortest.cpp
-
+util/gendptest/gendptest
