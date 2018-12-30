@@ -1,6 +1,7 @@
 // test
 // -----------------------------------------------------------------------------
 #include <deque>
+#include <type_traits>
 #include <set>
 #include <dptl/deep_ptr.hpp>
 #include <dptl/udata.hpp>
@@ -35,6 +36,8 @@ class ppadapttest : public unittest, public basic_testdata
 
 	void test91();
 	void test92();
+
+	void testA1();
 
 	ppadapttest( int argc, char** argv ) : unittest( argc, argv )
 	{
@@ -310,7 +313,7 @@ void ppadapttest::test13()
 	dref_ptr<test*>		r1( q1 );
 	dref_ptr<test*>		r2; 
 	dref_ptr<test*>		r3( std::move( q3 ));
-	dref_ptr<test*>		r4;		 
+	dref_ptr<test*>		r4;			
 
 	r2 = q2;
 	r4 = std::move( q4 );
@@ -328,7 +331,7 @@ void ppadapttest::test14()
 	deep_ptr<test*>		r1( q1 );
 	deep_ptr<test*>		r2; 
 	deep_ptr<test*>		r3( std::move( q3 ));		// mover transfers ownership to movee
-	deep_ptr<test*>		r4;				 
+	deep_ptr<test*>		r4;					
 
 	r2 = q2;
 	r4 = std::move( q4 );					// mover transfers ownership to movee 
@@ -385,7 +388,7 @@ void ppadapttest::test23()
 	deep_ptr<const test*>	r1( q1 );
 	deep_ptr<const test*>	r2; 
 	deep_ptr<const test*>	r3( std::move( q3 ));
-	deep_ptr<const test*>	r4;		 
+	deep_ptr<const test*>	r4;			
 
 	r2 = q2;
 	r4 = std::move( q4 );
@@ -403,7 +406,7 @@ void ppadapttest::test24()
 	deep_ptr<test*>		r1( q1 );
 	deep_ptr<test*>		r2; 
 	//deep_ptr<test*>		r3( std::move( q3 ));
-	deep_ptr<test*>		r4;				 
+	deep_ptr<test*>		r4;					
 
 	r2 = q2;
 	//r4 = std::move( q4 );			
@@ -428,6 +431,50 @@ void ppadapttest::test92()
 
 	AssertEqual( sizeof( deep_ptr<test*> ), sizeof( test* ));
 	AssertEqual( sizeof( dref_ptr<test*> ), sizeof( test* ));
+}
+
+// -----------------------------------------------------------------------------
+#include <dptl/dp_list.hpp>
+
+deep_ptr<const char[]> copy_of_local_variable()
+{
+	const char*     local_variable = "pointer";
+
+	return deep_ptr<const char[]>( local_variable );	// deep copy construction of deep_ptr
+}
+
+void ppadapttest::testA1()
+{
+	this->set_subtitle( "sample code of DPTL feature" );
+
+	dp_list<const char[]>   l { "hello", "native", "pointers" };	// copy constructions with deep_ptrs from c-strings
+	dp_list<const char[]>   m = l;				// copy construction with deep-coping deep_ptrs from deep_ptrs
+	dp_list<const char[]>   n = std::move( l );		// move construction with moving deep_ptrs
+
+	printf( "%s\n", ( m == n ) ? "m == n" : "m != n" );	// deep comparison of deep_ptrs
+	m.back() = copy_of_local_variable();			// deleting "pointers" and moving deep_ptr to "pointer"
+	printf( "%s\n", ( m < n ) ? "m < n" : "m >= n" );	// deep comparison of deep_ptrs; "pointer" < "pointers"
+
+	const char*	greeting = "hello";
+
+	l.push_back( greeting );				// copy construction of deep_ptr with lhs c-string
+	// l.push_back( "hello" );				// causes runtime error: move construction without deep coping
+								//   "hello" is rhs after conversion: const char[6] -> const char*
+	l.push_back( static_cast<const char* const&>( "great" )); // copy construction of deep_ptr with lhs c-string
+	l.push_back( strdup( "native" ));			// move construction of deep_ptr with rhs c-string
+	l.push_back( copy_of_local_variable());			// move construction of deep_ptr with rhs deep_ptr
+
+	for ( const char* p : l ) printf( "%s, ", p );		// p: automatically converted from deep_ptr<const char[]>
+	puts( "" );
+	for ( auto i = m.begin(); i != m.end(); ++i ) { 	// *i need to be casted to const char* as an argument of printf
+		const char* p = *i;
+		printf( "%s, ", p );
+	}
+	puts( "" );
+	for ( auto p : n ) printf( "%s, ", static_cast<const char*>( p )); // p is deep_ptr; static_cast is required
+	puts( "" );
+	for ( auto p : n ) printf( "%zu, ", strlen( p ));	// the strlen's argument is automatically converted from deep_ptr p
+	puts( "" );
 }
 
 // -----------------------------------------------------------------------------

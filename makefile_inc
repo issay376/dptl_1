@@ -1,0 +1,22 @@
+#
+# Makefile definitions for Deep Pointer Template Library
+#
+#	Version 0.1 
+#
+# --- Environment Depends -->
+DPTLDIR = /(Installation directory)
+CCPP = c++
+CFLAGS = -ggdb -D_DEBUG -Wno-parentheses -std=c++11 
+# <-------------------------
+
+DPTLSRC = ${DPTLDIR}/src
+DPTLINC = ${DPTLDIR}/include
+DPTLLIB = ${DPTLDIR}/lib
+DPTLBIN = ${DPTLDIR}/bin
+
+CP = cp
+RM = rm -f
+AR = ar -cr
+
+.cpp.o :
+	${CCPP} ${CFLAGS} -I${DPTLINC} -c $<

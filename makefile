@@ -1,4 +1,4 @@
-# dptl Version 2.0
+# dptl Version 0.1
 
 all :
 	make -C util install

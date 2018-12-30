@@ -4,6 +4,8 @@ tmp/
 *.dSYM/
 *.swp
 *.bk
+bkup.sh
+makefile.inc
 test/dp_array/dp_arraytest
 test/dp_array/dp_arraytest.cpp
 test/dp_deque/dp_dequetest

@@ -1,7 +1,11 @@
 //
-// test implementation of policy based std::array
+// dp_array.hpp - sample customization of std::array for deep_ptr
 //
+//	2018/12/30, version 0.1
 //
+//      © Kazunari Saitoh, 2018-2019.
+//      Distributed under the Boost Software License, Version 1.0.
+//      (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 //
 
 #ifndef __DPTL_DP_ARRAY_HPP

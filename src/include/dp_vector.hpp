@@ -1,7 +1,11 @@
 //
-// test implementation of policy based std::vector
+// dp_vector.hpp - sample customization of std::vector for deep_ptr
 //
+//      2018/12/30, version 0.1
 //
+//      © Kazunari Saitoh, 2018-2019.
+//      Distributed under the Boost Software License, Version 1.0.
+//      (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 //
 
 #ifndef __DPTL_DP_VECTOR_HPP
@@ -151,15 +155,6 @@ class __dp_vector : public std::vector<T>
 		for ( auto p = il.begin(); p != il.end(); ++p, ++j ) *j = *p;
 		return r; 
         }
-
-	void push_back( const value_type& p )
-	{
-		super::push_back( p );
-	}
-	void push_back( value_type&& p )
-	{
-		super::push_back( std::move( p ));
-	}
 
 	// wrapper for appropriate casting of raw pointer avoiding unnecessary duplication
 	void resize( size_type n ) { super::resize( n ); }

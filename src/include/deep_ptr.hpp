@@ -1,8 +1,12 @@
 //
-// deep_ptr.hpp --- deep pointer: adapter for STL and STL like value-based container
+// deep_ptr.hpp --- deep pointer for STL and STL like value-based container
 //
-//	2018/11/29	K.Saitoh; all right reserved
+//      2018/12/30, version 0.1
 //
+//      © Kazunari Saitoh, 2018-2019.
+//      Distributed under the Boost Software License, Version 1.0.
+//      (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+// 
 
 #ifndef __DPTL_DPADAPTER_H
 #define __DPTL_DPADAPTER_H
@@ -41,10 +45,14 @@ namespace std {
 namespace DPTL_NAMESPACE {
 #endif
 
+
+//
 // Implementation depended constant
 // -----------------------------------------------------------------------------
 static const size_t MinimumHashSize = 256;
 
+
+//
 // Type Deducers ( use like 'typename const_p<T>::t' )
 // ============================================================================
 template <typename T>
@@ -70,6 +78,8 @@ template <typename V>		    struct const_a<V*>		{ typedef const V* t; };
 template <typename V>		    struct const_a<V[]>		{ typedef const V t[]; };
 template <typename V, size_t N>     struct const_a<V[N]>	{ typedef const V t[N]; };
 
+
+//
 // Common Function Objects (dp_hash, dp_eql, dp_less, dp_dup, dp_del)
 // ============================================================================
 
