@@ -1,0 +1,269 @@
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>deep pointer template library (DPTL)</title>
+<head>
+<body>
+<ol>
+<h1>deep pointer template library (DPTL)</h1>
+<h2><li>概要</li></h2>
+<p>deep pointer template libray (以下DPTLと略す）は、C++11以降のC++で使用できるテンプレートライブラリーです。</p>
+<p>deep pointerは、C++のポインターとポインターの指し先のデータをひとまとめにして扱うためのスマートポインターです。指し先のデータのメモリ管理、比較処理、コンテナへの格納などを、ポインターへの操作として、より直感的かつシンプルに行うことができます。</p>
+<p>deep pointerの設計で、特に留意したのは、C と C++ とのギャップを埋めることです。<br/>
+C++11 以降、右辺参照やスマートポインターによって、複雑なデータ構造とパフォーマンスの両立の面でも、C++は大きく進化しました。しかし、値とリファレンスを中心に置く標準ライブラリのプログラミング・スタイルと、ポインタを中心に置くCのスタイルとの違いは決定的で、C++の標準的なプログラミング・スタイルでは、Cネイティブのポインタ、文字列、配列などは使用を極力控え、スマートポインタ、stringクラス、arrayクラスに移行すべきとされるようになりました。<br/>
+こうした中で、さらに複雑になった言語仕様を前に、Cのスタイルに比べて、C++ではシンプルで正しいコードを書くことが難しいと感じている方も多いのではないでしょうか。また、適切なレベルのコードが書けるまでの習得時間が長く、プロジェクト・メンバーのスキル確保に苦労されているケースも多いと思います。Cで書かれたライブラリやシステムコールとの連携も課題になる可能性があるでしょう。</p>
+<p>deep pointer は、こうした問題に対して、C と C++ とのギャップを埋め、C++ 上で C のスタイルを併用しても問題が生じにくくすることを目標に、設計されています。<br/>
+deep pointer を使うことで、ネイティブのポインタ、文字列、配列などを、Modern C++ の環境で安全かつシンプルに利用できるようになります。特に、標準テンプレートライブラリのコンテナは、deep pointer を介して、ほぼ透過的に違和感なくネイティブのポインタ、配列、文字列を扱うことができるようになります。<br/>
+具体例でみたほうが分かりやすいので、char*型の文字列とそのlistを例にとって、サンプルコードでdeep_ptrの特長を説明していきましょう。</p>
+<p>サンプルコード:<br/>
+<pre><code>#include &lt;cstdio&gt;
+#include &lt;dptl/deep_ptr.hpp&gt;
+#include &lt;dptl/dp_list.hpp&gt;
+
+using namespace dptl;
+
+deep_ptr&lt;const char[]&gt; copy_of_local_variable()
+{
+        const char*     local_variable = "pointer";
+
+        return deep_ptr&lt;const char[]&gt;( local_variable );			//  1
+}
+
+int main()
+{
+        dp_list&lt;const char[]&gt;   l { "hello", "native", "pointers" };		//  2
+        dp_list&lt;const char[]&gt;   m = l;						//  3
+        dp_list&lt;const char[]&gt;   n = std::move( l );				//  4
+
+        printf( "%s\n", ( m == n ) ? "m == n" : "m != n" );			//  5
+        m.back() = copy_of_local_variable();					//  6
+        printf( "%s\n", ( m &lt; n ) ? "m &lt; n" : "m &gt;= n" );			//  7
+
+	const char*	greeting = "hello";
+
+	l.push_back( greeting );						//  8
+        // l.push_back( "hello" ); --- causes runtime error			//  9
+        l.push_back( strdup( "native" ));					// 10
+        l.push_back( copy_of_local_variable());                         	// 11
+
+        for ( const char* p : l ) printf( "%s, ", p );                  	// 12
+        puts( "" );
+        for ( auto i = m.begin(); i != m.end(); ++i ) {                  	// 13
+		const char* p = *i;
+		printf( "%s, ", p );
+	}
+        puts( "" );
+        for ( auto p : n ) printf( "%s, ", static_cast&lt;const char*&gt;( p ));	// 14
+        puts( "" );
+        for ( auto p : n ) printf( "%zu, ", strlen( p ));			// 15
+        puts( "" );
+
+	return 0;								// 16
+}</code></pre><p>
+<p>サンプルコードの実行結果:</br>
+<pre><samp>m == n
+m &lt; n
+hello, native, pointer, 
+hello, native, pointer, 
+hello, native, pointers, 
+5, 6, 8, 
+</samp></pre></p>
+
+<p>以下、解説番号はサンプルコードのコメント欄の番号に対応します。
+<ol>
+<li>deep_ptr を戻す関数の例です。deep_ptr の元になるポインタが指している文字列はローカル変数ですから、関数から戻ると無効になります。そこで、deep_ptr のコンストラクターに左辺値のポインターを与えて "pointer" という文字列も含めて deep copy し、戻り値としています。<br/>このdeep_ptrは、戻り先で使用されデストラクトされた時、指し先のデストラクタ（delete[] char、ユーザーによるカストマイズも可能）を自動的に呼び出すので、メモリ管理のためにコードの中で明示的にデストラクトする必要がありません。<br/>deep_ptr のテンプレート引数が const char* ではなく const char[] となってることに注目してください。これは、文字へのポインタと、文字配列のポインタを区別するためで、const char* であれば、先頭の文字'p’へのポインタをあらわすことになります。さらに可変長と固定長の配列を区別して扱うことも可能で、null終端をもつ可変長文字列は const char[] で、固定長文字列であればサイズを N として const char[N] で表すことができます。<br/>この関数では、deep_ptr はリファレンスでなく変数で戻されています。戻り値を式の中で扱う場合、右辺値のdeep_ptrになることが、この後のコードで意味を持ってきますので、頭の隅に置いておいてください。</li>
+<br/>
+<li>dp_list&lt;T&gt;は、std::list&lt;deep_ptr&lt;T&gt;&gt;の派生クラスです。<br/>
+<code>template &lt;typename T&gt; using dp_list&lt;T&gt; = std::list&lt;deep_ptr&lt;T&gt;&gt;;</code> と定義するのではなく派生クラスとしているのは、おもに2つの理由があります。
+<ul>
+ <li><code>list::list( size_type n, const value_type& v );</code>のような、コンテナに格納しないポインタを引数を持つインターフェースでは、引数のポインタがdeep_ptrにキャストされて不要なコピーが生じないようにする</li>
+ <li>ポインタを引数とする場合にキャストを省略できるようにする</li>
+</ul>
+サンプルコードでは、const char*の初期化リストを使って初期化を行なっていますが、これもstd::listを派生させてカスタマイズしたことで実現しています。動作としては、初期化リスト中の文字列それぞれが複製されて、dp_listの要素であるdeep_ptrの指し先として管理されます。</li>
+<li>dp_listのコピーコンストラクタを呼び出しています。コピーコンストラクタでは、要素のdeep_ptrそれぞれがコピーされるので、指し先の文字列もそれぞれ複製されます。</li>
+<li>dp_listのムーブコンストラクタを呼び出しています。ムーブコンストラクタでは、ムーブ元の要素のdeep_ptrがムーブ先に移動するだけで、指し先の文字列は複製されません。</li>
+<br/>
+<li><code>m == n</code> でdp_listどうしの比較を行なっています。<br/>
+std::listの比較演算は、要素の辞書式順序での比較になりますが、要素がdeep_ptrですので、deep_ptrどうしの比較は、指し先の比較（この場合は <code>strcmp(p,q)==0</code> に相当）が行われます。</li>
+<li>backでdp_listの最後の要素（この場合は"pointers"を指し先にもつdeep_ptr）の左辺値レファレンスを取り出して、copy_of_local_variable() の戻り値である deep_ptr の右辺値を代入しています。したがって、この代入はムーブアサインメントとなり、余分な文字列の複製は行われずに、"pointer"を指し先とするdeep_ptrに入れ替わることになります。元の"pointers"を指していたdeep_ptrはデストラクトされ、"pointers"も正しくデストラクトされます。</li>
+<li><code>m &lt; n</code> でdp_listどうしの比較を行なっています。<br/>
+同値比較（==）と同様に、順序比較（&lt;）の場合も、要素の文字列に対して、可変長配列のデフォルトの比較として辞書式順序比較（この場合は <code>strcmp(p,q)&lt;0</code> に相当）が行われるので、"pointer" &lt; "pointers"により、"m &lt; n"が出力されることになります。</li>
+<br/>
+<li>push_back は dp_list に要素を追加するインターフェースです。<br/>
+このインターフェースには、追加されるデータへのポインタそのもの、あるいは追加されるデータを指し先にする deep_ptr、どちらでも渡すことができます。しかしどちらの場合でも、そのポインタまたは deep_ptr が左辺値か右辺値かによって動作が異なることに注意が必要です。
+<ul>
+ <li>左辺値の場合、差し先のデータや配列を deep copy して、新しくできたものを deep_ptr の指し先としてコンテナに追加します。</li>
+ <li>右辺値の場合、deep copy はされず、渡されたポインタの指し先のデータをそのまま指し先とした deep_ptr がコンテナに追加されて、データのデストラクトを行う責任の移管が起こります。</li>
+</ul>
+要素の追加のインターフェースで左辺値と右辺値を区別するのは、deep_ptr 用にカストマイズされたコンテナすべてに共通の仕様です。<br/>
+この push_back では、渡された引数の greeting は左辺値ですので、その内容が deep copy されます。</li>
+<li>次の行は不正なコードであるためコメントアウトされています。<br/>
+ここでは、push_back に文字列のリテラルをそのまま渡していますが、"hello" は const char[6] のリテラルで、const char*への型変換を受けると右辺値になるので、ムーブアサインメントが実行されてしまいます。そのため複製が行われず、リテラルのアドレスをそのまま指し先にした deep_ptr ができてしまうため、このまま実行すれば deep_ptr のデストラクト時にランタイム・エラーを起こすことになります。</li>
+<li>そのため、8.のように変数を介して左辺値として渡すか、長くなるのでオススメしませんが左辺値（この場合はconst char* const&）に static_cast するか、この例のようにあらかじめ複製した上で右辺値としてインターフェースに渡す必要があります。</li>
+<li>ポインタではなく deep_ptr を push_back の引数に渡す場合も、左辺値と右辺値は同様に区別されます。<br/>
+copy_of_local_valiable() の戻り値は deep_ptr の右辺値ですから、無駄なコピーなしで戻り値の指し先が deep_ptr の指し先となり、dp_list に格納されます。</li>
+<br/>
+<li>次にdp_listの要素の順次処理をみてみましょう。<br/>
+いちばん簡潔なのが、for-range文を使うこの方法で、要素の deep_ptr から const char* へのキャストが自然に記述できます。</li>
+<li>上の文をイテレータを使って書き直したのがこのケースですが、printf文の仮引数は静的な型を持たないため、const char* 型の変数を介さないで直接 *i を渡すことはできません。どうしても１文にしたい場合は、static_castを使う必要があります。</li>
+<li>for-range文で auto を使って型推論したものですが、この場合 auto は deep_ptr になるので、printf文の引数として const char* 型で与えるために static_cast を使うことになります。</li>
+<li>もちろん、このケースの strlen関数のように、仮引数が const char* 型であれば、deep_ptr から自動的にキャストが行われるため static_cast は必要ありません。</li>
+<li>main関数内で宣言されたdp_listがデストラクトされるタイミングで、要素のdeep_ptrがデストラクトされ、指し先の文字列に対して正しく delete[] が実行されます</li>
+</ol>
+<p>いかがでしょう。解説では C++ の特有の複雑さ全開ですが、コード自体は複雑さをうまくたたみ込んで、Cのスタイルを取り入れたコードをシンプルに記述できることが実感していただけるのではないでしょうか。</p>
+
+<h2><li>deep pointerライブラリの構成と導入</li></h2>
+
+<h3>deep pointerの導入</h3>
+<p>LinuxやMacOSなど、*NIX系OSへのdeep pointerの導入は以下の手順で行います。</p>
+<ol>
+ <li>GitHubなどから、ソースコードを入手して、(導入ディレクトリ)/ に展開する</li>
+ <samp><pre>
+# tar ball: deep_ptr.tar.gz を入手した場合
+(導入ディレクトリ)/> ls
+deep_ptr.tar.gz
+(導入ディレクトリ)/> tar -xvzf deep_ptr.tar.gz
+</pre></samp>
+ <li>(導入ディレクトリ)/ をカレントディレクトリにして、make install を実行する</li>
+ <samp><pre>
+(導入ディレクトリ)/> make install
+(導入ディレクトリ)/> ls include/dptl
+deep_ptr.hpp		dp_forward_list.hpp	dp_set.hpp		dp_vector.hpp
+dp_array.hpp		dp_list.hpp		dp_unordered_map.hpp	udata.hpp
+dp_deque.hpp		dp_map.hpp		dp_unordered_set.hpp	utest.hpp
+(導入ディレクトリ)/> ls bin
+gendptest
+</pre></samp>
+<p>ここで行なっているのは、以下の3つの作業です。<p>
+<ul>
+ <li>makefile_inc から makefile.inc を作る。</li>
+ <li>(導入ディレクトリ)/src/include へのシンボリックリンク (導入ディレクトリ)/include/dptl を張る。</li>
+ <li>単体テストジェネレータをmakeして、(導入ディレクトリ)/bin/gendptest として導入する。</li>
+</ul>
+<p>最後のコンパイルで、コンパイラが見つからずに失敗する場合は、makefile.ini 内の C++コンパイラ（デフォルトは　c++ ）と、必要に応じてコンパイルオプションを、導入されているものに合わせて変更し、make install を再実行してください。</p>
+ <li>make utest を実行して (導入ディレクトリ)/test 以下で単体テストコードとその実行ファイルを作成し、単体テストが通ったことを確認する</li>
+ <samp><pre>
+(導入ディレクトリ)/> make utest
+</pre></samp>
+</ol>
+<p>現在、導入を確認しているのは、以下の環境です。
+<ul>
+ <li>MacOS Mojave 10.14.2, llvm version 10.0.0 (clang-1000.11.45.5)</li>
+ <li>Ubuntu 7.3.0, GNU C++ 18.04</li>
+</ul></p>
+
+<h3>deep pointerのファイル構成</h3>
+<ul>
+<li>(導入ディレクトリ)/src/include/</li>
+<ul>
+ <li>deep_ptr.hpp</li>
+ <p>deep pointerが定義されているヘッダファイル、deep_ptr, dref_ptr, 補助クラス（dp_dup, dp_del, dp_eql, dp_cmp, dp_less, dp_hash）, テンプレート・メタプログラミング用traitを含む</p>
+ <li>dp_array.hpp</li>
+ <p>std::array の deep_ptr用カスタマイズの例: dp_arrayを含む</p>
+ <li>dp_deque.hpp</li>
+ <p>std::deque の deep_ptr用カスタマイズの例: dp_dequeを含む</p>
+ <li>dp_forward_list.hpp</li>
+ <p>std::forward_list の deep_ptr用カスタマイズの例: dp_forward_listを含む</p>
+ <li>dp_list.hpp</li>
+ <p>std::list の deep_ptr用カスタマイズの例: dp_listを含む</p>
+ <li>dp_map.hpp</li>
+ <p>std::map, std::multimap の deep_ptr用カスタマイズの例: dpp_map, dpp_multimapを含む</p>
+ <li>dp_set.hpp</li>
+ <p>std::set, std::multiset の deep_ptr用カスタマイズの例: dp_set, dp_multisetを含む</p>
+ <li>dp_unordered_map.hpp</li>
+ <p>std::unordered_map, std::unordered_multimap の deep_ptr用カスタマイズの例: dpp_unordered_map, dpp_unordered_multimapを含む</p>
+ <li>dp_unordered_set.hpp</li>
+ <p>std::unordered_set, std::unordered_multiset の deep_ptr用カスタマイズの例: dp_unordered_set, dp_unordered_multisetを含む</p>
+ <li>dp_vector.hpp</li>
+ <p>std::vector の deep_ptr用カスタマイズの例: dp_vectorを含む</p>
+ <li>udata.hpp, utest.hpp</li>
+ <p>deep pointerとdpコンテナの単体テスト用ヘッダファイル</p>
+</ul>
+<li>(導入ディレクトリ)/test/</li>
+<p>単体テスト用ディレクトリ、単体テストコードは deep pointer および dpコンテナのコーディングサンプルとして利用できる</p>
+<ul>
+ <li>(導入ディレクトリ)/test/deep_ptr/</li>
+ <p>deep pointerの基本単体テスト用ディレクトリ: dptest.cpp, makefileを含む</p>
+ <li>(導入ディレクトリ)/test/dp_array/</li>
+ <p>dp_arrayの単体テスト用ディレクトリ: dp_array.tmpl, makefileを含み、単体テストコード dp_arraytest.cpp が生成される</p>
+ <li>(導入ディレクトリ)/test/dp_deque/</li>
+ <p>dp_dequeの単体テスト用ディレクトリ: dp_deque.tmpl, makefileを含み、単体テストコード dp_dequetest.cpp が生成される</p>
+ <li>(導入ディレクトリ)/test/dp_forward_list/</li>
+ <p>dp_forward_listの単体テスト用ディレクトリ: dp_forward_list.tmpl, makefileを含み、単体テストコード dp_forward_listtest.cpp が生成される</p>
+ <li>(導入ディレクトリ)/test/dp_list/</li>
+ <p>dp_listの単体テスト用ディレクトリ: dp_list.tmpl, makefileを含み、単体テストコード dp_listtest.cpp が生成される</p>
+ <li>(導入ディレクトリ)/test/dp_map/</li>
+ <p>dp_mapの単体テスト用ディレクトリ: dp_map.tmpl, dp_multimap.tmpl, makefileを含み、単体テストコード dp_maptest.cpp, dp_multimaptest.cpp が生成される</p>
+ <li>(導入ディレクトリ)/test/dp_set/</li>
+ <p>dp_setの単体テスト用ディレクトリ: dp_set.tmpl, dp_multiset.tmpl, makefileを含み、単体テストコード dp_settest.cpp, dp_multisettest.cpp が生成される</p>
+ <li>(導入ディレクトリ)/test/dp_unordered_map/</li>
+ <p>dp_unordered_mapの単体テスト用ディレクトリ: dp_unordered_map.tmpl, dp_unordered_multimap.tmpl, makefileを含み、単体テストコード dp_unordered_maptest.cpp, dp_unordered_multimaptest.cpp が生成される</p>
+ <li>(導入ディレクトリ)/test/dp_unordered_set/</li>
+ <p>dp_unordered_setの単体テスト用ディレクトリ: dp_unordered_set.tmpl, dp_unordered_multiset.tmpl, makefileを含み、単体テストコード dp_unordered_settest.cpp, dp_unordered_multisettest.cpp が生成される</p>
+ <li>(導入ディレクトリ)/test/dp_vector/</li>
+ <p>dp_vectorの単体テスト用ディレクトリ: dp_vector.tmpl, makefileを含み、単体テストコード dp_vectortest.cpp が生成される</p>
+ <li>makefile</li>
+ <p>単体テスト一括作成用makefile</p>
+</ul>
+<li>(導入ディレクトリ)/util/gendptest/</li>
+<p>単体テストコードの作成ユーティリティ gendptest のソースコード gendptest.cpp と makefileを含む</p>
+<li>(導入ディレクトリ)/doc/</li>
+<p>deep pointerに関するドキュメントとライセンスを含む</p>
+<li>(導入ディレクトリ)/bin/</li>
+<p>gendptest を格納するディレクトリ</p>
+<li>(導入ディレクトリ)/include/</li>
+<p>dptl（(導入ディレクトリ)/src/include/へのシンボリックリンク）を含む</p>
+</ul>
+
+<h3>deep pointerの各機能の要約</h3>
+<ul>
+ <li>deep pointer</li>
+ <ul>
+  <li>deep_ptrはポインターの指し先のデータの比較、コピー、移動、複製、削除などをdeep pointer自身の比較、コピー、移動、複製、削除などで実現するためのクラス</li>
+  <li>ポインターの指し先は、<ul>
+   <li>変数のアドレス</li>
+   <li>固定長配列の先頭アドレス</li>
+   <li>デフォルトコンストラクタによるインスタンスで終わる可変長配列（char*型などのnull文字終端を持つ文字列を含む）の先頭アドレス</li>
+  </ul>を、テンプレート引数の型によって区別して扱える</li>
+  <li>deep_ptrは指し先のデータのオーナーシップを持ち、デストラクトされるとき指し先のデストラクタを呼び出す</li>
+  <li>deep_ptrにつくconstは、指し先のデータのconstも併せて意味する</li>
+  <li>deep_ptrをコンテナクラスの要素に使用することで、コンテナの比較演算子でアドレスではなく指し先のデータを使った比較や、コンテナのコピー、移動で要素の指し先のデータのコピー、移動が行える</li>
+  <li>指し先のデータのオーナーシップをもたず、指し先の比較は行うが、コピー、移動は行わない dref_ptr (deep referece pointer)も併せて提供する</li>
+  <li>deep_ptrとdref_ptrは、相互に比較、コピー可能</li>
+  <li>deep_ptrとdref_ptrは、キャストコンストラクターとキャスト演算子によって、元のポインターとの互換性をもつ</li>
+  <li>deep_ptrとdref_ptrのインスタンスは、ポインターと同じサイズであることが保証され、reinterpret_castでポインターに変換して扱うこともできる</li>
+ </ul>
+ <li>deep pointerのユーティリティクラス群</li>
+ <ul>
+  <li>ポインターの指し先の複製、削除、等値比較、順序比較、ハッシュ関数のための関数クラス（dp_dup, dp_del, dp_eql, dp_less, dp_hashなど）が提供される。
+ポインタ、可変長配列、固定長配列に対する標準的な動作（複製を例にとると、クラスのインスタンスならコピーコンストラクターによるコピー、char*文字列ならnull終端を含むコピーになりstrdup関数と同等の動作）はあらかじめ定義されている</li>
+  <li>あらかじめ定義された動作は、オーバーライドによりユーザーがカスタマイズすることが可能（例えば、コピーコンストラクターがないクラスのインスタンスもカスタマイズによって使用することができる）</li>
+  <li>C++の型推論を使ったテンプレート・メタプログラミング用に、型変換用traitを用意している</li>
+ </ul>
+ <li>dpコンテナ：C++ Standard Template Library(STL)のコンテナのカストマイズ・サンプル</li>
+ <ul>
+  <li>deep pointerを直接STLのコンテナのテンプレート引数にして利用することもできるが、格納に関係しないdeep pointerの引数を持つインターフェースでは無駄なコピーが発生したり、ポインターを直接使用しようとすると型変換の必要になることがある。そのため、コンテナのインターフェースにポインターがそのまま使用でき、無駄なコピーが生じないようにカスタマイズしたサンプルのコンテナ・テンプレートクラスを提供している</li>
+  <li>deque, listなどポインタのシークエンスを格納するコンテナは、dp_ではじまる deep_ptr を要素とするコンテナと、dr_ではじまる dref_ptr を要素とするコンテナが定義されている</li>
+  <li>map, unordered_mapなど、キーとそのマップのペアを格納するコンテナは、d(Key)(Mapped)_（(Key)(Mapped)はそれぞれ１文字で p: deep_ptr, r: dref_ptr, n: ポインタ以外を表す）ではじまり、dnn_を除く８種のコンテナが定義されている。たとえば <code>dpn_map&lt;const char[], int&gt;</code> は、char*型null終端文字列の deep_ptr をキーに、int にマップする std::list をカスタマイズしたコンテナである</li>
+  <li>deep pointerは、C++標準ライブラリにあるスマートポインターのようにコンテナに格納できることに加え、コンテナ間の比較演算で指し先のデータの比較が行われるため、特にmap/setでのキーの比較、unordered_map/setのhash値の一致が自然に行える（テンプレート引数で比較やハッシュのカスタマイズを行わなくてよい）</li>
+  <li>null終端文字列やネイティブ配列を格納できるため、STLコンテナとC言語で書かれたライブラリーやシステムコールとの併用や、C言語のプログラミングスタイルとの親和性を維持することが可能</li>
+  <li>dpコンテナの用例サンプルコードとして、dpコンテナの単体テスト用コードを使うことができる</li>
+  <li>テストパターンからコードを生成するためのジェネレーターを使用して、deep pointerの種類、ポインタ・固定長配列・可変長配列の組み合わせをテストしているので、このコードから様々なケースの使用例が得られる</li>
+ </ul>
+ <li>deep pointerライブラリのプライベートライブラリへの組み込み</li>
+  <ul>
+  <li>プライベートライブラリにdeep pointerを組み込む際、DPTL_NAMESPACE マクロを定義することで、デフォルトの namespace dptl を変更することが可能。</p>
+  </ul>
+</ul>
+
+<h2><li>deep pointerライブラリの利用</li></h2>
+
+<h3>著作権表示</h3>
+<p>© Kazunari Saitoh 2018-2019.</p>
+
+<h3>配布ライセンス</h3>
+<p>deep pointerライブラリは、完全に無保証のオープンソースソフトウェア（OSS）です。</p>
+<p>deep pointerライブラリは、boostライブラリではありませんが、配布はユーザーの便宜を最大化するため、Boost Software License 1.0 (BSL-1.0)で行います。</p>
+<p>Distributed under the Boost Software License, Version 1.0.<br/>
+    (See accompanying file LICENSE_1_0.txt or copy at <a href="https://www.boost.org/LICENSE_1_0.txt">https://www.boost.org/LICENSE_1_0.txt</a>)<p>
+
