@@ -50,7 +50,7 @@ namespace DPTL_NAMESPACE {
 // -----------------------------------------------------------------------------
 template <typename T>           T  dpl( T v )             { return dp_dup<T>()( v ); }
 template <typename T>           T* dpl( const T* p )      { return dp_dup<T*>()( p ); }
-template <typename T>           T* dpl( const T (&a)[] )  { return dp_dup<T[]>()( a ); }
+template <typename T>           T* dpl( const T (&a)[0] ) { return dp_dup<T[]>()( a ); }
 template <typename T, size_t N> T* dpl( const T (&a)[N] ) { return dp_dup<T[N]>()( a ); }
 
 // -----------------------------------------------------------------------------

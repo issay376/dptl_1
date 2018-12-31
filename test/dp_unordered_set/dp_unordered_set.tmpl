@@ -166,12 +166,9 @@ $}
 
 $V "emplace/insert/erase"
 ${
-$D$R${	dr_unordered_set<$v>	m1 = { $1, $2 };
-	dr_unordered_set<$v>	m2;
-	dr_unordered_set<$v>	m3 = { $2, $3, $5 };$}$&
-$N${	std::unordered_set<$v>	m1 = { $1, $2 };
-	std::unordered_set<$v>	m2;
-	std::unordered_set<$v>	m3 = { $2, $3, $5 };$}
+	$a	m1 = { $1, $2 };
+	$a	m2;
+	$a	m3 = { $2, $3, $5 };
 
 	// emplace
 	{

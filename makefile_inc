@@ -4,7 +4,7 @@
 #	Version 0.1 
 #
 # --- Environment Depends -->
-DPTLDIR = /(Installation directory)
+# DPTLDIR = /(Installation directory)
 CCPP = c++
 CFLAGS = -ggdb -D_DEBUG -Wno-parentheses -std=c++11 
 # <-------------------------

@@ -483,9 +483,9 @@ inline void print( const base* const& p ) { if ( p ) p->print( stdout ); else pr
 inline void print( base const& t )	  { t.print( stdout ); }
 
 inline void print( const char* const& s ) { if ( s ) printf( "\"%s\"", s ); else printf( "nullptr" ); }
-inline void print( const char (&s)[] )    { if ( s ) printf( "\"%s\"", s ); else printf( "nullptr" ); }
+inline void print( const char (&s)[0] )   { if ( s ) printf( "\"%s\"", s ); else printf( "nullptr" ); }
 inline void print( const wchar_t* const& s ) { if ( s ) wprintf( L"\"%s\"", s ); else printf( "nullptr" ); }
-inline void print( const wchar_t (&s)[] )    { if ( s ) wprintf( L"\"%s\"", s ); else printf( "nullptr" ); }
+inline void print( const wchar_t (&s)[0] )   { if ( s ) wprintf( L"\"%s\"", s ); else printf( "nullptr" ); }
 
 inline void print( long const& i )	  { printf( "%ld", i ); }
 inline void print( int const& i )	  { printf( "%d", i ); }

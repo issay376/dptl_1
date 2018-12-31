@@ -222,12 +222,9 @@ $}
 
 $V "emplace/insert/erase"
 ${
-$R$D${	dr_multiset<$v>	m1 = { $1, $2 };
-	dr_multiset<$v>	m2;
-	dr_multiset<$v>	m3 = { $2, $3, $3, $3, $5 };$}$&
-$N${	std::multiset<$v>	m1 = { $1, $2 };
-	std::multiset<$v>	m2;
-	std::multiset<$v>	m3 = { $2, $3, $3, $3, $5 };$}
+	$a	m1 = { $1, $2 };
+	$a	m2;
+	$a	m3 = { $2, $3, $3, $3, $5 };
 
 	// emplace
 	{

@@ -101,8 +101,8 @@ ${
 		AssertTrue( check_list( lx, { $1 } ));
 		AssertTrue( check_list( lr, { } ));			// not mandatory
 
-		lx = std::move( lx );
-		AssertTrue( check_list( lx, { } ));			// not mandatory
+		//lx = std::move( lx );					// self move is unsupported and
+		//AssertTrue( check_list( lx, { } ));			// not mandatory
 	}
 	// iterator constructor
 	{

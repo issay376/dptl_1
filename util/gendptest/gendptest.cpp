@@ -1088,7 +1088,7 @@ void writer::write_header( const dp_list<token_lst*>& us, bool keyed, int stl )
 		}
 		if ( 0 < ts ) {
 			if ( const char* sb = (*u)->subtitle()) fprintf( m_out, "\t// --- %s ---\n", sb );
-			for ( unsigned j = 0; j < ts; ++j ) fprintf( m_out, "\tvoid test%02.2X();\n", ++c );
+			for ( unsigned j = 0; j < ts; ++j ) fprintf( m_out, "\tvoid test%2.2X();\n", ++c );
 			fprintf( m_out, "\n" );
 		}
 	}
@@ -1125,7 +1125,7 @@ void writer::write_unit( token_lst* ls, mode vp, data vt, mode kp, data kt )
 {
 	if ( const char* sb = ls->subtitle()) {
 		fprintf( m_out, "\n// -----------------------------------------------------------------------------\n" );
-		fprintf( m_out, "void %stest::test%02.2X()\n{\n", m_pcontainer, test_number());
+		fprintf( m_out, "void %stest::test%2.2X()\n{\n", m_pcontainer, test_number());
 		++m_indent;
 		indent();
 		fprintf( m_out, "this->set_subtitle( \"%s", sb );

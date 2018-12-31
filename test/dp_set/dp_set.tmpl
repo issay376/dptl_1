@@ -218,12 +218,9 @@ $}
 
 $V "emplace/insert/erase"
 ${
-$D$R${	dr_set<$v>	m1 = { $1, $2 };
-	dr_set<$v>	m2;
-	dr_set<$v>	m3 = { $2, $3, $5 };$}$&
-$N${	std::set<$v>	m1 = { $1, $2 };
-	std::set<$v>	m2;
-	std::set<$v>	m3 = { $2, $3, $5 };$}
+	$a	m1 = { $1, $2 };
+	$a	m2;
+	$a	m3 = { $2, $3, $5 };
 
 	// emplace
 	{
