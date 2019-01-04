@@ -1,23 +1,11 @@
 //
-// utest.h --- unit test utility for Pointer Container Template Library
+// utest.hpp --- unit test utility for Pointer Container Template Library
 //
-//	Version 2.0
+//      2018/12/30, version 0.1
 //
-//      Copyright (C) 2003, 2018 Kazunari Saitoh
-//
-//      This library is free software; you can redistribute it and/or
-//      modify it under the terms of the GNU Lesser General Public
-//      License as published by the Free Software Foundation; either
-//      version 2.1 of the License, or (at your option) any later version.
-//
-//      This library is distributed in the hope that it will be useful,
-//      but WITHOUT ANY WARRANTY; without even the implied warranty of
-//      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//      Lesser General Public License for more details.
-//
-//      You should have received a copy of the GNU Lesser General Public
-//      License along with this library; if not, write to the Free Software
-//      Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//      © Kazunari Saitoh, 2018-2019.
+//      Distributed under the Boost Software License, Version 1.0.
+//      (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 //
 
 #ifndef __DPTL_UTEST_H
