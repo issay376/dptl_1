@@ -1,0 +1,281 @@
+<html lang = "en">
+<head>
+<meta charset = "UTF-8">
+<title>deep pointer template library (DPTL) </title>
+<head>
+<body>
+<ol>
+<h1>deep pointer template library (DPTL) </h1>
+<p>version 0.1, 2018/12/30</p>
+<h2><li>Summary</li></h2>
+<p>deep pointer template library (DPTL) is a template library that can be used in C++11 and later C++.</p>
+<p>Deep pointer is a smart pointer for handling data and a pointer pointing the data collectively. Processing the pointed data like duplication, destruction, comparison, storing and retrieving from the container can be done more intuitively and simply as operations on the pointer.</p>
+<p>In the design of deep pointer, I especially cared about filling the gap between C and C++.
+With C++11 and later, C++ has evolved greatly to handling complex data structures with sufficient performance, using rvalue references and smart pointers. However, the difference between the programming style of standard libraries (that center on values ​​and references) and the style of C (centered around pointers) is deterministic, and in the C++ standard programming style, C native pointer, string, and array should be shifted to smart pointer, string class, and array class.
+Under such circumstances, many people feel that it is more difficult to write correct code in the complicated C++ language specification than in simple C style. Also, there are many cases where it is difficult to acquire the skills of project members, because learning time to write appropriate level code is too long. Coordination with libraries and system calls written in C may also be an issue.</p>
+<p>Deep pointer is designed with the aim of making less likely to occur problems even if C style is used in combination on C++.
+Using deep pointer makes it possible to use native pointers, strings, and arrays safely and simply in Modern C++ environment. In particular, the containers of the standard template library will be able to handle native pointers, strings, and arrays almost transparently and without discomfort through deep pointers.
+Since it is easier to see in the concrete example, let's explain the features of deep_ptr in the sample code, taking a null-terminated character string and its list as an example.</p>
+<h3>Sample code:</h3>
+<pre><code>#include &lt;cstdio&gt;
+#include &lt;dptl/deep_ptr.hpp&gt;
+#include &lt;dptl/dp_list.hpp&gt;
+
+using namespace dptl;
+
+deep_ptr&lt;const char[]&gt; copy_of_local_variable()
+{
+        const char*     local_variable = "pointer";
+
+        return deep_ptr&lt;const char[]&gt;( local_variable );			//  1
+}
+
+int main()
+{
+        dp_list&lt;const char[]&gt;   l { "hello", "native", "pointers" };		//  2
+        dp_list&lt;const char[]&gt;   m = l;						//  3
+        dp_list&lt;const char[]&gt;   n = std::move( l );				//  4
+
+        printf( "%s\n", ( m == n ) ? "m == n" : "m != n" );			//  5
+        m.back() = copy_of_local_variable();					//  6
+        printf( "%s\n", ( m &lt; n ) ? "m &lt; n" : "m &gt;= n" );			//  7
+
+	const char*	greeting = "hello";
+
+	l.push_back( greeting );						//  8
+        // l.push_back( "hello" ); --- causes runtime error			//  9
+        l.push_back( strdup( "native" ));					// 10
+        l.push_back( copy_of_local_variable());                         	// 11
+
+        for ( const char* p : l ) printf( "%s, ", p );                  	// 12
+        puts( "" );
+        for ( auto i = m.begin(); i != m.end(); ++i ) {                  	// 13
+		const char* p = *i;
+		printf( "%s, ", p );
+	}
+        puts( "" );
+        for ( auto p : n ) printf( "%s, ", static_cast&lt;const char*&gt;( p ));	// 14
+        puts( "" );
+        for ( auto p : n ) printf( "%zu, ", strlen( p ));			// 15
+        puts( "" );
+
+	return 0;								// 16
+}</code></pre>
+
+<h3>Sample code execution result:</h3>
+<pre><samp>m == n
+m &lt; n
+hello, native, pointer, 
+hello, native, pointer, 
+hello, native, pointers, 
+5, 6, 8, 
+</samp></pre>
+
+<h3>Explanations of sample code</h3>
+<p>The number corresponds to the number in the comment column of the sample code.
+<ol>
+<li>Here is an example of a function that returns deep_ptr.<br/>
+The character string pointer that is the source of deep_ptr is a local variable, so it will be invalid when returning from the function. Therefore, The code gives lvalue pointer to the constructor of deep_ptr to make deep copy including the character string "pointer", then it will be returned from the function safely. After the deep_ptr will has been destructed, it automatically will calls destructor of the string (delete[](char*), which can be customized by the user), so you do not need to code explicitly destructing. <br/>
+Notice that the template argument for deep_ptr is const char[] instead of const char*. This is to distinguish between pointer to a character and pointer to an array of characters, and if it is const char*, it will be a pointer to the first one letter 'p' (Please remind that it is a 'deep' pointer. For example, the copy operation causes completely different results). Furthermore, variable length and fixed length arrays can also be handled differently. A variable length character string having a null termination is represented by const char[], and if it is a fixed length character string with size N, it can be indicated by const char[N]. <br/>In this function, deep_ptr is returned as a variable rather than a reference. In an expression, the return value of function is dealing as 'rvalue'. It becomes meaningful in the following lines.</li>
+
+<p></p>
+<li>dp_list&lt;T&gt; is a derived class of std::list&lt;deep_ptr&lt;T&gt;&gt;. We can use alias to define dp_list like<br/>
+<code>template &lt;typename T&gt; using dp_list&lt;T&gt; = std::list&lt;deep_ptr&lt;T&gt;&gt;;</code><br/>
+but there are two main reasons why don't do so.
+<ul>
+ <li>There are interfaces that has argument of pointer not to store in the container, such as <code>list::list(size_type n, const value_type &v);</code><br/>
+In this case, the pointer argument will cast deep_pointer and unnecessary copy of the pointed data will be occurred. The interface of derived dp_list class can prevent it.</li>
+ <li>Using the interface of derived class, it is not have to write cumbersome casting.</li>
+</ul>
+In the sample code, initialization is performed using const char* initialization list realized by interface of dp_list.<br/>As this operation, every character strings in the initialization list are duplicated and managed by deep_ptrs which are elements of dp_list.</li>
+<li>Calling copy constructor of dp_list. In the copy constructor, each element deep_ptr is copied, so the pointed string is also duplicated.</li>
+<li>Calling move constructor of dp_list. In the move constructor, every pointed data of deep_ptr will move from source dp_list to destination, and no strings are duplicated.</li>
+
+<p></p>
+<li>The code <code>m == n</code> compares dp_list to each other.<br/>
+The comparison operation of std::list is a comparison of elements in lexicographic order, and since the element is deep_ptr, the comparison between deep_ptr is that of pointed data (in this case, same as <code>strcmp(p,q) == 0</code>). Therefore, a lexicographical comparison for the list of strings, not the list of string addresses, is done naturally.</li>
+<li>The back interface extracts the lvalue reference of the last element of dp_list (in this case deep_ptr pointing to "pointers") and assigns the right side value of deep_ptr which is the return value of copy_of_local_variable (). Therefore, this operation becomes a move assignment, it will replace deep_ptr pointed to "pointer" without duplicating extra character string. The original deep_ptr, which pointed to "pointers", will be destructed with "pointers" storage correctly.</li>
+<li>We are doing a comparison between dp_list in <code>m &lt; n</code>.<br/>
+Deep pointer has a default order comparison of the pointed value, and in the case of variable length character string, it is the same operation as <code>strcmp(p,q) &lt; 0</code>.
+As in the case of equality comparison (==), it take place lexicographical comparison for the list of strings, not for the list of string addresses.</li>
+
+<p></p>
+<li>push_back is an interface to add an element to std::list<br/>
+You can pass either a pointer or a deep_ptr to the derived interface of dp_container. In either case, however, it is important to notice that the behavior depends on whether the pointer or deep_ptr is an lvalue or an rvalue.
+<ul>
+ <li>In the case of lvalue, it makes the deep copy of the pointed data which will be pointed by new deep_ptr just added to the container.</li>
+ <li>In the case of rvalue, deep copy is not done. The deep_ptr pointed to the data, which is pointed by the passed pointer, is added to the container accompanied with the responsibility of destructing the data.</li>
+</ul>
+It is the common specification for all interfaces adding an element to dp_container that either a pointer or a deep_ptr can be accepted, and it's behavior is distinguished by whether the lvalue is passed to copy the pointed data or​​ the rvalue to move it with ownership.<br/>
+In this push_back, since the passed argument 'greeting' is an lvalue, its contents will be deep copied.</li>
+<li>The following line is commented out because it is invalid code.
+In this case, the literal of the string is passed to push_back as it is, but literal "hello" is 'const char[6]', and when if it receives type conversion to 'const char *', it becomes an rvalue, so the move assignment will be executed. As a result, duplication is not performed, and deep_ptr is created with the literal address as it is, so if you execute it, it will cause a runtime error when destructing deep_ptr.</li>
+<li>Therefore, you need to pass it as lvalue of variable (as shown in line 8), or a static_cast to the lvalue (in this case const char * const &),  or explicitly duplicate the data and pass it as rvalue like this line.</li>
+<li>This is an example to pass deep_ptr.
+Since the return value of copy_of_local_valiable () is the rvalue of deep_ptr, the data pointed by returned deep_ptr is moved to the new deep_ptr in dp_list without wasteful copying.</li>
+<p></p>
+<li>Let's see the sequential processing of the elements of dp_list.<br/>
+The simplest code is to use for-range statement. In this way, casting from a deep_ptr of an element of dp_list to a 'const char*' can be described naturally.</li>
+<li>In this case, the above statement was rewritten using an iterator. Since the formal argument of the printf statement does not have a static type, you can not pass *i of deep_ptr type directly without assigning it to 'const char*' variable. If you want to express them in one sentence, you need to use static_cast.</li>
+<li>It is the sample with type inference using auto in for-range statement. But in this case auto is deep_ptr, so we use static_cast to give 'const char*' type as argument of printf statement.</li>
+<li>Of course, if formal argument is 'const char*' type like strlen function in this case, static_cast is not necessary because it will be casted automatically from deep_ptr.</li>
+<li>When the dp_list declared in the main function is destructed, the element deep_ptr is destructed and the delete[] is executed for the pointed string.</li>
+</ol>
+<p>How about it? Although the explanation is full of the complexity unique to C++, the code itself can be described simply as the C style code.</p>
+
+<h2><li>Installation and contents of the deep pointer library</li></h2>
+
+<h3>Installation of deep pointer </h3>
+<p>To install deep pointer to *NIX OS such as Linux, MacOS, etc., follow the procedure below. </p>
+<ol>
+ <li>Obtain source code from GitHub etc. and expand it under (installation directory)/</li>
+ <samp><pre>
+# tar ball: When you get deep_ptr.tgz
+(Installation directory)/> ls
+deep_ptr.tgz
+(Installation directory)/> tar -xvzf deep_ptr.tgz
+</pre></samp>
+ <li>set (install directory)/ as the current directory and execute 'make install'</li>
+ <samp><pre>
+(Installation directory)/> make install
+(Installation directory)/> ls include/dptl
+deep_ptr.hpp dp_forward_list.hpp dp_set.hpp           dp_vector.hpp
+dp_array.hpp dp_list.hpp         dp_unordered_map.hpp udata.hpp
+dp_deque.hpp dp_map.hpp          dp_unordered_set.hpp utest.hpp
+(Installation directory)/> ls bin
+gendptest
+</pre> </samp>
+<p>Here we have done the following three tasks.<p>
+<ul>
+ <li>To create makefile.inc from makefile_inc.</li>
+ <li>To make a symbolic link (installation directory)/include/dptl to (installation directory)/src/include.</li>
+ <li>To make a unit test generator and install it as (installation directory)/bin/gendptest.</li>
+</ul>
+<p>In the last compilation, if it fails by the compiler not found, change the C++ compiler definition in makefile.ini (default is c++ ) and please re-execute 'make install'. </p>
+ <li>Execute 'make utest' to create unit test code and its executable file under (test directory)/test and confirm unit test passed</li>
+ <samp> <pre>
+(Installation directory)/> make utest
+</pre> </samp>
+</ol>
+<p> Currently, we are confirming the installation process in the following environment.
+<ul>
+ <li>MacOS Mojave 10.14.2, llvm version 10.0.0 (clang-1000.11.45.5)</li>
+ <li>Ubuntu 7.3.0, GNU C++ 18.04 </ li>
+</ul></p>
+ 
+<h3>Contents of deep pointer </h3>
+<ul>
+<li>(Introduction directory)/src/include/</li>
+<ul>
+ <li>deep_ptr.hpp</li>
+ <p>Include the header files, deep_ptr, dref_ptr, auxiliary classes (dp_dup, dp_del, dp_eql, dp_cmp, dp_less, dp_hash) containing the deep pointer, traits for template metaprogramming</p>
+ <li>dp_array.hpp</li>
+ <p>Example of customization for deep_ptr of std::array: including dp_array</p>
+ <li>dp_deque.hpp</li>
+ <p>Example of customization for deep_ptr of std::deque: including dp_deque</p>
+ <li>dp_forward_list.hpp</li>
+ <p>Example of customization for deep_ptr of std::forward_list: including dp_forward_list</p>
+ <li>dp_list.hpp</li>
+ <p>Example of customization for deep_ptr of std::list: including dp_list</p>
+ <li>dp_map.hpp</li>
+ <p>Examples of customization for deep_ptr of std::map and std::multimap: including dpp_map, dpp_multimap</p>
+ <li>dp_set.hpp</li>
+ <p>Examples of customization for deep_ptr of std::set and std::multiset: including dp_set, dp_multiset</p>
+ <li>dp_unordered_map.hpp</li>
+ <p>Example of customization for deep_ptr of std::unordered_map and std::unordered_multimap: including dpp_unordered_map, dpp_unordered_multimap</p>
+ <li>dp_unordered_set.hpp</li>
+ <p>Examples of customization for deep_ptr of std::unordered_set and std::unordered_multiset: including dp_unordered_set, dp_unordered_multiset</p>
+ <li>dp_vector.hpp</li>
+ <p>Example of customization for deep_ptr of std::vector: including dp_vector</p>
+ <li>udata.hpp, utest.hpp</li>
+ <p>Unit test header files for deep pointer and dp_container</p>
+</ul>
+<li>(Introduction directory)/test/</li>
+<p>Unit test directory, unit test code can be used as a coding sample for deep pointer and dp_containers</p>
+<ul>
+ <li>(Introduction directory)/test/deep_ptr/</li>
+ <p>Directory for basic unit test of deep pointer: including dptest.cpp, makefile</p>
+ <li>(Introduction directory)/test/dp_array/</li>
+ <p>Directory for unit test of dp_array: including dp_array.tmpl and makefile, and a unit test code dp_arraytest.cpp will be generated</p>
+ <li>(Introduction directory)/test/dp_deque/</li>
+ <p>Directory for unit test of dp_deque: including dp_deque.tmpl and makefile, and a unit test code dp_dequetest.cpp will be generated</p>
+ <li>(Introduction directory)/test/dp_forward_list/</li>
+ <p>Directory for unit test of dp_forward_list: including dp_forward_list.tmpl and makefile, and and a unit test code dp_forward_listtest.cpp will be generated</p>
+ <li>(Introduction directory)/test/dp_list/</li>
+ <p>Directory for unit test of dp_list: including dp_list.tmpl and makefile, and and a unit test code dp_listtest.cpp will be generated</p>
+ <li>(Introduction directory)/test/dp_map/</li>
+ <p>Directories for unit test of dp_map: including dp_map.tmpl, dp_multimap.tmpl and makefile, and unit test codes dp_maptest.cpp and dp_multimaptest.cpp will be  generated</p>
+ <li>(Introduction directory)/test/dp_set/</li>
+ <p>Directory for unit testing of dp_set: including dp_set.tmpl, dp_multiset.tmpl, including makefile, and unit test codes dp_settest.cpp and dp_multisettest.cpp are generated</p>
+ <li>(Introduction directory)/test/dp_unordered_map/</li>
+ <p>Directories for unit test of dp_unordered_map: including dp_unordered_map.tmpl, dp_unordered_multimap.tmpl, and unit test codes dp_unordered_maptest.cpp, dp_unordered_multimaptest.cpp are generated</p>
+ <li>(Introduction directory)/test/dp_unordered_set/</li>
+ <p>Directories for unit test of dp_unordered_set: including dp_unordered_set.tmpl, dp_unordered_multiset.tmpl, and unit test codes dp_unordered_settest.cpp, dp_unordered_multisettest.cpp are generated</p>
+ <li>(Introduction directory)/test/dp_vector/</li>
+ <p>Directories for unit test of dp_vector: including dp_vector.tmpl and makefile, and a unit test code dp_vectortest.cpp is generated</p>
+ <li>makefile</li>
+ <p>Makefile for unit test batch creation</p>
+</ul>
+<li>(Introduction directory)/util/gendptest/</li>
+<p>Includes source code of test code generator: gendptest.cpp and makefile</p>
+<li>(Introduction directory)/doc/</li>
+<p>Includes documents and licenses for deep pointer</p>
+<li>(Installation directory)/bin/</li>
+<p>Directory containing gendptest</p>
+<li>(Introduction directory)/include/</li>
+<p>Contains dptl (symbolic link to (installation directory)/src/include/)</p>
+</ul>
+
+<h2><li>Functions of deep pointer</li></h2>
+
+<h3>deep pointer</h3>
+ <ul>
+  <li>deep_ptr is a class for realizing comparison, copying, moving, duplication, deletion etc. of the pointed data, by comparing, copying, moving, copying, deleting etc of the deep pointer itself</li>
+  <li>Specifying template argument, the deep_ptr can point to<ul>
+   <li>address of variable</li>
+   <li>First address of fixed-length array</li>
+   <li>Start address of variable length array ending in instance created by default constructor (including character string with null character termination such as char*)</li>
+  </ul></li>
+  <li>deep_ptr has ownership of the pointed data which is the responsibility to call destructor of pointed data when it has been destructed</li>
+  <li>const on deep_ptr also implies the const of the pointed data</​​li>
+  <li>By using deep_ptr as an element of a container class, it is possible<ul>
+   <li>to compare the pointed data (not the address of pointed data) by the comparison operator of the container</li>
+   <li>to copy or move the pointed data by copying and moving the container</li>
+   <li>to delete the pointed data when the container has been destructed</li>
+  </ul>
+  <li>We also offer dref_ptr (deep reference pointer), which can compare the pointed data, but does not have the ownership of them and does not copy or move them.</li>
+  <li>deep_ptr and dref_ptr can be compared and copied each other</li>
+  <li>deep_ptr and dref_ptr are compatible with the original pointer by cast constructor and cast operator</li>
+  <li>Instances of deep_ptr and dref_ptr are guaranteed to be the same size as the pointer and can be handled by converting to pointer with reinterpret_cast</li>
+ </ul>
+<h3>Utility classes of deep pointer</h3>
+ <ul>
+  <li>Function classes (dp_dup, dp_del, dp_eql, dp_less, dp_hash, etc.) for duplication, deletion, equality comparison, order comparison, and hash function of pointers are provided.
+Standard operations for pointers, variable length arrays, and fixed length arrays (for example, copying by copy constructor for instances of class, copy with null termination for char * string, equivalent to strdup function ) Is predefined</li>
+  <li>Predefined behavior can be customized by user with override (eg, instances of classes without copy constructor can also be used by customization)</li>
+  <li>We provide type conversion trait for template metaprogramming using C++ type inference</li>
+ </ul>
+<h3>dp_containers: customization samples of C++ Standard Template Library (STL) containers</h3>
+ <ul>
+  <li>Although deep pointer can be directly used as a template argument of container of STL, wasteful copying occurs at interface having argument of deep pointer which is not related to storage, and if you try to use pointer directly, type Conversion may be necessary in some cases. Therefore, we can use the pointer as it is for the interface of the container, and provide a container template class of the customized sample so as not to cause unnecessary copying.</li>
+  <li>Containers that store sequences of pointers such as deque, list contain containers with elements deep_ptr beginning with dp_ and containers with dref_ptr as elements starting with dr_</li>
+  <li>d(Key)(Mapped)_Container ((Key) and (Mapped) are one character each of which stores a key and its map pair such as map and unordered_map; p:deep_ptr, r:dref_ptr, n:non-pointer) are defined as 8 kinds of containers except dnn_. For example, <code>dpn_map &lt;const char[], int&gt;</code>is a customized container for std::map that has deep_ptr of null-terminated string as a key, and int as a mapped value.
+  <li>Deep pointer can be stored in a container like a smart pointer in the C++ standard library, and comparison of the pointed data is performed by comparison operation between containers. Particularly in key comparison of map and set, and in matching of hash values ​​of unordered_map and unordered_set, the code can be described naturally (You do not need to customize comparisons and hashes with template arguments.)</li>
+  <li>Since dp_containers can store null-terminated character strings and native arrays, it can be used together with library and system calls written in C language keeping compatibility with C programming style.</li>
+  <li>As examples of dp_container usage, you can use the code for unit test of dp_container generated by test code generator 'gendptest'.</li>
+ </ul>
+<h3>Include deep pointer library in private library</h3>
+ <ul>
+  <li>When incorporating deep pointer into your private library, it is possible to change the default namespace dptl by defining the DPTL_NAMESPACE macro.</p>
+ </ul>
+
+<h2><li>Distribution of deep pointer library</li></h2>
+
+<h3>Copyright notice </h3>
+<p>© Kazunari Saitoh 2018 - 2019.</p>
+
+<h3>Distribution license </h3>
+<p>The deep pointer library is open source software(OSS) without warranties any kind.<br/>
+The deep pointer library is not a boost library, but distribution is done with Boost Software License 1.0 (BSL-1.0) in order to maximize user convenience.</p>
+<p>Distributed under the Boost Software License, Version 1.0.
+    (See accompanying file LICENSE_1_0.txt or copy at <a href="https://www.boost.org/LICENSE_1_0.txt">https://www.boost.org/LICENSE_1_0.txt </a>) <p >
