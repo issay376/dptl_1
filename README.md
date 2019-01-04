@@ -7,6 +7,8 @@ In the design of deep pointer, I especially cared about filling the gap between 
 
 Deep pointer is designed with the aim of making less likely to occur problems even if C style is used in combination on C++. Using deep pointer makes it possible to use native pointers, strings, and arrays safely and simply in Modern C++ environment. In particular, the containers of the standard template library will be able to handle native pointers, strings, and arrays almost transparently and without discomfort through deep pointers. 
 
+Please refer doc/readme_en.html for more details.
+
 ---
 
 deep pointer template libray (以下DPTLと略す）は、C++11以降のC++で使用できるテンプレートライブラリーです。
@@ -20,11 +22,11 @@ C++11 以降、右辺参照やスマートポインターによって、複雑�
 deep pointer は、こうした問題に対して、C++ 上で C のスタイルを併用しても問題が生じにくくすることを目標に設計されています。
 deep pointer を使うことで、ネイティブのポインタ、文字列、配列などを、Modern C++ の環境で安全かつシンプルに利用できるようになります。特に、標準テンプレートライブラリのコンテナは、deep pointer を介して、ほぼ透過的に違和感なくネイティブのポインタ、配列、文字列を扱うことができるようになります。
 
+詳細は、doc/readme_ja.html をご覧ください。
+
 ---
 
 deep pointer template library is open source software without warranties any kind.
 
 © Kazunari Saitoh 2018 - 2019.
 Distributed under the Boost Software License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt ) 
-
-Please refer doc/readme_en.html or doc/readme_jp.html for more details.
