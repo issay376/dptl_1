@@ -6,15 +6,14 @@
 <body>
 <ol>
 <h1>deep pointer template library (DPTL) </h1>
-<p>version 0.1, 2018/12/30</p>
+<p>version 1.0.0, 2018/01/07</p>
 <h2><li>Summary</li></h2>
 <p>deep pointer template library (DPTL) is a template library that can be used in C++11 and later C++.</p>
-<p>Deep pointer is a smart pointer for handling data and a pointer pointing the data collectively. Processing the pointed data like duplication, destruction, comparison, storing and retrieving from the container can be done more intuitively and simply as operations on the pointer.</p>
-<p>In the design of deep pointer, I especially cared about filling the gap between C and C++.
-With C++11 and later, C++ has evolved greatly to handling complex data structures with sufficient performance, using rvalue references and smart pointers. However, the difference between the programming style of standard libraries (that center on values ​​and references) and the style of C (centered around pointers) is deterministic, and in the C++ standard programming style, C native pointer, string, and array should be shifted to smart pointer, string class, and array class.
-Under such circumstances, many people feel that it is more difficult to write correct code in the complicated C++ language specification than in simple C style. Also, there are many cases where it is difficult to acquire the skills of project members, because learning time to write appropriate level code is too long. Coordination with libraries and system calls written in C may also be an issue.</p>
-<p>Deep pointer is designed with the aim of making less likely to occur problems even if C style is used in combination on C++.
-Using deep pointer makes it possible to use native pointers, strings, and arrays safely and simply in Modern C++ environment. In particular, the containers of the standard template library will be able to handle native pointers, strings, and arrays almost transparently and without discomfort through deep pointers.
+<p>Deep pointer is a smart pointer for handling data and its pointer collectively. Processing the pointed data like duplication, comparison, storing to containers and destruction can be done more intuitively and simply as operations on the pointer.</p>
+<p>Deep pointer is designed with the aim of making less likely to occur problems even if C style is used in combination under C++ environment.<br/>
+With C++11 and later, C++ has evolved greatly to handling complex data structures with sufficient performance, using rvalue references and smart pointers. However, the difference between the programming style of standard libraries (that center on values and references) and the style of C (centered around pointers) is deterministic. In the C++ standard programming style, C native pointer, string, and array should be shifted to smart pointer, std::string, and std::array.<br/>
+Under such circumstances, many people feel that it is more difficult to write correct code in the complicated C++ language specification than in simple C style. There are many cases where it is difficult to acquire the skills for project members, because learning time to write appropriate code is too long. Coordination with libraries and system calls written in C may also be an issue.</p>
+<p>Using deep pointer makes it possible to use native pointers, strings, and arrays safely and simply in Modern C++ environment. In particular, the containers of the standard template library will be able to handle native pointers, strings, and arrays almost transparently and without discomfort through deep pointers.
 Since it is easier to see in the concrete example, let's explain the features of deep_ptr in the sample code, taking a null-terminated character string and its list as an example.</p>
 <h3>Sample code:</h3>
 <pre><code>#include &lt;cstdio&gt;
@@ -233,8 +232,8 @@ gendptest
   <li>deep_ptr is a class for realizing comparison, copying, moving, duplication, deletion etc. of the pointed data, by comparing, copying, moving, copying, deleting etc of the deep pointer itself</li>
   <li>Specifying template argument, the deep_ptr can point to<ul>
    <li>address of variable</li>
-   <li>First address of fixed-length array</li>
-   <li>Start address of variable length array ending in instance created by default constructor (including character string with null character termination such as char*)</li>
+   <li>address of fixed-length array</li>
+   <li>address of variable length array of ending with the instance created by default constructor (including character string with null character termination such as char*)</li>
   </ul></li>
   <li>deep_ptr has ownership of the pointed data which is the responsibility to call destructor of pointed data when it has been destructed</li>
   <li>const on deep_ptr also implies the const of the pointed data</​​li>
@@ -257,10 +256,12 @@ Standard operations for pointers, variable length arrays, and fixed length array
  </ul>
 <h3>dp_containers: customization samples of C++ Standard Template Library (STL) containers</h3>
  <ul>
-  <li>Although deep pointer can be directly used as a template argument of container of STL, wasteful copying occurs at interface having argument of deep pointer which is not related to storage, and if you try to use pointer directly, type Conversion may be necessary in some cases. Therefore, we can use the pointer as it is for the interface of the container, and provide a container template class of the customized sample so as not to cause unnecessary copying.</li>
-  <li>Containers that store sequences of pointers such as deque, list contain containers with elements deep_ptr beginning with dp_ and containers with dref_ptr as elements starting with dr_</li>
-  <li>d(Key)(Mapped)_Container ((Key) and (Mapped) are one character each of which stores a key and its map pair such as map and unordered_map; p:deep_ptr, r:dref_ptr, n:non-pointer) are defined as 8 kinds of containers except dnn_. For example, <code>dpn_map &lt;const char[], int&gt;</code>is a customized container for std::map that has deep_ptr of null-terminated string as a key, and int as a mapped value.
-  <li>Deep pointer can be stored in a container like a smart pointer in the C++ standard library, and comparison of the pointed data is performed by comparison operation between containers. Particularly in key comparison of map and set, and in matching of hash values ​​of unordered_map and unordered_set, the code can be described naturally (You do not need to customize comparisons and hashes with template arguments.)</li>
+  <li>Deep pointer can be directly used as a template argument of container of STL. In this case, however, it will be caused wasteful copies at the interface having an argument of deep pointer which is not to be stored to the container. And also if you try to use pointer directly, type conversions may be necessary in some cases. Therefore, we offer dp_containers as samples of customizing STL containers to avoiding these issues.</li>
+  <li>dp_containers are offered as aliases of template classes.<br/>
+For the container of the sequence of pointers, such as deque, list, etc., dp_xxx&lt;P&gt; is an alias of the derived class of 'std::xxx&lt;deep_ptr&lt;P&gt;&gt;', and dr_xxx&lt;P&gt; is an alias of the derived class of 'std::xxx&lt;dref_ptr&lt;P&gt;&gt;'.<br/>
+For the container of maps like map or unordered_map, d(Key)(Mapped)_xxx defined as 8 kinds of aliases except dnn_xxx. ((Key) and (Mapped) are one character each to mean 'p':deep_ptr, 'r':dref_ptr, 'n':non-pointer.)<br/>
+For example, <code>dr_list&lt;Foo*&gt;</code> is an alias of the derived class of <code>std::list&lt;dref_ptr&lt;Foo*&gt;&gt;</code>, and <code>dpn_map&lt;const char[], int&gt;</code> is an alias of the derived class of std::map that has deep_ptr of null-terminated string as a key, and int as a mapped value: <code>std::map&lt;deep_ptr&lt;const char[]&gt;, int&gt;</code>.</li>
+  <li>Deep pointer is stored in a container like the smart pointer of C++ standard library, but the comparison operation between containers performs comparison of the pointed data, not of the address of the pointed data. Particularly in key comparison of map and set, or in matching of hash values ​​of unordered_map and unordered_set, the code can be described naturally without specifying customize comparisons or hash functions as a template argument.</li>
   <li>Since dp_containers can store null-terminated character strings and native arrays, it can be used together with library and system calls written in C language keeping compatibility with C programming style.</li>
   <li>As examples of dp_container usage, you can use the code for unit test of dp_container generated by test code generator 'gendptest'.</li>
  </ul>

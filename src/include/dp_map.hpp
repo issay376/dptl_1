@@ -1,7 +1,7 @@
 //
-// dp_map.hpp - sample customization of std::map/multimap for deep pointer
+// dp_map.hpp - sample customization of std::map/std::multimap for deep pointer
 //
-//      2018/12/30, version 0.1
+//      2019/01/07, version 1.0.0
 //
 //      © Kazunari Saitoh, 2018-2019.
 //      Distributed under the Boost Software License, Version 1.0.
