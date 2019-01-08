@@ -25,6 +25,12 @@ install :
 uninstall :
 	make -C util uninstall
 
+tarball : 
+	find . -type f | grep '^\.\/[^.].*\.' | grep -v '\.DS_Store' | grep -v '\.bk' | grep -v '\.sh' | grep -v '\.old' | grep -v '\.dSYM' | grep -v 'Info.plist' | grep -v '\.a' | grep -v 'makefile\.inc' > '$$tmpfile'
+	find . -type f | grep 'makefile' | grep -v 'makefile\.inc' >> '$$tmpfile'
+	cat '$$tmpfile' | xargs tar cvf - | gzip -c > '../bkup/dptl_release'`date '+%Y%m%d'`.tgz
+	rm '$$tmpfile'
+
 clean :
 	make -C util clean
 	make -C test clean

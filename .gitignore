@@ -1,6 +1,7 @@
 .DS_Store
 bin/
 tmp/
+include/
 *.dSYM/
 *.swp
 *.bk
