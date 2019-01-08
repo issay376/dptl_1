@@ -1,7 +1,7 @@
 //
 // deep_ptr.hpp --- deep pointer template library for C++11 or later
 //
-//      2019/01/07, version 1.0.0
+//      2019/01/08, version 1.0.1
 //
 //      © Kazunari Saitoh, 2018-2019.
 //      Distributed under the Boost Software License, Version 1.0.
@@ -30,7 +30,7 @@
 #include <utility>
 
 // c++14 compatible type transformation traits for c++11
-#ifndef __cpp_lib_transformation_trait_aliases
+#if defined(__cplusplus) && (__cplusplus < 201402)
 namespace std {
 	template <bool C, typename T, typename F> using conditional_t      = typename conditional<C,T,F>::type;
 	template <bool C, typename T = void>      using enable_if_t	   = typename enable_if<C,T>::type;
@@ -78,7 +78,6 @@ template <typename V>		    struct const_a<V*>		{ typedef const V* t; };
 template <typename V>		    struct const_a<V[]>		{ typedef const V t[]; };
 template <typename V, size_t N>     struct const_a<V[N]>	{ typedef const V t[N]; };
 
-
 //
 // Common Function Objects (dp_hash, dp_eql, dp_less, dp_dup, dp_del)
 // ============================================================================
@@ -88,20 +87,6 @@ template <typename V, size_t N>     struct const_a<V[N]>	{ typedef const V t[N];
 template <typename K, size_t N = 0> struct dp_hash;
 
 // ----------------------------------------------------------------------------
-template <typename K> struct dp_hash_varray
-{
-	size_t operator()( const K* const& key ) const
-	{
-		size_t  r = 0;
-		const K t = K();
-
-		if ( key ) {
-			for ( const K* p = key; *p != t; ++p ) r += ( r << 2 ) + dp_hash<K>()( *p );
-		}
-		return r;
-	}
-};
-
 template <typename K> struct dp_hash_id
 {
 	size_t operator()( K const& key ) const
@@ -110,7 +95,6 @@ template <typename K> struct dp_hash_id
 	}
 };
 
-// ----------------------------------------------------------------------------
 struct dp_hash_pvoid
 {
 	size_t operator()( const void* key ) const
@@ -154,7 +138,19 @@ template <typename K> struct dp_hash<K*>
 {
 	size_t operator()( const K* const& key ) const	{ return key ? dp_hash<K>()( *key ) : 0; }
 };
-template <typename K>	   struct dp_hash<K[]>  : public dp_hash_varray<K>	{ };
+template <typename K>		struct dp_hash<K[]> 
+{
+	size_t operator()( const K* const& key ) const
+	{
+		size_t  r = 0;
+		const K t = K();
+
+		if ( key ) {
+			for ( const K* p = key; *p != t; ++p ) r += ( r << 2 ) + dp_hash<K>()( *p );
+		}
+		return r;
+	}
+};
 template <typename K, size_t N> struct dp_hash<K[N]>
 {
 	size_t operator()( const K* const& key ) const

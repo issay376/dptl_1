@@ -1,7 +1,7 @@
 //
 // dp_unordered_map.hpp - sample customization of std::unordered_map/std::unordered_multimap for deep pointer
 //
-//      2019/01/07, version 1.0.0
+//      2019/01/08, version 1.0.1
 //
 //      © Kazunari Saitoh, 2018-2019.
 //      Distributed under the Boost Software License, Version 1.0.
@@ -25,7 +25,7 @@ namespace DPTL_NAMESPACE {
 //
 // unordered_map for deep pointer
 // -----------------------------------------------------------------------------
-template <typename K, typename T, typename Hash = dp_hash<dp_type<K>>> 
+template <typename K, typename T, typename Hash = dp_hash<dp_type<K>,std::extent<K,1>::value>>
 class __dp_unordered_map : public std::unordered_map<dp_const<K>,T,Hash>
 {
 	typedef dp_const<K>				KD;
@@ -62,7 +62,7 @@ class __dp_unordered_map : public std::unordered_map<dp_const<K>,T,Hash>
 	__dp_unordered_map() = default;
 	explicit __dp_unordered_map( size_type n, const hasher& hf = hasher(), const key_equal& eql = key_equal(),
 					const allocator_type& alloc = allocator_type()) : super( n, hf, eql, alloc ) { }
-	explicit __dp_unordered_map( const allocator_type& alloc ) : super( alloc )) { }
+	explicit __dp_unordered_map( const allocator_type& alloc ) : super( alloc ) { }
 	__dp_unordered_map( size_type n, const allocator_type& alloc ) : super( n, alloc ) { }
 	__dp_unordered_map( size_type n, const hasher& hf, const allocator_type& alloc ) : super( n, hf, alloc ) { }
 
@@ -266,7 +266,7 @@ template <typename K, typename T> using dnr_unordered_map = __dp_unordered_map<K
 //
 // unordered_multimap for deep pointer
 // -----------------------------------------------------------------------------
-template <typename K, typename T, typename Hash = dp_hash<dp_type<K>>> 
+template <typename K, typename T, typename Hash = dp_hash<dp_type<K>,std::extent<K,1>::value>>
 class __dp_unordered_multimap : public std::unordered_multimap<dp_const<K>,T,Hash>
 {
 	typedef dp_const<K>				KD;
@@ -303,7 +303,7 @@ class __dp_unordered_multimap : public std::unordered_multimap<dp_const<K>,T,Has
 	__dp_unordered_multimap() = default;
 	explicit __dp_unordered_multimap( size_type n, const hasher& hf = hasher(), const key_equal& eql = key_equal(),
 				const allocator_type& alloc = allocator_type()) : super( n, hf, eql, alloc ) { }
-	explicit __dp_unordered_multimap( const allocator_type& alloc ) : super( alloc )) { }
+	explicit __dp_unordered_multimap( const allocator_type& alloc ) : super( alloc ) { }
 	__dp_unordered_multimap( size_type n, const allocator_type& alloc ) : super( n, alloc ) { }
 	__dp_unordered_multimap( size_type n, const hasher& hf, const allocator_type& alloc ) : super( n, hf, alloc ) { }
 

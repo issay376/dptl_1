@@ -1,7 +1,7 @@
 //
 // dp_unordered_set.hpp - sample customization of std::unordered_set/std::unordered_multiset for deep pointer
 //
-//      2019/01/07, version 1.0.0
+//      2019/01/08, version 1.0.1
 //
 //      © Kazunari Saitoh, 2018-2019.
 //      Distributed under the Boost Software License, Version 1.0.
@@ -24,7 +24,7 @@ namespace DPTL_NAMESPACE {
 
 // policy based pointer unordered_set 
 // -----------------------------------------------------------------------------
-template <typename K, typename Hash = dp_hash<dp_type<K>>> 
+template <typename K, typename Hash = dp_hash<dp_type<K>,std::extent<K,1>::value>> 
 class __dp_unordered_set : public std::unordered_set<dp_const<K>,Hash>
 {
 	typedef dp_const<K>				KD;
@@ -79,17 +79,17 @@ class __dp_unordered_set : public std::unordered_set<dp_const<K>,Hash>
 
 	__dp_unordered_set( std::initializer_list<value_pointer> il, size_type n = MinimumHashSize, 
 			  const hasher& hf = hasher(), const key_equal& eql = key_equal(),
-			  const allocator_type& alloc = allocator_type()) : super( il, n, hf, eql, alloc ) { }
+			  const allocator_type& alloc = allocator_type()) : super( n, hf, eql, alloc )
 	{
 		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 	__dp_unordered_set( std::initializer_list<value_pointer> il, size_type n,
-			  const allocator_type& alloc ) : super( il, n, alloc )
+			  const allocator_type& alloc ) : super( n, alloc )
 	{
 		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 	__dp_unordered_set( std::initializer_list<value_pointer> il, size_type n,
-			  const hasher& hf, const allocator_type& alloc ) : super( il, n, hf, alloc )
+			  const hasher& hf, const allocator_type& alloc ) : super( n, hf, alloc )
 	{
 		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
@@ -207,7 +207,7 @@ class __dp_unordered_set : public std::unordered_set<dp_const<K>,Hash>
 
 // policy based pointer unordered_multiset 
 // -----------------------------------------------------------------------------
-template <typename K, typename Hash = dp_hash<dp_type<K>>> 
+template <typename K, typename Hash = dp_hash<dp_type<K>,std::extent<K,1>::value>> 
 class __dp_unordered_multiset : public std::unordered_multiset<dp_const<K>,Hash>
 {
 	typedef dp_const<K>				KD;
@@ -262,17 +262,17 @@ class __dp_unordered_multiset : public std::unordered_multiset<dp_const<K>,Hash>
 
 	__dp_unordered_multiset( std::initializer_list<value_pointer> il, size_type n = MinimumHashSize, 
 			  const hasher& hf = hasher(), const key_equal& eql = key_equal(),
-			  const allocator_type& alloc = allocator_type()) : super( il, n, hf, eql, alloc ) { }
+			  const allocator_type& alloc = allocator_type()) : super( n, hf, eql, alloc )
 	{
 		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 	__dp_unordered_multiset( std::initializer_list<value_pointer> il, size_type n,
-			  const allocator_type& alloc ) : super( il, n, alloc )
+			  const allocator_type& alloc ) : super( n, alloc )
 	{
 		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
 	__dp_unordered_multiset( std::initializer_list<value_pointer> il, size_type n,
-			  const hasher& hf, const allocator_type& alloc ) : super( il, n, hf, alloc )
+			  const hasher& hf, const allocator_type& alloc ) : super( n, hf, alloc )
 	{
 		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
 	}
