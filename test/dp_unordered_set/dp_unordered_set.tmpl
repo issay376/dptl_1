@@ -89,8 +89,8 @@ ${
 		AssertTrue( check_unordered_set( lx, { $1 } ));
 		AssertTrue( check_unordered_set( lr, {} ));		// not mandatory
 
-		lx = std::move( lx );
-		AssertTrue( check_unordered_set( lx, {} ));		// not mandatory
+		//lx = std::move( lx );
+		//AssertTrue( check_unordered_set( lx, {} ));		// not mandatory
 	}
 	// iterator constructor
 	{

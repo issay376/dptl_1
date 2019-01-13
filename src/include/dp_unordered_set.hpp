@@ -1,7 +1,7 @@
 //
 // dp_unordered_set.hpp - sample customization of std::unordered_set/std::unordered_multiset for deep pointer
 //
-//      2019/01/08, version 1.0.1
+//      2019/01/13, version 1.0.2
 //
 //      © Kazunari Saitoh, 2018-2019.
 //      Distributed under the Boost Software License, Version 1.0.

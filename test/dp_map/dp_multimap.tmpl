@@ -74,8 +74,8 @@ ${
 		AssertTrue( check_multimap( lx, {{ @1, $1 }} ));
 		AssertTrue( check_multimap( lr, {} ));					// not mandatory
 
-		lx = std::move( lx );
-		AssertTrue( check_multimap( lx, {} ));					// not mandatory
+		//lx = std::move( lx );
+		//AssertTrue( check_multimap( lx, {} ));					// not mandatory
 	}
 	// iterator constructor
 	{

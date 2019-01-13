@@ -104,8 +104,8 @@ ${
 		AssertTrue( check_forward_list( lx, { $5 } ));
 		AssertTrue( check_forward_list( lr, { } ));			// not mandatory
 
-		lx = std::move( lx );
-		AssertTrue( check_forward_list( lx, { } ));			// not mandatory
+		//lx = std::move( lx );
+		//AssertTrue( check_forward_list( lx, { } ));			// not mandatory
 	}
 	// iterator constructor
 	{

@@ -92,8 +92,8 @@ ${
 		AssertTrue( check_unordered_multiset( lx, { $1 } ));
 		AssertTrue( check_unordered_multiset( lr, {} ));		// not mandatory
 
-		lx = std::move( lx );
-		AssertTrue( check_unordered_multiset( lx, {} ));		// not mandatory
+		//lx = std::move( lx );
+		//AssertTrue( check_unordered_multiset( lx, {} ));		// not mandatory
 	}
 	// iterator constructor
 	{

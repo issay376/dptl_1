@@ -12,6 +12,8 @@ test/dp_array/dp_arraytest
 test/dp_array/dp_arraytest.cpp
 test/dp_deque/dp_dequetest
 test/dp_deque/dp_dequetest.cpp
+test/dp_forward_list/dp_forward_listtest
+test/dp_forward_list/dp_forward_listtest.cpp
 test/dp_list/dp_listtest
 test/dp_list/dp_listtest.cpp
 test/dp_map/dp_maptest
