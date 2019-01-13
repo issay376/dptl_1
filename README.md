@@ -9,7 +9,7 @@ Under such circumstances, many people feel that it is more difficult to write co
 
 Using deep pointer makes it possible to use native pointers, strings, and arrays safely and simply in Modern C++ environment. In particular, the containers of the standard template library will be able to handle native pointers, strings, and arrays almost transparently and without discomfort through deep pointers.
 
-Please refer <a href="docs/readme_en.html">readme</a> for more details.
+Please refer <a href="https://issay376.github.io/dptl_1/docs/readme_en.html">readme</a> for more details.
 
 ---
 
@@ -24,7 +24,7 @@ C++11 以降、右辺参照やスマートポインターによって、複雑�
 deep pointer は、こうした問題に対して、C++ 上で C のスタイルを併用しても問題が生じにくくすることを目標に設計されています。
 deep pointer を使うことで、ネイティブのポインタ、文字列、配列などを、Modern C++ の環境で安全かつシンプルに利用できるようになります。特に、標準テンプレートライブラリのコンテナは、deep pointer を介して、ほぼ透過的に違和感なくネイティブのポインタ、配列、文字列を扱うことができるようになります。
 
-詳細は、<a href="docs/readme_ja.html">readme</a> をご覧ください。
+詳細は、<a href="https://issay376.github.io/dptl_1/docs/readme_ja.html">readme</a> をご覧ください。
 
 ---
 
