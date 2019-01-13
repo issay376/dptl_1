@@ -44,7 +44,7 @@ class __dp_unordered_set : public std::unordered_set<dp_const<K>,Hash>
 	typedef typename super::const_pointer		const_pointer;
 	typedef typename super::iterator		iterator;
 	typedef typename super::const_iterator		const_iterator;
-	typedef typename super::local_iterator	reverse_iterator;
+	typedef typename super::local_iterator		local_iterator;
 	typedef typename super::const_local_iterator	const_reverse_iterator;
 	typedef typename super::difference_type		difference_type;
 	typedef typename super::size_type		size_type;
@@ -81,17 +81,17 @@ class __dp_unordered_set : public std::unordered_set<dp_const<K>,Hash>
 			  const hasher& hf = hasher(), const key_equal& eql = key_equal(),
 			  const allocator_type& alloc = allocator_type()) : super( n, hf, eql, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::emplace( p );
 	}
 	__dp_unordered_set( std::initializer_list<value_pointer> il, size_type n,
 			  const allocator_type& alloc ) : super( n, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::emplace( p );
 	}
 	__dp_unordered_set( std::initializer_list<value_pointer> il, size_type n,
 			  const hasher& hf, const allocator_type& alloc ) : super( n, hf, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::emplace( p );
 	}
 
 #elif defined(__cplusplus) && (__cplusplus >= 201103)
@@ -115,7 +115,7 @@ class __dp_unordered_set : public std::unordered_set<dp_const<K>,Hash>
                          const hasher& hf = hasher(), const key_equal& eql = key_equal(),
                          const allocator_type& alloc = allocator_type()) : super( n, hf, eql, alloc )
         {
-                for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+                for ( auto&& p : il ) super::emplace( p );
         }
 #else
 #error "c++11 up required"
@@ -126,7 +126,7 @@ class __dp_unordered_set : public std::unordered_set<dp_const<K>,Hash>
 	__dp_unordered_set& operator=( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
-		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::emplace( p );
 		return *this;
 	}
 
@@ -164,7 +164,7 @@ class __dp_unordered_set : public std::unordered_set<dp_const<K>,Hash>
 	}
 	void insert( std::initializer_list<value_pointer> il )
 	{
-		for ( auto&& p : il ) super::insert( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::insert( p );
 	}
 
 	// wrapper for appropriate casting of raw pointer avoiding unnecessary duplication
@@ -227,7 +227,7 @@ class __dp_unordered_multiset : public std::unordered_multiset<dp_const<K>,Hash>
 	typedef typename super::const_pointer		const_pointer;
 	typedef typename super::iterator		iterator;
 	typedef typename super::const_iterator		const_iterator;
-	typedef typename super::local_iterator	reverse_iterator;
+	typedef typename super::local_iterator		local_iterator;
 	typedef typename super::const_local_iterator	const_reverse_iterator;
 	typedef typename super::difference_type		difference_type;
 	typedef typename super::size_type		size_type;
@@ -264,17 +264,17 @@ class __dp_unordered_multiset : public std::unordered_multiset<dp_const<K>,Hash>
 			  const hasher& hf = hasher(), const key_equal& eql = key_equal(),
 			  const allocator_type& alloc = allocator_type()) : super( n, hf, eql, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::emplace( p );
 	}
 	__dp_unordered_multiset( std::initializer_list<value_pointer> il, size_type n,
 			  const allocator_type& alloc ) : super( n, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::emplace( p );
 	}
 	__dp_unordered_multiset( std::initializer_list<value_pointer> il, size_type n,
 			  const hasher& hf, const allocator_type& alloc ) : super( n, hf, alloc )
 	{
-		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::emplace( p );
 	}
 
 #elif defined(__cplusplus) && (__cplusplus >= 201103)
@@ -298,7 +298,7 @@ class __dp_unordered_multiset : public std::unordered_multiset<dp_const<K>,Hash>
                          const hasher& hf = hasher(), const key_equal& eql = key_equal(),
                          const allocator_type& alloc = allocator_type()) : super( n, hf, eql, alloc )
         {
-                for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+                for ( auto&& p : il ) super::emplace( p );
         }
 #else
 #error "c++11 up required"
@@ -309,7 +309,7 @@ class __dp_unordered_multiset : public std::unordered_multiset<dp_const<K>,Hash>
 	__dp_unordered_multiset& operator=( std::initializer_list<value_pointer> il )
 	{
 		super::clear();
-		for ( auto&& p : il ) super::emplace( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::emplace( p );
 		return *this;
 	}
 
@@ -347,7 +347,7 @@ class __dp_unordered_multiset : public std::unordered_multiset<dp_const<K>,Hash>
 	}
 	void insert( std::initializer_list<value_pointer> il )
 	{
-		for ( auto&& p : il ) super::insert( std::forward<decltype( p )>( p ));
+		for ( auto&& p : il ) super::insert( p );
 	}
 
 	// wrapper for appropriate casting of raw pointer avoiding unnecessary duplication

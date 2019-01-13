@@ -5,7 +5,7 @@ template <typename K, typename T>
 inline bool check_unordered_multimap( __dp_unordered_multimap<K,T> const& ls,
 				 std::initializer_list<typename __dp_unordered_multimap<K,T>::value_pointer> const& ts )
 {
-	__dp_unordered_multimap<dp_const_pointer<K>,dp_pointer<T>,dp_hash<dp_const_type<K>>>	l;
+	std::unordered_multimap<dp_const_pointer<K>,dp_pointer<T>,dp_hash<dp_const_type<K>>>	l;
 
 	for ( auto a : ts ) l.emplace( a.first, a.second );
 

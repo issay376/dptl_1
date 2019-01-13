@@ -6,14 +6,14 @@
 <body>
 <ol>
 <h1>deep pointer template library (DPTL) </h1>
-<p>version 1.0.0, 2018/01/07</p>
+<p>version 1.0.1, 2018/01/13</p>
 <h2><li>Summary</li></h2>
 <p>deep pointer template library (DPTL) is a template library that can be used in C++11 and later C++.</p>
 <p>Deep pointer is a smart pointer for handling data and its pointer collectively. Processing the pointed data like duplication, comparison, storing to containers and destruction can be done more intuitively and simply as operations on the pointer.</p>
-<p>Deep pointer is designed with the aim of making less likely to occur problems even if C style is used in combination under C++ environment.<br/>
+<p>DPTL is designed with the aim of making less likely to occur problems even if C style is used in combination under C++ environment.<br/>
 With C++11 and later, C++ has evolved greatly to handling complex data structures with sufficient performance, using rvalue references and smart pointers. However, the difference between the programming style of standard libraries (that center on values and references) and the style of C (centered around pointers) is deterministic. In the C++ standard programming style, C native pointer, string, and array should be shifted to smart pointer, std::string, and std::array.<br/>
 Under such circumstances, many people feel that it is more difficult to write correct code in the complicated C++ language specification than in simple C style. There are many cases where it is difficult to acquire the skills for project members, because learning time to write appropriate code is too long. Coordination with libraries and system calls written in C may also be an issue.</p>
-<p>Using deep pointer makes it possible to use native pointers, strings, and arrays safely and simply in Modern C++ environment. In particular, the containers of the standard template library will be able to handle native pointers, strings, and arrays almost transparently and without discomfort through deep pointers.
+<p>Using DPTL makes it possible to use native pointers, strings, and arrays safely and simply in Modern C++ environment. In particular, the containers of the standard template library will be able to handle native pointers, strings, and arrays almost transparently and without discomfort through deep pointers.
 Since it is easier to see in the concrete example, let's explain the features of deep_ptr in the sample code, taking a null-terminated character string and its list as an example.</p>
 <h3>Sample code:</h3>
 <pre><code>#include &lt;cstdio&gt;
@@ -82,7 +82,7 @@ Notice that the template argument for deep_ptr is const char[] instead of const 
 <code>template &lt;typename T&gt; using dp_list&lt;T&gt; = std::list&lt;deep_ptr&lt;T&gt;&gt;;</code><br/>
 but there are two main reasons why don't do so.
 <ul>
- <li>There are interfaces that has argument of pointer not to store in the container, such as <code>list::list(size_type n, const value_type &v);</code><br/>
+ <li>There are interfaces that has argument of pointer not to store in the container, such as <code>list::list(size_type n, const value_type&amp; v);</code><br/>
 In this case, the pointer argument will cast deep_pointer and unnecessary copy of the pointed data will be occurred. The interface of derived dp_list class can prevent it.</li>
  <li>Using the interface of derived class, it is not have to write cumbersome casting.</li>
 </ul>
@@ -109,7 +109,7 @@ It is the common specification for all interfaces adding an element to dp_contai
 In this push_back, since the passed argument 'greeting' is an lvalue, its contents will be deep copied.</li>
 <li>The following line is commented out because it is invalid code.
 In this case, the literal of the string is passed to push_back as it is, but literal "hello" is 'const char[6]', and when if it receives type conversion to 'const char *', it becomes an rvalue, so the move assignment will be executed. As a result, duplication is not performed, and deep_ptr is created with the literal address as it is, so if you execute it, it will cause a runtime error when destructing deep_ptr.</li>
-<li>Therefore, you need to pass it as lvalue of variable (as shown in line 8), or a static_cast to the lvalue (in this case const char * const &),  or explicitly duplicate the data and pass it as rvalue like this line.</li>
+<li>Therefore, you need to pass it as lvalue of variable (as shown in line 8), or a static_cast to the lvalue (in this case 'const char* const&amp;'), or explicitly duplicate the data and pass it as rvalue like this line.</li>
 <li>This is an example to pass deep_ptr.
 Since the return value of copy_of_local_valiable () is the rvalue of deep_ptr, the data pointed by returned deep_ptr is moved to the new deep_ptr in dp_list without wasteful copying.</li>
 <p></p>
@@ -124,8 +124,8 @@ The simplest code is to use for-range statement. In this way, casting from a dee
 
 <h2><li>Installation and contents of the deep pointer library</li></h2>
 
-<h3>Installation of deep pointer </h3>
-<p>To install deep pointer to *NIX OS such as Linux, MacOS, etc., follow the procedure below. </p>
+<h3>Installation of DPTL</h3>
+<p>To install DPTL to *NIX OS such as Linux, MacOS, etc., follow the procedure below. </p>
 <ol>
  <li>Obtain source code from GitHub etc. and expand it under (installation directory)/</li>
  <samp><pre>
@@ -162,7 +162,7 @@ gendptest
  <li>Ubuntu 7.3.0, GNU C++ 18.04 </ li>
 </ul></p>
  
-<h3>Contents of deep pointer </h3>
+<h3>Contents of DPTL</h3>
 <ul>
 <li>(Introduction directory)/src/include/</li>
 <ul>
@@ -225,7 +225,7 @@ gendptest
 <p>Contains dptl (symbolic link to (installation directory)/src/include/)</p>
 </ul>
 
-<h2><li>Functions of deep pointer</li></h2>
+<h2><li>Functions of DPTL</li></h2>
 
 <h3>deep pointer</h3>
  <ul>
@@ -270,7 +270,7 @@ For example, <code>dr_list&lt;Foo*&gt;</code> is an alias of the derived class o
   <li>When incorporating deep pointer into your private library, it is possible to change the default namespace dptl by defining the DPTL_NAMESPACE macro.</p>
  </ul>
 
-<h2><li>Distribution of deep pointer library</li></h2>
+<h2><li>Distribution of DPTL</li></h2>
 
 <h3>Copyright notice </h3>
 <p>© Kazunari Saitoh 2018 - 2019.</p>
