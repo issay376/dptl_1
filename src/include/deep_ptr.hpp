@@ -1,7 +1,7 @@
 //
 // deep_ptr.hpp --- deep pointer template library for C++11 or later
 //
-//      2019/01/08, version 1.0.1
+//      2019/01/08, version 1.0.3
 //
 //      © Kazunari Saitoh, 2018-2019.
 //      Distributed under the Boost Software License, Version 1.0.
@@ -824,6 +824,7 @@ class dref_ptr<T[N]> : public dp_base<T[N]>
 	const T& operator[]( size_t n ) const	{ return this->m_p[ n ]; }
 };
 
+
 //
 // Type deducers
 //
@@ -856,6 +857,45 @@ template <typename T> using dp_const_pointer	= typename dp_cpt_aux<T>::t;
 template <typename T> using dp_type		= typename dp_typ_aux<T>::t;
 template <typename T> using dp_const_type	= typename dp_cty_aux<T>::t;
 template <typename T> using dp_const		= typename dp_cdp_aux<T>::t;
+
+//
+// utility for deep_ptr constuctor and dp_container interface
+//
+//	dp_copy			cast lvalue 
+//	dp_move			cast rvalue (a synonym of std::move)
+//
+// sample of usage:
+//	deep_ptr<foo*> sample()
+//	{
+//		foo	a( "args" );			// local variable
+//		return dp_copy<foo*>( &a );		// &a is rvalue, hence dp_copy is required to copy-construct deep_ptr
+//	}
+//
+// -----------------------------------------------------------------------------
+// 	Note: Templete argument of dp_copy (<foo*> as above) is redundant, but it's better always to use it.
+//            If it is eliminated, serious problems may be occured under implicit type conversion, like followings.
+//
+//	  deep_ptr<const char[]> causes_runtime_error()
+//	  {							// "hello" is 'const char[6]', and implicit type conversion
+//		  return dp_copy( "hello" );			// will make the argument of deep_ptr 'rvalue'. Thus,
+//	  }							// the move constructor is selected, and runtime-error will be
+//								// occured when the return value will have been destructed.	
+//	  deep_ptr<const char[]> ok()
+//	  {							// "hello" is casted as lvalue 'const char* const&' and
+//		  return dp_copy<const char*>( "hello" );	// the copy constructor will be selected.
+//	  }							
+// -----------------------------------------------------------------------------
+template <typename T>
+constexpr typename std::remove_reference<T>::type&& dp_move( T&& p )
+{
+        return static_cast<typename std::remove_reference<T>::type&&>( p );
+}
+
+template <typename T>
+constexpr const typename std::remove_reference<T>::type& dp_copy( const T& p )
+{
+        return static_cast<const typename std::remove_reference<T>::type&>( p );
+}
 
 #ifndef NO_NAMESPACE
 }

@@ -9,7 +9,7 @@
 
 using namespace dptl;
 
-class ppadapttest : public unittest, public basic_testdata
+class dptest : public unittest, public basic_testdata
 {
 	int	m_cnt;
 
@@ -38,13 +38,18 @@ class ppadapttest : public unittest, public basic_testdata
 	void test92();
 
 	void testA1();
+	void testA2();
+	void testA3();
 
-	ppadapttest( int argc, char** argv ) : unittest( argc, argv )
+	void testB1();
+	void testB2();
+
+	dptest( int argc, char** argv ) : unittest( argc, argv )
 	{
 		m_cnt = test::getCntr();
 		fprintf( stderr, "*** test::getCntr() : %d\n", m_cnt );
 	}
-	~ppadapttest()
+	~dptest()
 	{
 		this->set_subtitle( "test class allocation" );
 		AssertEqual( m_cnt, test::getCntr() );
@@ -53,7 +58,7 @@ class ppadapttest : public unittest, public basic_testdata
 };
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test01()
+void dptest::test01()
 {
 	this->set_subtitle( "refer pointer" );
 
@@ -72,7 +77,7 @@ void ppadapttest::test01()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test02()
+void dptest::test02()
 {
 	this->set_subtitle( "deep pointer (move)" );
 
@@ -91,7 +96,7 @@ void ppadapttest::test02()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test03()
+void dptest::test03()
 {
 	this->set_subtitle( "deep pointer (copy)" );
 
@@ -116,7 +121,7 @@ void ppadapttest::test03()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test04()
+void dptest::test04()
 {
 	this->set_subtitle( "refer string" );
 
@@ -141,7 +146,7 @@ void ppadapttest::test04()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test05()
+void dptest::test05()
 {
 	this->set_subtitle( "deep string (move)" );
 
@@ -166,7 +171,7 @@ void ppadapttest::test05()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test06()
+void dptest::test06()
 {
 	this->set_subtitle( "deep string (copy)" );
 
@@ -191,7 +196,7 @@ void ppadapttest::test06()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test07()
+void dptest::test07()
 {
 	this->set_subtitle( "refer array" );
 
@@ -216,7 +221,7 @@ void ppadapttest::test07()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test08()
+void dptest::test08()
 {
 	this->set_subtitle( "deep array (move)" );
 
@@ -241,7 +246,7 @@ void ppadapttest::test08()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test09()
+void dptest::test09()
 {
 	this->set_subtitle( "deep array (copy)" );
 
@@ -266,7 +271,7 @@ void ppadapttest::test09()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test11()
+void dptest::test11()
 {
 	this->set_subtitle( "cross policy copy/move: deep->deep" );
 
@@ -284,7 +289,7 @@ void ppadapttest::test11()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test12()
+void dptest::test12()
 {
 	this->set_subtitle( "cross policy copy/move: refer->refer" );
 
@@ -302,7 +307,7 @@ void ppadapttest::test12()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test13()
+void dptest::test13()
 {
 	this->set_subtitle( "cross policy copy/move: deep->refer" );
 
@@ -320,7 +325,7 @@ void ppadapttest::test13()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test14()
+void dptest::test14()
 {
 	this->set_subtitle( "cross policy copy/move: refer->deep" );
 
@@ -341,7 +346,7 @@ void ppadapttest::test14()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test21()
+void dptest::test21()
 {
 	this->set_subtitle( "cross policy copy/move: non-const->non-const" );
 
@@ -359,7 +364,7 @@ void ppadapttest::test21()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test22()
+void dptest::test22()
 {
 	this->set_subtitle( "cross policy copy/move: const->const" );
 
@@ -377,7 +382,7 @@ void ppadapttest::test22()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test23()
+void dptest::test23()
 {
 	this->set_subtitle( "cross policy copy/move: non-const->const" );
 
@@ -395,7 +400,7 @@ void ppadapttest::test23()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test24()
+void dptest::test24()
 {
 	this->set_subtitle( "cross policy copy/move: const->non-const" );
 
@@ -413,7 +418,7 @@ void ppadapttest::test24()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test91()
+void dptest::test91()
 {
 	this->set_subtitle( "dp_less test" );
 
@@ -425,7 +430,7 @@ void ppadapttest::test91()
 }
 
 // -----------------------------------------------------------------------------
-void ppadapttest::test92()
+void dptest::test92()
 {
 	this->set_subtitle( "sizeof deep_ptr/dref_ptr" );
 
@@ -436,14 +441,25 @@ void ppadapttest::test92()
 // -----------------------------------------------------------------------------
 #include <dptl/dp_list.hpp>
 
-deep_ptr<const char[]> copy_of_local_variable()
+deep_ptr<const char[]> copy_of_local_string()
 {
 	const char*     local_variable = "pointer";
 
+	//return local_variable;				// runtime error, local_variable will be converted as rvalue
+	//return dp_copy<const char*>( local_variable );	// ok
 	return deep_ptr<const char[]>( local_variable );	// deep copy construction of deep_ptr
 }
 
-void ppadapttest::testA1()
+deep_ptr<test*> copy_of_local_pointer()
+{
+	test		local_variable( 7, "pointer" );
+
+	// return deep_ptr<test*>( &local_variable );		// runtime error, &local_variable is rvalue
+	// return dp_copy<test*>( &local_variable );		// ok
+	return deep_ptr<test*>( dp_copy<test*>( &local_variable ));
+}
+
+void dptest::testA1()
 {
 	this->set_subtitle( "sample code of DPTL feature" );
 
@@ -452,17 +468,19 @@ void ppadapttest::testA1()
 	dp_list<const char[]>   n = std::move( l );		// move construction with moving deep_ptrs
 
 	printf( "%s\n", ( m == n ) ? "m == n" : "m != n" );	// deep comparison of deep_ptrs
-	m.back() = copy_of_local_variable();			// deleting "pointers" and moving deep_ptr to "pointer"
+	m.back() = copy_of_local_string();			// deleting "pointers" and moving deep_ptr to "pointer"
 	printf( "%s\n", ( m < n ) ? "m < n" : "m >= n" );	// deep comparison of deep_ptrs; "pointer" < "pointers"
 
 	const char*	greeting = "hello";
 
-	l.push_back( greeting );				// copy construction of deep_ptr with lhs c-string
+	l.push_back( greeting );				// copy construction of deep_ptr with lvalue c-string
 	// l.push_back( "hello" );				// causes runtime error: move construction without deep coping
-								//   "hello" is rhs after conversion: const char[6] -> const char*
-	l.push_back( static_cast<const char* const&>( "great" )); // copy construction of deep_ptr with lhs c-string
-	l.push_back( strdup( "native" ));			// move construction of deep_ptr with rhs c-string
-	l.push_back( copy_of_local_variable());			// move construction of deep_ptr with rhs deep_ptr
+								//   "hello" will be rvalue after: const char[6] -> const char*
+	// l.push_back( dp_copy( "great" ));			// runtime error, hence dp_copy( "great" ) is 'const char[6]' !!
+	l.push_back( dp_copy<const char*>( "great" )); 		// copy construction of deep_ptr with lvalue c-string, same as:
+								//   'l.push_back( static_cast<const char* const&>( "great" ))'
+	l.push_back( strdup( "native" ));			// move construction of deep_ptr with rvalue duplicated c-string
+	l.push_back( copy_of_local_string());			// move construction of deep_ptr with rvalue deep_ptr
 
 	for ( const char* p : l ) printf( "%s, ", p );		// p: automatically converted from deep_ptr<const char[]>
 	puts( "" );
@@ -477,11 +495,87 @@ void ppadapttest::testA1()
 	puts( "" );
 }
 
+void dptest::testA2()
+{
+	this->set_subtitle( "dp_copy/dp_move test for string" );
+
+	const char*	dup = strdup( "hello" );
+
+	dp_list<const char[]>	l;
+
+	l.push_back( dp_copy( dup ));				// copy push_back
+	l.push_back( dp_move( dup ));				// move push_back (responsibility to delete is transfered)
+
+	printf( "dup: %p\n", dup );				// dup has been unusable
+
+	l.push_back( dp_copy( copy_of_local_string()));		// copy push_back
+	l.push_back( dp_move( copy_of_local_string()));		// move push_back
+
+	for ( const char* p : l ) printf( "%s\n", p );
+
+	// delete [] dup;					// no need to delete
+}
+
+void dptest::testA3()
+{
+	this->set_subtitle( "dp_copy/dp_move test for pointer" );
+
+	test*	dup = new test( t1 );
+
+	dp_list<test*>	l;
+
+	l.push_back( dp_copy( dup ));				// copy push_back
+	l.push_back( dp_move( dup ));				// move push_back (responsibility to delete is transfered)
+
+	printf( "dup: %p\n", dup );				// dup has been unusable
+
+	l.push_back( dp_copy( copy_of_local_pointer()));	// copy push_back
+	l.push_back( dp_move( copy_of_local_pointer()));	// move push_back
+
+	for ( test* p : l ) println( p );
+
+	// delete dup;						// no need to delete
+}
+
+// temporal
+// -----------------------------------------------------------------------------
+deep_ptr<test*> sample( const char* s )
+{
+	test	r( 1, s );
+
+	return dp_copy( &r );
+}
+
+deep_ptr<const char[]> bad_fn()
+{
+	return dp_copy( "world" );
+}
+
+deep_ptr<const char[]> good_fn()
+{
+	return dp_copy<const char*>( "world" );
+}
+
+void dptest::testB1()
+{
+	deep_ptr<test*>	r = sample( s1 );
+
+	static_cast<test*>( r )->print();
+}
+
+void dptest::testB2()
+{
+	//deep_ptr<const char[]>	s = bad_fn();
+	deep_ptr<const char[]>		s = good_fn();
+
+	printf( "%s\n", static_cast<const char*>( s ));
+}
+
 // -----------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-	ppadapttest( argc, argv ).run();
-
+	dptest( argc, argv ).run();
+ 
 	return 0;
 }
 
