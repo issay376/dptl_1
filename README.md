@@ -1,7 +1,7 @@
 # dptl_1
-deep pointer template library (DPTL) is a template library that can be used in C++11 and later C++.
+deep pointer template library (DPTL) is a template library that can be used in C++11 and later.
 
-Deep pointer is a smart pointer for handling data and its pointer collectively. Processing the pointed data like duplication, comparison, storing to containers and destruction can be done more intuitively and simply as operations on the pointer.
+Deep pointer is a smart pointer for handling the data and its pointer collectively. Processing the pointed data like duplication, comparison, storing to containers and destruction can be done more intuitively and simply as operations on the pointer.
 
 Deep pointer is designed with the aim of making less likely to occur problems even if C style is used in combination under C++ environment.
 With C++11 and later, C++ has evolved greatly to handling complex data structures with sufficient performance, using rvalue references and smart pointers. However, the difference between the programming style of standard libraries (that center on values and references) and the style of C (centered around pointers) is deterministic. In the C++ standard programming style, C native pointer, string, and array should be shifted to smart pointer, std::string, and std::array.
